@@ -141,37 +141,37 @@
     {
       "id": "g1",
       "src": "/media/Album/img1.jpg",
-      "gradient": "linear-gradient(145deg,#9fb7d4,#40536e 48%,#20283a)",
+      "gradient": "",
       "date": "46194"
     },
     {
       "id": "g2",
       "src": "/media/Album/img2.jpg",
-      "gradient": "linear-gradient(145deg,#ffc98d,#d8797d 45%,#39466d)",
+      "gradient": "",
       "date": "46195"
     },
     {
       "id": "g3",
       "src": "/media/Album/img3.jpg",
-      "gradient": "linear-gradient(145deg,#e7d7b4,#a68a65 60%,#4c4032)",
+      "gradient": "",
       "date": "46196"
     },
     {
       "id": "g4",
       "src": "/media/Album/img4.jpg",
-      "gradient": "linear-gradient(145deg,#afdee2,#5aa0aa 55%,#254d63)",
+      "gradient": "",
       "date": "46197"
     },
     {
       "id": "g5",
       "src": "/media/Album/img5.jpg",
-      "gradient": "linear-gradient(145deg,#8390ae,#303856 50%,#111526)",
+      "gradient": "",
       "date": "46198"
     },
     {
       "id": "g6",
       "src": "/media/Album/img6.jpg",
-      "gradient": "linear-gradient(145deg,#f0e1ad,#9bb57b 48%,#3e5c50)",
+      "gradient": "",
       "date": "46199"
     },
     {
