@@ -19,7 +19,8 @@ function markCoverFailed(item) { failedCovers.value = new Set([...failedCovers.v
 <template>
   <div class="music-app" :class="{ 'music-app--player': view === 'player' }" :style="{ '--album-color': track.color || '#7c8ff6' }">
     <template v-if="view === 'library'">
-      <header class="music-library-header"><span>资料库</span><h2>歌曲</h2><div><Search :size="16" />搜索</div></header>
+      <header class="music-library-header"><span>资料库</span><h2>歌曲</h2></header>
+      <div class="app-search music-search"><Search :size="16" />搜索</div>
       <main class="song-list">
         <button v-for="(item, index) in music.playlist" :key="item.id" type="button" @click="music.selectTrack(index)">
           <span class="song-cover" :style="fallbackCoverStyle(item)"><img v-if="hasCover(item)" :src="item.cover" alt="" @error="markCoverFailed(item)" /><i v-else></i></span>

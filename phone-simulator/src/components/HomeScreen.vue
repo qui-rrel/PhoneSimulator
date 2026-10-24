@@ -22,15 +22,19 @@ onBeforeUnmount(() => window.clearInterval(timer))
   <div class="home-screen">
     <div class="home-content">
       <section v-if="phoneConfig.home.showGreetingWidget" class="home-widget">
-        <div>
-          <span class="widget-kicker">{{ widgetDate }}</span>
-          <strong class="widget-time">{{ widgetTime }}</strong>
+        <div class="home-widget__clock">
+          <button class="home-widget__date" type="button" aria-label="打开日历" @click="phone.openApp('calendar')">
+            <span class="widget-kicker">{{ widgetDate }}</span>
+          </button>
+          <button class="widget-time" type="button" aria-label="打开时钟" @click="phone.openApp('clock')">
+            {{ widgetTime }}
+          </button>
         </div>
-        <div class="weather-mini">
+        <button class="weather-mini" type="button" aria-label="打开天气" @click="phone.openApp('weather')">
           <CloudSun :size="28" />
           <span>{{ weather.temperature }}°</span>
           <small>{{ weather.location }}</small>
-        </div>
+        </button>
       </section>
 
       <div class="app-grid">

@@ -322,10 +322,6 @@ button {
   transform: scaleX(0.82);
 }
 
-.home-indicator--light span {
-  background: #fff;
-}
-
 .edge-back-zone {
   position: absolute;
   z-index: 125;
@@ -386,6 +382,38 @@ button {
   backdrop-filter: blur(26px) saturate(1.15);
 }
 
+.home-widget__clock {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.home-widget__date,
+.widget-time,
+.weather-mini {
+  color: inherit;
+  transition: opacity .14s ease, transform .14s ease;
+}
+
+.home-widget__date {
+  width: 100%;
+  padding: 0 0 5px;
+  text-align: left;
+}
+
+.widget-time {
+  padding: 0;
+  text-align: left;
+}
+
+.home-widget__date:active,
+.widget-time:active,
+.weather-mini:active {
+  opacity: .7;
+  transform: scale(.96);
+}
+
 .widget-kicker {
   display: flex;
   align-items: center;
@@ -397,19 +425,14 @@ button {
   letter-spacing: 0.08em;
 }
 
-.home-widget strong {
-  display: block;
-  font-size: 18px;
-  line-height: 1.35;
-  letter-spacing: -0.03em;
-}
-
 .weather-mini {
   min-width: 82px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
+  padding: 0;
+  text-align: right;
 }
 
 .weather-mini span {
@@ -1341,6 +1364,35 @@ button {
   font-size: 12px;
 }
 
+.app-search {
+  position: relative;
+  z-index: 2;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 14px 9px;
+  padding: 0 10px;
+  border-radius: 9px;
+  color: #8b8d94;
+  background: #ececef;
+  font-size: 11px;
+}
+
+.settings-search { background: #dfdfe4; }
+.mail-search { background: #e7e7eb; }
+.music-search { margin-right: 15px; margin-left: 15px; background: #eeeef1; }
+
+.desktop-drag-scroll {
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .desktop-drag-scroll { cursor: grab; }
+  .desktop-drag-scroll.is-dragging { cursor: grabbing; }
+}
+
 .notes-list {
   margin: 0 14px;
   overflow: hidden;
@@ -1470,18 +1522,6 @@ button {
   overflow: hidden;
 }
 
-.photo-grid button > span::before,
-.photo-grid button > span::after {
-  position: absolute;
-  content: '';
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  filter: blur(1px);
-  transform: rotate(-30deg);
-}
-
-.photo-grid button > span::before { width: 90%; height: 24%; left: -14%; top: 18%; }
-.photo-grid button > span::after { width: 70%; height: 16%; right: -8%; bottom: 15%; }
 .photo-grid button > span i { position: absolute; width: 28px; height: 38px; left: 42%; top: 37%; border-radius: 20px 20px 5px 5px; background: rgba(15, 24, 42, 0.27); }
 .photo-grid small { display: block; padding: 4px 3px 7px; overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -1507,19 +1547,9 @@ button {
   height: calc(100% - 151px);
   margin-top: 0;
   overflow: hidden;
+  background: #000;
 }
 
-.photo-viewer::before,
-.photo-viewer::after {
-  position: absolute;
-  content: '';
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.24);
-  transform: rotate(-26deg);
-}
-
-.photo-viewer::before { width: 135%; height: 21%; left: -36%; top: 24%; }
-.photo-viewer::after { width: 110%; height: 14%; right: -34%; bottom: 23%; }
 .abstract-photo-mark { position: absolute; width: 72px; height: 105px; left: 42%; top: 42%; border-radius: 42px 42px 10px 10px; background: rgba(17, 24, 42, 0.27); }
 
 .photo-toolbar {
@@ -1856,6 +1886,7 @@ button {
 }
 
 .widget-time {
+  display: block;
   margin-top: 4px;
   font-size: 36px !important;
   font-weight: 500 !important;
@@ -1946,10 +1977,9 @@ button {
 .weather-footer { position: absolute; z-index: 3; right: 0; bottom: 0; left: 0; height: 54px; display: flex; justify-content: space-between; padding: 10px 17px 20px; background: rgba(75,139,193,.6); backdrop-filter: blur(20px); }
 
 /* Settings */
-.settings-app > header { height: 124px; padding: 58px 14px 8px; }
-.settings-app > header h2 { margin: 0 0 8px; font-size: 29px; letter-spacing: -.04em; }
-.settings-app > header div { height: 30px; display: flex; align-items: center; gap: 5px; padding: 0 8px; border-radius: 9px; color: #85868d; background: #dfdfe4; font-size: 11px; }
-.settings-scroll { height: calc(100% - 124px); padding: 0 14px 42px; overflow-y: auto; scrollbar-width: none; }
+.settings-app > header { height: 104px; padding: 58px 14px 8px; }
+.settings-app > header h2 { margin: 0; font-size: 29px; letter-spacing: -.04em; }
+.settings-scroll { height: calc(100% - 148px); padding: 0 14px 42px; overflow-y: auto; scrollbar-width: none; }
 .settings-scroll::-webkit-scrollbar { display: none; }
 .settings-profile, .settings-group { margin-bottom: 16px; overflow: hidden; border-radius: 11px; background: #fff; }
 .settings-profile { min-height: 76px; display: flex; align-items: center; gap: 10px; padding: 10px 11px; }
@@ -1998,7 +2028,9 @@ button {
 .photo-grid { grid-template-columns: repeat(3, 1fr); gap: 1px; padding: 0; }
 .photo-grid button > span { aspect-ratio: 1; }
 .photo-grid small { display: none; }
-.photo-detail-header { height: 92px; padding-top: 46px; background: #fff; }
+.photo-detail-header { height: 92px; display: grid; grid-template-columns: 40px 1fr 40px; padding-top: 46px; background: #fff; }
+.photo-detail-header > strong { justify-self: center; color: #17181d; font-size: 14px; }
+.photo-detail-header > button:last-child { justify-self: end; }
 .photo-viewer { height: calc(100% - 147px); touch-action: pan-y; transition: transform .14s ease-out; }
 .photo-filmstrip { height: 37px; display: flex; align-items: center; justify-content: center; gap: 3px; overflow: hidden; background: #fff; }
 .photo-filmstrip button { width: 27px; height: 27px; flex: none; opacity: .62; transform: scale(.88); transition: .16s; }
@@ -2007,11 +2039,11 @@ button {
 
 /* Music library and player */
 .music-app { position: relative; display: block; padding: 0; color: #17181d; background: #fff; }
-.music-library-header { height: 137px; padding: 55px 15px 8px; border-bottom: 1px solid #dedee2; }
+.music-library-header { height: 116px; padding: 55px 15px 8px; }
 .music-library-header > span { color: #ed2a55; font-size: 11px; }
-.music-library-header h2 { margin: 4px 0 7px; font-size: 29px; }
-.music-library-header div { height: 28px; display: flex; align-items: center; gap: 6px; padding: 0 8px; border-radius: 8px; color: #888a91; background: #eeeef1; font-size: 11px; }
-.song-list { padding-left: 14px; }
+.music-library-header h2 { margin: 4px 0 0; font-size: 29px; }
+.song-list { height: calc(100% - 225px); padding-left: 14px; overflow-y: auto; scrollbar-width: none; }
+.song-list::-webkit-scrollbar { display: none; }
 .song-list > button { position: relative; width: 100%; height: 69px; display: flex; align-items: center; gap: 10px; padding-right: 15px; text-align: left; }
 .song-list > button::after { position: absolute; right: 0; bottom: 0; left: 63px; height: 1px; content: ''; background: #ededf0; }
 .song-cover, .mini-cover { width: 50px; height: 50px; display: grid; place-items: center; flex: none; overflow: hidden; border-radius: 5px; background: linear-gradient(145deg,color-mix(in srgb,var(--cover-color) 60%,white),var(--cover-color)); }
@@ -2056,12 +2088,11 @@ button {
 .browser-toolbar { position: absolute; right: 0; bottom: 0; left: 0; height: 53px; display: flex; align-items: flex-start; justify-content: space-around; padding-top: 10px; border-top: 1px solid #d9d9de; color: #147ce5; background: rgba(248,248,250,.96); }
 
 /* Mail */
-.mail-header { height: 151px; padding: 53px 14px 7px; border-bottom: 1px solid #dddde1; background: #f8f8fa; }
+.mail-header { height: 122px; padding: 53px 14px 7px; background: #f8f8fa; }
 .mail-header > button { color: #147ce5; font-size: 12px; }
 .mail-header > button:nth-child(2) { float: right; }
-.mail-header h2 { margin: 12px 0 8px; font-size: 29px; }
-.mail-header > div { height: 28px; display: flex; align-items: center; gap: 5px; padding: 0 8px; border-radius: 8px; color: #888a90; background: #e7e7eb; font-size: 10px; }
-.mail-list { height: calc(100% - 210px); padding-left: 13px; overflow-y: auto; background: #fff; }
+.mail-header h2 { margin: 12px 0 0; font-size: 29px; }
+.mail-list { height: calc(100% - 225px); padding-left: 13px; overflow-y: auto; background: #fff; }
 .mail-list > button { position: relative; width: 100%; min-height: 80px; display: flex; align-items: flex-start; gap: 7px; padding: 10px 12px 9px 0; text-align: left; }
 .mail-list > button::after { position: absolute; right: 0; bottom: 0; left: 18px; height: 1px; content: ''; background: #e5e5e8; }
 .mail-list > button > i { width: 8px; height: 8px; flex: none; margin-top: 5px; border-radius: 50%; background: #1679e4; }

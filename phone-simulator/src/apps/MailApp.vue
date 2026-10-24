@@ -14,7 +14,8 @@ function openMail(mail) { phone.openContent('mail', mail.id) }
 <template>
   <div class="mail-app">
     <template v-if="!selected">
-      <header class="mail-header"><button type="button">邮箱</button><button type="button">编辑</button><h2>收件箱</h2><div><Search :size="16" />搜索</div></header>
+      <header class="mail-header"><button type="button">邮箱</button><button type="button">编辑</button><h2>收件箱</h2></header>
+      <div class="app-search mail-search"><Search :size="16" />搜索</div>
       <main class="mail-list">
         <button v-for="mail in contentConfig.mail" :key="mail.id" type="button" @click="openMail(mail)">
           <i v-if="mail.unread"></i><span><strong>{{ mail.from }}</strong><b>{{ mail.subject }}</b><small>{{ mail.preview }}</small></span><time>{{ mail.time }}</time>

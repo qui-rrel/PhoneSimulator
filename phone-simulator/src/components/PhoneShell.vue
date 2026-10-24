@@ -104,7 +104,6 @@ function cancelEdgeBack() {
       <button
         v-if="!phone.locked"
         class="home-indicator"
-        :class="{ 'home-indicator--light': ['music', 'weather', 'clock'].includes(phone.activeAppId) || phone.incomingCall || phone.activeCall }"
         type="button"
         aria-label="返回主屏幕"
         @click="phone.navigateHome"

@@ -3,9 +3,11 @@ import { CloudRain, CloudSun, Droplets, Eye, Navigation, Sun, Sunrise, Wind } fr
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { phoneConfig } from '../config/phone.config'
 import { createWeatherSnapshot } from '../utils/weather'
+import { usePointerScroll } from '../utils/pointerScroll'
 
 defineProps({ app: { type: Object, required: true } })
 const now = ref(new Date())
+const { dragging, beginPointerScroll, movePointerScroll, endPointerScroll, wheelPointerScroll } = usePointerScroll()
 let timer
 const weather = computed(() => createWeatherSnapshot(phoneConfig.weather, now.value))
 onMounted(() => { timer = window.setInterval(() => (now.value = new Date()), 60000) })
@@ -21,7 +23,15 @@ onBeforeUnmount(() => window.clearInterval(timer))
       <p>{{ weather.condition }}</p>
       <small>最高 {{ weather.high }}°　最低 {{ weather.low }}°</small>
     </header>
-    <main class="weather-scroll">
+    <main
+      class="weather-scroll desktop-drag-scroll"
+      :class="{ 'is-dragging': dragging }"
+      @pointerdown="beginPointerScroll"
+      @pointermove="movePointerScroll"
+      @pointerup="endPointerScroll"
+      @pointercancel="endPointerScroll"
+      @wheel.prevent="wheelPointerScroll"
+    >
       <section class="weather-card hourly-card">
         <p>今天大部分时间晴朗。今晚云量增多，最低气温 13°。</p>
         <div class="hourly-row">

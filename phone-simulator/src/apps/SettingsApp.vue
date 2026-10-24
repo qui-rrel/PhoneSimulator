@@ -1,8 +1,10 @@
 <script setup>
 import { Accessibility, Bell, Bluetooth, ChevronRight, CircleUserRound, Clock3, Eye, Focus, Gauge, LockKeyhole, Moon, Search, Settings, Smartphone, Volume2, Wallpaper, Wifi, Zap } from 'lucide-vue-next'
 import { phoneConfig } from '../config/phone.config'
+import { usePointerScroll } from '../utils/pointerScroll'
 
 defineProps({ app: { type: Object, required: true } })
+const { dragging, beginPointerScroll, movePointerScroll, endPointerScroll, wheelPointerScroll } = usePointerScroll()
 const rows = [
   { label: '通知', icon: Bell, color: '#ee4b4e' },
   { label: '声音与触感', icon: Volume2, color: '#f14c4e' },
@@ -21,8 +23,17 @@ const rows = [
 
 <template>
   <div class="settings-app">
-    <header><h2>设置</h2><div><Search :size="17" />搜索</div></header>
-    <main class="settings-scroll">
+    <header><h2>设置</h2></header>
+    <div class="app-search settings-search"><Search :size="17" />搜索</div>
+    <main
+      class="settings-scroll desktop-drag-scroll"
+      :class="{ 'is-dragging': dragging }"
+      @pointerdown="beginPointerScroll"
+      @pointermove="movePointerScroll"
+      @pointerup="endPointerScroll"
+      @pointercancel="endPointerScroll"
+      @wheel.prevent="wheelPointerScroll"
+    >
       <section class="settings-profile">
         <span><CircleUserRound :size="42" /></span><div><strong>{{ phoneConfig.owner.name }}</strong><p>Apple ID、iCloud、媒体与购买项目</p></div><ChevronRight :size="17" />
       </section>
