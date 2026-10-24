@@ -6,7 +6,10 @@ import { usePhoneStore } from '../stores/phone'
 
 defineProps({ app: { type: Object, required: true } })
 const phone = usePhoneStore()
-const selectedIndex = ref(-1)
+const selectedIndex = computed(() => {
+  if (phone.activeContent?.appId !== 'photos') return -1
+  return contentConfig.gallery.findIndex((photo) => photo.id === phone.activeContent.targetId)
+})
 const selected = computed(() => contentConfig.gallery[selectedIndex.value])
 const photoStyle = (photo) => photo.src
   ? {
@@ -25,7 +28,8 @@ function endSwipe() {
   if (swipeStart.value === null) return
   if (Math.abs(swipeOffset.value) > 45) {
     const direction = swipeOffset.value < 0 ? 1 : -1
-    selectedIndex.value = (selectedIndex.value + direction + contentConfig.gallery.length) % contentConfig.gallery.length
+    const nextIndex = (selectedIndex.value + direction + contentConfig.gallery.length) % contentConfig.gallery.length
+    phone.replaceContent('photos', contentConfig.gallery[nextIndex].id)
   }
   swipeStart.value = null
   swipeOffset.value = 0
@@ -40,7 +44,7 @@ function endSwipe() {
       <div class="photo-grid"><button v-for="(photo, index) in contentConfig.gallery" :key="photo.id" type="button" :aria-label="`查看第 ${index + 1} 张照片`" @click="openPhoto(photo, index)"><span :style="photoStyle(photo)"><i v-if="!photo.src"></i></span></button></div>
     </template>
     <template v-else>
-      <header class="simple-app-header photo-detail-header"><button type="button" @click="selectedIndex = -1"><ChevronLeft :size="24" /></button><div><strong>{{ selected.date }}</strong><small>{{ selectedIndex + 1 }} / {{ contentConfig.gallery.length }}</small></div><button type="button"><MoreHorizontal :size="21" /></button></header>
+      <header class="simple-app-header photo-detail-header"><button type="button" @click="phone.navigateBack"><ChevronLeft :size="24" /></button><div><strong>{{ selected.date }}</strong><small>{{ selectedIndex + 1 }} / {{ contentConfig.gallery.length }}</small></div><button type="button"><MoreHorizontal :size="21" /></button></header>
       <div class="photo-viewer" :style="{ ...photoStyle(selected), transform: `translateX(${swipeOffset * 0.18}px)` }" @pointerdown="beginSwipe" @pointermove="moveSwipe" @pointerup="endSwipe" @pointercancel="endSwipe"><span v-if="!selected.src" class="abstract-photo-mark"></span></div>
       <footer class="photo-toolbar"><Share2 :size="21" /><Heart :size="21" /><Trash2 :size="21" /></footer>
     </template>

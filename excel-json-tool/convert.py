@@ -391,9 +391,11 @@ def unique_ids(items, key, label):
     return seen
 
 
+basic_fields = set()
 for row in rows("基础设置"):
     value = row["value"]
     field = as_text(row["field"])
+    basic_fields.add(field)
     if field == "security.passcode":
         value = as_passcode(value)
     elif field == "security.digits":
@@ -410,6 +412,12 @@ for row in rows("基础设置"):
         set_path(story, field[6:], value)
     else:
         set_path(content, field, value)
+
+site_title = as_text(content.get("site", {}).get("title", ""))
+if "site.title" in basic_fields and not site_title:
+    raise ValueError("基础设置中的网页名称不能为空。")
+if not site_title:
+    set_path(content, "site.title", "PhoneSimulator")
 
 if isinstance(content.get("home"), dict):
     content["home"].pop("pageLabel", None)

@@ -9,6 +9,7 @@ const formatTime = (date = new Date()) => new Intl.DateTimeFormat('zh-CN', { hou
 const formatDateKey = (date = new Date()) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 const hydrateContacts = (contacts = []) => clone(contacts)
 const CALL_END_DISPLAY_MS = 1400
+const PHONE_HISTORY_KEY = '__phoneSimulatorNavigation'
 
 let timelineTimers = []
 let callTimeout = null
@@ -20,6 +21,9 @@ let alarmTimer = null
 let alarmAudio = null
 let alarmAudioContext = null
 let alarmPulse = null
+let navigationReady = false
+let navigationDepth = 0
+let navigationPopstateHandler = null
 
 export const usePhoneStore = defineStore('phone', () => {
   const locked = ref(true)
@@ -28,6 +32,7 @@ export const usePhoneStore = defineStore('phone', () => {
   const pinError = ref(false)
   const activeAppId = ref(null)
   const activeContactId = ref(null)
+  const activeContent = ref(null)
   const notification = ref(null)
   const contacts = ref(hydrateContacts(contentConfig.contacts))
   const alarms = ref(clone(contentConfig.alarms || []))
@@ -51,6 +56,101 @@ export const usePhoneStore = defineStore('phone', () => {
   const activeApp = computed(() => phoneConfig.apps.find((app) => app.id === activeAppId.value))
   const activeContact = computed(() => contacts.value.find((contact) => contact.id === activeContactId.value))
   const unreadTotal = computed(() => contacts.value.reduce((total, contact) => total + (contact.unread || 0), 0))
+  const canNavigateBack = computed(() => Boolean(
+    !locked.value &&
+    activeAppId.value &&
+    !incomingCall.value &&
+    !activeCall.value &&
+    !alarmRinging.value,
+  ))
+
+  function navigationSnapshot() {
+    return {
+      appId: activeAppId.value,
+      contactId: activeContactId.value,
+      content: activeContent.value ? clone(activeContent.value) : null,
+    }
+  }
+
+  function historyPayload(depth = navigationDepth) {
+    const currentState = window.history.state
+    const state = currentState && typeof currentState === 'object' ? currentState : {}
+    return {
+      ...state,
+      [PHONE_HISTORY_KEY]: {
+        depth,
+        view: navigationSnapshot(),
+      },
+    }
+  }
+
+  function replaceNavigationHistory() {
+    if (!navigationReady || typeof window === 'undefined') return
+    window.history.replaceState(historyPayload(), '')
+  }
+
+  function pushNavigationHistory() {
+    if (!navigationReady || typeof window === 'undefined') return
+    navigationDepth += 1
+    window.history.pushState(historyPayload(), '')
+  }
+
+  function applyNavigationView(view = {}) {
+    const app = phoneConfig.apps.find((item) => item.id === view.appId && item.enabled !== false)
+    activeAppId.value = app?.id || null
+    activeContactId.value = activeAppId.value === 'messages' && contacts.value.some((item) => item.id === view.contactId)
+      ? view.contactId
+      : null
+    activeContent.value = view.content?.appId === activeAppId.value
+      ? clone(view.content)
+      : null
+  }
+
+  function startNavigation() {
+    if (navigationReady || typeof window === 'undefined') return
+    navigationReady = true
+    navigationDepth = 0
+    window.history.replaceState(historyPayload(0), '')
+    navigationPopstateHandler = (event) => {
+      const navigation = event.state?.[PHONE_HISTORY_KEY]
+      if (!navigation) return
+      navigationDepth = Math.max(0, Number(navigation.depth) || 0)
+      applyNavigationView(navigation.view)
+    }
+    window.addEventListener('popstate', navigationPopstateHandler)
+  }
+
+  function stopNavigation() {
+    if (typeof window !== 'undefined' && navigationPopstateHandler) {
+      window.removeEventListener('popstate', navigationPopstateHandler)
+    }
+    navigationPopstateHandler = null
+    navigationReady = false
+  }
+
+  function navigateBack() {
+    if (!canNavigateBack.value) return false
+    if (navigationReady && navigationDepth > 0) {
+      window.history.back()
+      return true
+    }
+    if (activeContent.value) activeContent.value = null
+    else if (activeContactId.value) activeContactId.value = null
+    else if (activeAppId.value) activeAppId.value = null
+    return true
+  }
+
+  function navigateHome() {
+    if (locked.value) return false
+    if (navigationReady && navigationDepth > 0) {
+      window.history.go(-navigationDepth)
+      return true
+    }
+    activeContent.value = null
+    activeContactId.value = null
+    activeAppId.value = null
+    return true
+  }
 
   function showPasscode() { passcodeVisible.value = true }
   function pressPin(value) {
@@ -74,26 +174,38 @@ export const usePhoneStore = defineStore('phone', () => {
     playPasscodeDeleteSound()
     pin.value = pin.value.slice(0, -1)
   }
-  function lock() { activeAppId.value = null; activeContactId.value = null; passcodeVisible.value = false; locked.value = true }
+  function lock() { activeContent.value = null; activeAppId.value = null; activeContactId.value = null; passcodeVisible.value = false; locked.value = true; replaceNavigationHistory() }
   function openApp(id) {
     if (locked.value) return
     const app = phoneConfig.apps.find((item) => item.id === id)
     if (!app || app.enabled === false) return
+    const changed = activeAppId.value !== id || activeContactId.value || activeContent.value
+    activeContent.value = null
     activeContactId.value = null
     activeAppId.value = id
+    if (changed) pushNavigationHistory()
     if (id === 'messages') clearAppBadge(id)
     triggerOperation('app-open', { appId: id, targetId: id })
   }
-  function closeApp() { activeContactId.value = null; activeAppId.value = null }
+  function closeApp() { navigateHome() }
   function openContact(id) {
+    if (activeAppId.value !== 'messages') activeAppId.value = 'messages'
+    activeContent.value = null
     activeContactId.value = id
     const contact = contacts.value.find((item) => item.id === id)
     if (contact) contact.unread = 0
+    pushNavigationHistory()
     triggerOperation('content-open', { appId: 'messages', targetId: id })
   }
-  function closeContact() { activeContactId.value = null }
+  function closeContact() { navigateBack() }
   function openContent(appId, targetId) {
+    activeContent.value = { appId, targetId }
+    pushNavigationHistory()
     triggerOperation('content-open', { appId, targetId })
+  }
+  function replaceContent(appId, targetId) {
+    activeContent.value = { appId, targetId }
+    replaceNavigationHistory()
   }
   function clearAppBadge(id) {
     const app = phoneConfig.apps.find((item) => item.id === id)
@@ -487,7 +599,7 @@ export const usePhoneStore = defineStore('phone', () => {
     check()
     alarmTimer = window.setInterval(check, 1000)
   }
-  function startRuntime() { startTimeline(); startAlarmClock() }
+  function startRuntime() { startNavigation(); startTimeline(); startAlarmClock() }
   function resetStory() {
     contacts.value = hydrateContacts(contentConfig.contacts)
     callHistory.value = (contentConfig.callHistory || []).map(hydrateCallRecord)
@@ -503,10 +615,10 @@ export const usePhoneStore = defineStore('phone', () => {
   }
 
   return {
-    locked, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact,
+    locked, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact, activeContent,
     notification, contacts, unreadTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
-    callElapsed, callStatus, alarmRinging, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
-    closeContact, openContent, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
+    callElapsed, callStatus, alarmRinging, canNavigateBack, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
+    closeContact, openContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
     toggleAlarm, stopAlarm, triggerOperation, startOutgoingCall, acceptCall, rejectCall, endCall,
     activeStoryEvents, completedEvents, eventOutcomes, activeSmsScripts, getActiveSmsScript, advanceSmsScript, completeSmsScript,
     resetStory, startTimeline, startRuntime,

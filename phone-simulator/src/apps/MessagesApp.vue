@@ -122,7 +122,7 @@ watch(() => contact.value?.messages.length, scrollToBottom)
 
     <template v-else>
       <header class="chat-header">
-        <button type="button" aria-label="返回" @click="phone.closeContact">
+        <button type="button" aria-label="返回" @click="phone.navigateBack">
           <ChevronLeft :size="26" />
         </button>
         <div>

@@ -11,7 +11,10 @@ onMounted(() => {
   removeSoundUnlock = prepareSynthAudio()
   phone.startRuntime()
 })
-onBeforeUnmount(() => removeSoundUnlock())
+onBeforeUnmount(() => {
+  removeSoundUnlock()
+  phone.stopNavigation()
+})
 </script>
 
 <template>

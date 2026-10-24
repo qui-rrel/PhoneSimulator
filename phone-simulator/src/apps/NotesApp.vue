@@ -1,13 +1,15 @@
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { ChevronLeft, CircleEllipsis, Search, Share2, SquarePen } from 'lucide-vue-next'
 import { contentConfig } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
 
 defineProps({ app: { type: Object, required: true } })
 const phone = usePhoneStore()
-const selected = ref(null)
-function openNote(note) { selected.value = note; phone.openContent('notes', note.id) }
+const selected = computed(() => phone.activeContent?.appId === 'notes'
+  ? contentConfig.notes.find((note) => note.id === phone.activeContent.targetId) || null
+  : null)
+function openNote(note) { phone.openContent('notes', note.id) }
 </script>
 
 <template>
@@ -33,7 +35,7 @@ function openNote(note) { selected.value = note; phone.openContent('notes', note
 
     <template v-else>
       <header class="simple-app-header simple-app-header--yellow">
-        <button type="button" @click="selected = null"><ChevronLeft :size="24" />备忘录</button>
+        <button type="button" @click="phone.navigateBack"><ChevronLeft :size="24" />备忘录</button>
         <button type="button" aria-label="分享"><Share2 :size="19" /></button>
       </header>
       <article class="note-detail">

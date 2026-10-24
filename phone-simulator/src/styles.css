@@ -15,6 +15,7 @@ body,
 #app {
   min-height: 100%;
   margin: 0;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -169,6 +170,7 @@ button {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior-x: none;
   border-radius: var(--device-radius);
   background: #f5f5f7;
   isolation: isolate;
@@ -322,6 +324,39 @@ button {
 
 .home-indicator--light span {
   background: #fff;
+}
+
+.edge-back-zone {
+  position: absolute;
+  z-index: 125;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 22px;
+  touch-action: pan-y pinch-zoom;
+}
+
+.edge-back-indicator {
+  position: absolute;
+  left: -30px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(30, 33, 40, 0.68);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+  transition: color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+  backdrop-filter: blur(10px);
+}
+
+.edge-back-indicator--ready {
+  color: #087cff;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.28);
 }
 
 .home-screen {
