@@ -427,6 +427,115 @@ button {
   transition: transform 0.13s ease, filter 0.13s ease;
 }
 
+.app-glyph {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: inherit;
+  container-type: inline-size;
+}
+
+.app-glyph-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.app-glyph-calendar {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+  color: #141519;
+  background: linear-gradient(180deg, #ffffff 0%, #f6f6f4 100%);
+  font-variant-numeric: tabular-nums;
+}
+
+.app-glyph-calendar small {
+  position: absolute;
+  top: 12%;
+  right: 0;
+  left: 0;
+  color: #e3464c;
+  font-size: 20cqi;
+  font-weight: 750;
+  line-height: 1;
+  text-align: center;
+}
+
+.app-glyph-calendar strong {
+  position: absolute;
+  top: 34%;
+  right: 0;
+  left: 0;
+  font-size: 49cqi;
+  font-weight: 450;
+  line-height: 1;
+  text-align: center;
+}
+
+.app-glyph-clock {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+  color: #17191d;
+  background: linear-gradient(145deg, #ffffff, #ececea);
+}
+
+.app-glyph-clock::before {
+  position: absolute;
+  inset: 8%;
+  border: 1px solid rgba(30, 32, 36, 0.3);
+  border-radius: 50%;
+  background: repeating-conic-gradient(#35383d 0 1.4deg, transparent 1.4deg 30deg);
+  content: '';
+  mask: radial-gradient(circle, transparent 0 76%, #000 77%);
+}
+
+.app-glyph-clock__number {
+  position: absolute;
+  z-index: 1;
+  font-size: 13cqi;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app-glyph-clock__number--12 { top: 12%; left: 50%; transform: translateX(-50%); }
+.app-glyph-clock__number--3 { top: 50%; right: 11%; transform: translateY(-50%); }
+.app-glyph-clock__number--6 { bottom: 11%; left: 50%; transform: translateX(-50%); }
+.app-glyph-clock__number--9 { top: 50%; left: 11%; transform: translateY(-50%); }
+
+.app-glyph-clock__hand {
+  position: absolute;
+  z-index: 2;
+  bottom: 50%;
+  left: 50%;
+  display: block;
+  border-radius: 999px;
+  background: #111318;
+  transform-origin: 50% 100%;
+}
+
+.app-glyph-clock__hand--hour { width: 4.2%; height: 22%; }
+.app-glyph-clock__hand--minute { width: 2.8%; height: 31%; }
+
+.app-glyph-clock__hub {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: 8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #ef6b45;
+  transform: translate(-50%, -50%);
+}
+
 .app-label {
   max-width: 74px;
   overflow: hidden;
@@ -558,7 +667,7 @@ button {
   flex: none;
   border-radius: 9px;
   color: #fff;
-  background: #efbe37;
+  background: transparent;
   font-size: 17px;
   font-weight: 700;
 }
@@ -1997,11 +2106,8 @@ button {
 .call-overlay h2 { margin: 18px 0 4px; font-size: 29px; }
 .call-overlay > p { margin: 0; color: rgba(255,255,255,.7); font-size: 13px; }
 .incoming-call-actions, .active-call-actions { width: 100%; display: flex; justify-content: space-around; margin-top: auto; }
-.incoming-call-actions button, .active-call-actions button { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 10px; }
-.incoming-call-actions button svg, .active-call-actions button { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; }
-.incoming-call-actions .reject svg, .active-call-actions .reject { background: #e4454d; }
-.incoming-call-actions .accept svg { background: #39bd62; }
-.active-call-actions button:not(.reject) { background: rgba(255,255,255,.14); }
+.incoming-call-actions button, .active-call-actions button { width: 58px; height: 58px; display: block; overflow: hidden; border-radius: 50%; }
+.incoming-call-actions button img, .active-call-actions button img { width: 100%; height: 100%; display: block; object-fit: contain; clip-path: circle(50%); }
 .call-transcript { width: 100%; max-height: 260px; margin-top: 45px; overflow-y: auto; }
 .call-transcript p { width: fit-content; max-width: 78%; margin: 8px 0; padding: 8px 11px; border-radius: 14px; background: rgba(255,255,255,.14); font-size: 11px; }
 .call-transcript .call-line--me { margin-left: auto; background: #4779df; }

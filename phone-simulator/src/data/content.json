@@ -32,8 +32,7 @@
       "label": "信息",
       "enabled": true,
       "component": "MessagesApp",
-      "icon": "MessageCircle",
-      "color": "#31c45d",
+      "iconSrc": "/media/UI/AppIcon/messages-app-icon.png",
       "dock": true,
       "badge": 2
     },
@@ -42,8 +41,7 @@
       "label": "电话",
       "enabled": true,
       "component": "PhoneApp",
-      "icon": "Phone",
-      "color": "#36c568",
+      "iconSrc": "/media/UI/AppIcon/phone-app-icon.png",
       "dock": true
     },
     {
@@ -51,8 +49,7 @@
       "label": "音乐",
       "enabled": true,
       "component": "MusicApp",
-      "icon": "Music2",
-      "color": "#f24666",
+      "iconSrc": "/media/UI/AppIcon/apple-music-app-icon.png",
       "dock": true
     },
     {
@@ -60,9 +57,7 @@
       "label": "浏览器",
       "enabled": true,
       "component": "BrowserApp",
-      "icon": "Compass",
-      "color": "#ffffff",
-      "iconColor": "#248bf0",
+      "iconSrc": "/media/UI/AppIcon/browser-app-icon.png",
       "dock": true
     },
     {
@@ -70,59 +65,49 @@
       "label": "照片",
       "enabled": true,
       "component": "GalleryApp",
-      "icon": "Image",
-      "color": "#ffffff",
-      "iconColor": "#ef556d"
+      "iconSrc": "/media/UI/AppIcon/photos-app-icon.png"
     },
     {
       "id": "notes",
       "label": "备忘录",
       "enabled": true,
       "component": "NotesApp",
-      "icon": "NotebookPen",
-      "color": "#f6c846",
-      "iconColor": "#ffffff"
+      "iconSrc": "/media/UI/AppIcon/notes-app-icon.png"
     },
     {
       "id": "mail",
       "label": "邮件",
       "enabled": true,
       "component": "MailApp",
-      "icon": "Mail",
-      "color": "#247eea"
+      "iconSrc": "/media/UI/AppIcon/email-app-icon.png"
     },
     {
       "id": "calendar",
       "label": "日历",
       "enabled": true,
       "component": "CalendarApp",
-      "icon": "CalendarDays",
-      "color": "#ffffff",
-      "iconColor": "#ef3d45"
+      "iconSrc": ""
     },
     {
       "id": "weather",
       "label": "天气",
       "enabled": true,
       "component": "WeatherApp",
-      "icon": "CloudSun",
-      "color": "#4fa2f5"
+      "iconSrc": "/media/UI/AppIcon/weather-app-icon.png"
     },
     {
       "id": "clock",
       "label": "时钟",
       "enabled": true,
       "component": "ClockApp",
-      "icon": "Clock3",
-      "color": "#111318"
+      "iconSrc": ""
     },
     {
       "id": "settings",
       "label": "设置",
       "enabled": true,
       "component": "SettingsApp",
-      "icon": "Settings",
-      "color": "#9096a2"
+      "iconSrc": "/media/UI/AppIcon/settings-app-icon.png"
     }
   ],
   "lockNotifications": [
@@ -155,49 +140,49 @@
   "gallery": [
     {
       "id": "g1",
-      "src": "/media/img1.jpg",
+      "src": "/media/Album/img1.jpg",
       "gradient": "linear-gradient(145deg,#9fb7d4,#40536e 48%,#20283a)",
       "date": "46194"
     },
     {
       "id": "g2",
-      "src": "/media/img2.jpg",
+      "src": "/media/Album/img2.jpg",
       "gradient": "linear-gradient(145deg,#ffc98d,#d8797d 45%,#39466d)",
       "date": "46195"
     },
     {
       "id": "g3",
-      "src": "/media/img3.jpg",
+      "src": "/media/Album/img3.jpg",
       "gradient": "linear-gradient(145deg,#e7d7b4,#a68a65 60%,#4c4032)",
       "date": "46196"
     },
     {
       "id": "g4",
-      "src": "/media/img4.jpg",
+      "src": "/media/Album/img4.jpg",
       "gradient": "linear-gradient(145deg,#afdee2,#5aa0aa 55%,#254d63)",
       "date": "46197"
     },
     {
       "id": "g5",
-      "src": "/media/img5.jpg",
+      "src": "/media/Album/img5.jpg",
       "gradient": "linear-gradient(145deg,#8390ae,#303856 50%,#111526)",
       "date": "46198"
     },
     {
       "id": "g6",
-      "src": "/media/img6.jpg",
+      "src": "/media/Album/img6.jpg",
       "gradient": "linear-gradient(145deg,#f0e1ad,#9bb57b 48%,#3e5c50)",
       "date": "46199"
     },
     {
       "id": "g7",
-      "src": "/media/img7.jpg",
+      "src": "/media/Album/img7.jpg",
       "gradient": "",
       "date": "46200"
     },
     {
       "id": "g8",
-      "src": "/media/img8.jpg",
+      "src": "/media/Album/img8.jpg",
       "gradient": "",
       "date": "46201"
     }
@@ -324,8 +309,8 @@
       "id": "t1",
       "title": "想见你想见你想见你",
       "artist": "张月、陈瑶",
-      "src": "/media/想见你想见你想见你.mp3",
-      "cover": "/media/结婚照.jpg",
+      "src": "/media/Music/想见你想见你想见你.mp3",
+      "cover": "/media/Icon/结婚照.jpg",
       "color": "#BE9CF6",
       "duration": 0
     }

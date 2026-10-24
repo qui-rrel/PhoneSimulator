@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { phoneConfig } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
+import AppGlyph from './AppGlyph.vue'
 
 const phone = usePhoneStore()
 const contact = computed(() => phone.contacts.find((item) => item.id === phone.notification?.contactId))
@@ -20,11 +21,11 @@ const usesContactAvatar = computed(() => Boolean(contact.value && ['messages', '
       <span
         class="notification-icon"
         :class="{ 'notification-icon--avatar': usesContactAvatar }"
-        :style="{ background: usesContactAvatar ? contact.color : (app?.color || phone.notification.color || '#8b8d94'), color: app?.iconColor || '#fff' }"
+        :style="{ background: usesContactAvatar ? contact.color : undefined }"
       >
         <img v-if="usesContactAvatar && contact.avatar" :src="contact.avatar" alt="" />
         <span v-else-if="usesContactAvatar">{{ contact.initials }}</span>
-        <component :is="app.icon" v-else-if="app?.icon" :size="20" />
+        <AppGlyph v-else-if="app" :app="app" :size="20" />
       </span>
       <span class="notification-copy">
         <span class="notification-head">

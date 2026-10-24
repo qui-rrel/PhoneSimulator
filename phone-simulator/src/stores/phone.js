@@ -2,11 +2,13 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { contentConfig, phoneConfig } from '../config/phone.config'
 import { storyConfig } from '../config/story.config'
+import { playMessageReceiveSound, playPasscodeDeleteSound, playPasscodeDigitSound } from '../utils/sounds'
 
 const clone = (value) => JSON.parse(JSON.stringify(value))
 const formatTime = (date = new Date()) => new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date)
 const formatDateKey = (date = new Date()) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 const hydrateContacts = (contacts = []) => clone(contacts)
+const CALL_END_DISPLAY_MS = 1400
 
 let timelineTimers = []
 let callTimeout = null
@@ -53,6 +55,7 @@ export const usePhoneStore = defineStore('phone', () => {
   function showPasscode() { passcodeVisible.value = true }
   function pressPin(value) {
     if (pin.value.length >= phoneConfig.security.digits) return
+    playPasscodeDigitSound()
     pin.value += value
     pinError.value = false
     if (pin.value.length !== phoneConfig.security.digits) return
@@ -67,7 +70,10 @@ export const usePhoneStore = defineStore('phone', () => {
       }
     }, 140)
   }
-  function erasePin() { pin.value = pin.value.slice(0, -1) }
+  function erasePin() {
+    playPasscodeDeleteSound()
+    pin.value = pin.value.slice(0, -1)
+  }
   function lock() { activeAppId.value = null; activeContactId.value = null; passcodeVisible.value = false; locked.value = true }
   function openApp(id) {
     if (locked.value) return
@@ -164,6 +170,7 @@ export const usePhoneStore = defineStore('phone', () => {
     addMessage(contactId, { side: 'them', text })
     const contact = contacts.value.find((item) => item.id === contactId)
     if (!contact) return
+    playMessageReceiveSound()
     const isConversationOpen = activeAppId.value === 'messages' && activeContactId.value === contactId
     if (isConversationOpen) return
     contact.unread = (contact.unread || 0) + 1
@@ -231,6 +238,20 @@ export const usePhoneStore = defineStore('phone', () => {
       duration,
     })
   }
+  function showCallEnded(call, afterClose = null) {
+    window.clearTimeout(outgoingCloseTimer)
+    incomingCall.value = null
+    activeCall.value = { ...call }
+    callTranscript.value = []
+    callStatus.value = 'ended'
+    outgoingCloseTimer = window.setTimeout(() => {
+      activeCall.value = null
+      callTranscript.value = []
+      callElapsed.value = 0
+      callStatus.value = 'idle'
+      if (afterClose) afterClose()
+    }, CALL_END_DISPLAY_MS)
+  }
   function beginCall(call, direction, eventId = '') {
     window.clearTimeout(callTimeout)
     window.clearTimeout(outgoingCallTimer)
@@ -277,7 +298,7 @@ export const usePhoneStore = defineStore('phone', () => {
     if (outcome === 'accepted') beginCall(ringing, 'incoming', ringing.eventId)
     else {
       addCallRecord(ringing, outcome, 'incoming')
-      resolveStoryOutcome(ringing.eventId, outcome)
+      showCallEnded(ringing, () => resolveStoryOutcome(ringing.eventId, outcome))
     }
   }
   function acceptCall() { resolveIncomingCall('accepted') }
@@ -294,15 +315,10 @@ export const usePhoneStore = defineStore('phone', () => {
   }
   function finishUnansweredOutgoing(call) {
     if (!activeCall.value) return
-    callStatus.value = 'unanswered'
     addCallRecord(call, 'missed', 'outgoing')
     triggerOperation('outgoing-call-missed', { appId: 'phone', targetId: call.contactId })
     triggerOperation('call-ended', { appId: 'phone', targetId: call.contactId, outcome: 'missed' })
-    outgoingCloseTimer = window.setTimeout(() => {
-      activeCall.value = null
-      callTranscript.value = []
-      callStatus.value = 'idle'
-    }, 1400)
+    showCallEnded(call)
   }
   function startOutgoingCall(contactId, record = {}) {
     if (incomingCall.value || activeCall.value) return
@@ -332,19 +348,18 @@ export const usePhoneStore = defineStore('phone', () => {
   }
   function endCall() {
     const call = activeCall.value
-    if (!call) return
+    if (!call || callStatus.value === 'ended') return
+    const endedStatus = callStatus.value
     window.clearTimeout(outgoingCallTimer)
     window.clearTimeout(outgoingCloseTimer)
     window.clearInterval(callElapsedTimer)
     callScriptTimers.forEach((timer) => window.clearTimeout(timer))
-    if (callStatus.value !== 'unanswered') addCallRecord(call, callStatus.value === 'connected' ? 'completed' : 'outgoing', call.direction, callElapsed.value)
+    addCallRecord(call, endedStatus === 'connected' ? 'completed' : 'outgoing', call.direction, callElapsed.value)
     const eventId = call.eventId
-    triggerOperation('call-ended', { appId: 'phone', targetId: call.contactId, outcome: callStatus.value })
-    activeCall.value = null
-    callTranscript.value = []
-    callElapsed.value = 0
-    callStatus.value = 'idle'
-    if (eventId) resolveStoryOutcome(eventId, 'accepted')
+    triggerOperation('call-ended', { appId: 'phone', targetId: call.contactId, outcome: endedStatus })
+    showCallEnded(call, () => {
+      if (eventId) resolveStoryOutcome(eventId, 'accepted')
+    })
   }
 
   function findStoryEvent(eventId) {

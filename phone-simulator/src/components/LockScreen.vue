@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ChevronLeft, Delete, Flashlight, Globe2, LockKeyhole, Camera } from 'lucide-vue-next'
 import { phoneConfig } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
+import AppGlyph from './AppGlyph.vue'
 
 const phone = usePhoneStore()
 const now = ref(new Date())
@@ -82,11 +83,11 @@ onBeforeUnmount(() => window.clearInterval(timer))
             <span
               class="lock-notification-icon"
               :class="{ 'lock-notification-icon--avatar': usesContactAvatar(item) }"
-              :style="{ background: usesContactAvatar(item) ? notificationContact(item)?.color : (notificationApp(item)?.color || '#8b8d94'), color: notificationApp(item)?.iconColor || '#fff' }"
+              :style="{ background: usesContactAvatar(item) ? notificationContact(item)?.color : undefined }"
             >
               <img v-if="usesContactAvatar(item) && notificationContact(item)?.avatar" :src="notificationContact(item)?.avatar" alt="" />
               <span v-else-if="usesContactAvatar(item)">{{ notificationContact(item)?.initials }}</span>
-              <component :is="notificationApp(item)?.icon" v-else-if="notificationApp(item)?.icon" :size="20" />
+              <AppGlyph v-else-if="notificationApp(item)" :app="notificationApp(item)" :size="20" />
             </span>
             <span>
               <strong>{{ notificationTitle(item) }} <small>{{ item.time }}</small></strong>

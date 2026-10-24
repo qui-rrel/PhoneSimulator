@@ -2,6 +2,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { ChevronLeft, MoreHorizontal, Plus, Search, Send, Smile, Video } from 'lucide-vue-next'
 import { usePhoneStore } from '../stores/phone'
+import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
 
 defineProps({ app: { type: Object, required: true } })
 
@@ -53,6 +54,7 @@ async function typePresetReply() {
   const keystrokes = currentPlayerEntry.value?.keystrokes || line.replace(/\s/g, '')
   for (let index = 0; index < keystrokes.length; index += 1) {
     activeKey.value = keystrokes[index].toUpperCase()
+    playKeyboardTapSound()
     const textLength = Math.max(1, Math.floor(((index + 1) / keystrokes.length) * line.length))
     draft.value = line.slice(0, textLength)
     await new Promise((resolve) => window.setTimeout(resolve, 58 + Math.random() * 34))
@@ -63,6 +65,7 @@ async function typePresetReply() {
 }
 
 function tapKey(key) {
+  playKeyboardTapSound()
   activeKey.value = key
   window.setTimeout(() => { if (activeKey.value === key) activeKey.value = '' }, 110)
 }
@@ -72,6 +75,7 @@ async function sendPresetReply() {
   const id = contact.value.id
   const stage = currentStage.value
   if (!stage) return
+  playMessageSendSound()
   phone.addMessage(id, { side: 'me', text: draft.value, read: true })
   draft.value = ''
   phone.advanceSmsScript(stage.id)
@@ -174,7 +178,7 @@ watch(() => contact.value?.messages.length, scrollToBottom)
           <div v-for="(row, rowIndex) in keyboardRows" :key="rowIndex" class="keyboard-row">
             <button v-for="key in row" :key="key" type="button" :class="{ active: activeKey === key }" @click="tapKey(key)">{{ key }}</button>
           </div>
-          <div class="keyboard-bottom"><button type="button">123</button><button class="keyboard-space" type="button">空格</button><button type="button" @click="keyboardVisible = false">完成</button></div>
+          <div class="keyboard-bottom"><button type="button" @click="playKeyboardTapSound">123</button><button class="keyboard-space" type="button" @click="playKeyboardTapSound">空格</button><button type="button" @click="keyboardVisible = false">完成</button></div>
         </section>
       </Transition>
     </template>

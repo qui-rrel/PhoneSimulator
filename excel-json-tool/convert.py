@@ -30,6 +30,7 @@ HEADER_ALIASES = {
     "显示名称": "label",
     "是否使用": "enabled",
     "组件名（不要修改）": "component",
+    "图标路径（可空）": "iconSrc",
     "图标名（不要修改）": "icon",
     "背景色": "color",
     "图标色": "iconColor",
@@ -424,11 +425,8 @@ if "桌面应用" in workbook.sheetnames:
             "label": as_text(row["label"]),
             "enabled": as_bool(row.get("enabled", True)),
             "component": as_text(row["component"]),
-            "icon": as_text(row["icon"]),
-            "color": as_text(row["color"]),
+            "iconSrc": as_text(row.get("iconSrc", "")),
         }
-        if row.get("iconColor") not in (None, ""):
-            app["iconColor"] = str(row["iconColor"])
         if as_bool(row.get("dock")):
             app["dock"] = True
         if row.get("badge") not in (None, ""):
