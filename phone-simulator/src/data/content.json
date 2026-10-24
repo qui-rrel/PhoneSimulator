@@ -1,0 +1,374 @@
+{
+  "device": {
+    "width": 393,
+    "height": 852,
+    "radius": 58
+  },
+  "owner": {
+    "name": "张朋",
+    "signature": "月努力月幸运",
+    "wifiName": "YueZhang"
+  },
+  "security": {
+    "passcode": "2799",
+    "digits": 4
+  },
+  "theme": {
+    "accent": "#5b6df8",
+    "lockWallpaper": "radial-gradient(circle at 24% 18%, rgba(255,255,255,.38), transparent 24%), radial-gradient(circle at 76% 30%, rgba(177,205,255,.56), transparent 30%), linear-gradient(145deg, #8ba8d7 0%, #7583bc 38%, #353f6f 70%, #171b35 100%)",
+    "homeWallpaper": "radial-gradient(circle at 24% 18%, rgba(255,255,255,.38), transparent 24%), radial-gradient(circle at 76% 30%, rgba(177,205,255,.56), transparent 30%), linear-gradient(145deg, #8ba8d7 0%, #7583bc 38%, #353f6f 70%, #171b35 100%)",
+    "wallpaperOverlay": "linear-gradient(180deg, rgba(16,19,45,.02), rgba(10,12,34,.34))"
+  },
+  "weather": {
+    "location": "北京",
+    "seed": 21
+  },
+  "home": {
+    "showGreetingWidget": true
+  },
+  "apps": [
+    {
+      "id": "messages",
+      "label": "信息",
+      "enabled": true,
+      "component": "MessagesApp",
+      "icon": "MessageCircle",
+      "color": "#31c45d",
+      "dock": true,
+      "badge": 2
+    },
+    {
+      "id": "phone",
+      "label": "电话",
+      "enabled": true,
+      "component": "PhoneApp",
+      "icon": "Phone",
+      "color": "#36c568",
+      "dock": true
+    },
+    {
+      "id": "music",
+      "label": "音乐",
+      "enabled": true,
+      "component": "MusicApp",
+      "icon": "Music2",
+      "color": "#f24666",
+      "dock": true
+    },
+    {
+      "id": "browser",
+      "label": "浏览器",
+      "enabled": true,
+      "component": "BrowserApp",
+      "icon": "Compass",
+      "color": "#ffffff",
+      "iconColor": "#248bf0",
+      "dock": true
+    },
+    {
+      "id": "photos",
+      "label": "照片",
+      "enabled": true,
+      "component": "GalleryApp",
+      "icon": "Image",
+      "color": "#ffffff",
+      "iconColor": "#ef556d"
+    },
+    {
+      "id": "notes",
+      "label": "备忘录",
+      "enabled": true,
+      "component": "NotesApp",
+      "icon": "NotebookPen",
+      "color": "#f6c846",
+      "iconColor": "#ffffff"
+    },
+    {
+      "id": "mail",
+      "label": "邮件",
+      "enabled": true,
+      "component": "MailApp",
+      "icon": "Mail",
+      "color": "#247eea"
+    },
+    {
+      "id": "calendar",
+      "label": "日历",
+      "enabled": true,
+      "component": "CalendarApp",
+      "icon": "CalendarDays",
+      "color": "#ffffff",
+      "iconColor": "#ef3d45"
+    },
+    {
+      "id": "weather",
+      "label": "天气",
+      "enabled": true,
+      "component": "WeatherApp",
+      "icon": "CloudSun",
+      "color": "#4fa2f5"
+    },
+    {
+      "id": "clock",
+      "label": "时钟",
+      "enabled": true,
+      "component": "ClockApp",
+      "icon": "Clock3",
+      "color": "#111318"
+    },
+    {
+      "id": "settings",
+      "label": "设置",
+      "enabled": true,
+      "component": "SettingsApp",
+      "icon": "Settings",
+      "color": "#9096a2"
+    }
+  ],
+  "lockNotifications": [
+    {
+      "id": "lock-phone-example",
+      "appId": "phone",
+      "contactId": "yao",
+      "title": "",
+      "time": "2分钟前",
+      "body": "未接来电"
+    },
+    {
+      "id": "lock-message-example",
+      "appId": "messages",
+      "contactId": "yao",
+      "title": "",
+      "time": "$localTime",
+      "body": "到家了吗？"
+    }
+  ],
+  "notes": [
+    {
+      "id": "n1",
+      "title": "购物清单",
+      "excerpt": "胶卷、苏打水、电池",
+      "updatedAt": "2026-10-17",
+      "body": "□ 胶卷\n□ 苏打水\n□ 相机电池\n□ 牛皮纸信封"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "g1",
+      "src": "/media/img1.jpg",
+      "gradient": "linear-gradient(145deg,#9fb7d4,#40536e 48%,#20283a)",
+      "date": "46194"
+    },
+    {
+      "id": "g2",
+      "src": "/media/img2.jpg",
+      "gradient": "linear-gradient(145deg,#ffc98d,#d8797d 45%,#39466d)",
+      "date": "46195"
+    },
+    {
+      "id": "g3",
+      "src": "/media/img3.jpg",
+      "gradient": "linear-gradient(145deg,#e7d7b4,#a68a65 60%,#4c4032)",
+      "date": "46196"
+    },
+    {
+      "id": "g4",
+      "src": "/media/img4.jpg",
+      "gradient": "linear-gradient(145deg,#afdee2,#5aa0aa 55%,#254d63)",
+      "date": "46197"
+    },
+    {
+      "id": "g5",
+      "src": "/media/img5.jpg",
+      "gradient": "linear-gradient(145deg,#8390ae,#303856 50%,#111526)",
+      "date": "46198"
+    },
+    {
+      "id": "g6",
+      "src": "/media/img6.jpg",
+      "gradient": "linear-gradient(145deg,#f0e1ad,#9bb57b 48%,#3e5c50)",
+      "date": "46199"
+    },
+    {
+      "id": "g7",
+      "src": "/media/img7.jpg",
+      "gradient": "",
+      "date": "46200"
+    },
+    {
+      "id": "g8",
+      "src": "/media/img8.jpg",
+      "gradient": "",
+      "date": "46201"
+    }
+  ],
+  "alarms": [
+    {
+      "id": "c1",
+      "time": "07:30",
+      "label": "工作日",
+      "enabled": true,
+      "sound": ""
+    },
+    {
+      "id": "c2",
+      "time": "09:10",
+      "label": "周末",
+      "enabled": false,
+      "sound": ""
+    }
+  ],
+  "contacts": [
+    {
+      "id": "yao",
+      "name": "瑶瑶",
+      "avatar": "",
+      "initials": "瑶",
+      "color": "#7d8ef2",
+      "time": "$localTime",
+      "unread": 2,
+      "messages": [
+        {
+          "id": "m1",
+          "side": "them",
+          "text": "到家了吗？",
+          "stamp": "昨天 20:14",
+          "read": true
+        },
+        {
+          "id": "m2",
+          "side": "me",
+          "text": "刚到，在整理今天拍的东西。",
+          "stamp": "昨天 20:15",
+          "read": false
+        },
+        {
+          "id": "m3",
+          "side": "them",
+          "text": "我把那张照片发给你了。",
+          "stamp": "昨天 20:16",
+          "read": true
+        },
+        {
+          "id": "m4",
+          "side": "them",
+          "text": "在干嘛？",
+          "stamp": "$localTime",
+          "read": false
+        }
+      ]
+    },
+    {
+      "id": "studio",
+      "name": "工作室",
+      "avatar": "",
+      "initials": "工",
+      "color": "#ec8c5a",
+      "time": "昨天",
+      "unread": 0,
+      "messages": [
+        {
+          "id": "s1",
+          "side": "them",
+          "text": "周五之前确认最终版本。",
+          "stamp": "昨天 18:42",
+          "read": true
+        },
+        {
+          "id": "s2",
+          "side": "me",
+          "text": "收到，我今晚整理一下。",
+          "stamp": "昨天 18:44",
+          "read": false
+        }
+      ]
+    },
+    {
+      "id": "mom",
+      "name": "妈妈",
+      "avatar": "",
+      "initials": "妈",
+      "color": "#59aa85",
+      "time": "昨天",
+      "unread": 0,
+      "messages": [
+        {
+          "id": "mm1",
+          "side": "them",
+          "text": "天气凉了，记得添衣服。",
+          "stamp": "昨天 21:03",
+          "read": true
+        },
+        {
+          "id": "mm2",
+          "side": "me",
+          "text": "知道啦，晚点给你打电话。",
+          "stamp": "昨天 21:05",
+          "read": false
+        }
+      ]
+    }
+  ],
+  "callHistory": [
+    {
+      "id": "history-yao-example",
+      "contactId": "yao",
+      "direction": "incoming",
+      "outcome": "missed",
+      "time": "$localTime",
+      "duration": 0
+    }
+  ],
+  "playlist": [
+    {
+      "id": "t1",
+      "title": "想见你想见你想见你",
+      "artist": "张月、陈瑶",
+      "src": "/media/想见你想见你想见你.mp3",
+      "cover": "/media/结婚照.jpg",
+      "color": "#BE9CF6",
+      "duration": 0
+    }
+  ],
+  "browserHistory": [
+    {
+      "id": "web1",
+      "title": "北京市天气",
+      "url": "weather.local/beijing",
+      "time": "今天 18:20"
+    },
+    {
+      "id": "web2",
+      "title": "旧相机维修手册",
+      "url": "archive.local/camera",
+      "time": "昨天"
+    }
+  ],
+  "mail": [
+    {
+      "id": "mail1",
+      "from": "芒果TV",
+      "subject": "乘风演唱会通知",
+      "preview": "演唱会必须给我麦咭。",
+      "time": "昨天",
+      "unread": false,
+      "body": "根据麦咭合同，你和陈瑶需要在演唱会后台拍20张拍立得。"
+    }
+  ],
+  "calendarEvents": [
+    {
+      "id": "event1",
+      "date": "2026-10-22",
+      "title": "练舞",
+      "time": "15:00",
+      "color": "#f05c64"
+    },
+    {
+      "id": "event2",
+      "date": "2026-10-24",
+      "title": "商务拍摄",
+      "time": "19:00",
+      "color": "#5d7fe8"
+    }
+  ]
+}

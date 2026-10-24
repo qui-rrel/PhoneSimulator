@@ -1,0 +1,297 @@
+{
+  "events": [
+    {
+      "id": "studio-message",
+      "initialActive": true,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 12000
+      },
+      "action": {
+        "type": "sms-script",
+        "smsScriptId": "sms-studio-message"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "yao-sms-1",
+      "initialActive": true,
+      "trigger": {
+        "type": "operation",
+        "action": "message-input",
+        "appId": "messages",
+        "targetId": "yao"
+      },
+      "action": {
+        "type": "sms-script",
+        "smsScriptId": "sms-yao-1"
+      },
+      "nextByOutcome": {
+        "completed": "bridge-call",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "wait-open-photo",
+      "initialActive": false,
+      "trigger": {
+        "type": "operation",
+        "action": "content-open",
+        "appId": "photos"
+      },
+      "action": {
+        "type": "none"
+      },
+      "nextByOutcome": {
+        "completed": "yao-sms-4",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "yao-sms-2",
+      "initialActive": false,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 2000
+      },
+      "action": {
+        "type": "sms-script",
+        "smsScriptId": "sms-yao-2"
+      },
+      "nextByOutcome": {
+        "completed": "wait-open-photo",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "bridge-call",
+      "initialActive": false,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 3000
+      },
+      "action": {
+        "type": "call",
+        "dialogueId": "incoming-yao-bridge",
+        "timeoutMs": 16000
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "yao-sms-2",
+        "rejected": "yao-sms-3",
+        "missed": "yao-sms-3"
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "yao-sms-3",
+      "initialActive": false,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 0
+      },
+      "action": {
+        "type": "sms-script",
+        "smsScriptId": "sms-yao-3"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "yao-sms-4",
+      "initialActive": false,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 2000
+      },
+      "action": {
+        "type": "sms-script",
+        "smsScriptId": "sms-yao-4"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    }
+  ],
+  "smsScripts": [
+    {
+      "id": "sms-yao-1",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "me",
+          "text": "刚到家，怎么了",
+          "keystrokes": "gangdaojiazenmele"
+        },
+        {
+          "side": "them",
+          "text": "想你了",
+          "afterMs": 1800
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-2",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "them",
+          "text": "最近又开始怀念浪姐了",
+          "afterMs": 2000
+        },
+        {
+          "side": "me",
+          "text": "我也是",
+          "keystrokes": "我也是"
+        },
+        {
+          "side": "me",
+          "text": "想起来就看看相册我俩的照片",
+          "keystrokes": "xiangqilaijiukankanxiangcewoliadezhaopian"
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-3",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "them",
+          "text": "干嘛不接我电话！",
+          "afterMs": 0
+        },
+        {
+          "side": "them",
+          "text": "你完蛋了张月！",
+          "afterMs": 1800
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-4",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "them",
+          "text": "这次演唱会我们再拍点拍立得吧",
+          "afterMs": 5000
+        }
+      ]
+    },
+    {
+      "id": "sms-studio-message",
+      "contactId": "studio",
+      "messages": [
+        {
+          "side": "them",
+          "text": "粉丝又在闹了",
+          "afterMs": 0
+        }
+      ]
+    }
+  ],
+  "phoneDialogues": [
+    {
+      "id": "incoming-yao-bridge",
+      "contactId": "yao",
+      "direction": "incoming",
+      "hangupAfterMs": 4000,
+      "conversation": [
+        {
+          "side": "them",
+          "text": "月月我想你了",
+          "afterMs": 1200
+        },
+        {
+          "side": "me",
+          "text": "嗯，我也想你",
+          "afterMs": 1900
+        }
+      ]
+    },
+    {
+      "id": "out-yao-default",
+      "contactId": "yao",
+      "direction": "outgoing",
+      "hangupAfterMs": 4000,
+      "conversation": [
+        {
+          "side": "them",
+          "text": "怎么了月月？",
+          "afterMs": 1200
+        },
+        {
+          "side": "me",
+          "text": "没事，想听你的声音了",
+          "afterMs": 1500
+        }
+      ]
+    }
+  ],
+  "outgoingCallRules": [
+    {
+      "contactId": "yao",
+      "order": 1,
+      "eventId": "",
+      "eventState": "any",
+      "minDialCount": 0,
+      "maxDialCount": 0,
+      "answer": true,
+      "dialogueId": "out-yao-default",
+      "ringMs": 6500,
+      "connectAfterMs": 1200
+    }
+  ]
+}

@@ -1,0 +1,499 @@
+import { computed, ref } from 'vue'
+import { defineStore } from 'pinia'
+import { contentConfig, phoneConfig } from '../config/phone.config'
+import { storyConfig } from '../config/story.config'
+
+const clone = (value) => JSON.parse(JSON.stringify(value))
+const formatTime = (date = new Date()) => new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date)
+const formatDateKey = (date = new Date()) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+const hydrateContacts = (contacts = []) => clone(contacts)
+
+let timelineTimers = []
+let callTimeout = null
+let callElapsedTimer = null
+let callScriptTimers = []
+let outgoingCallTimer = null
+let outgoingCloseTimer = null
+let alarmTimer = null
+let alarmAudio = null
+let alarmAudioContext = null
+let alarmPulse = null
+
+export const usePhoneStore = defineStore('phone', () => {
+  const locked = ref(true)
+  const passcodeVisible = ref(false)
+  const pin = ref('')
+  const pinError = ref(false)
+  const activeAppId = ref(null)
+  const activeContactId = ref(null)
+  const notification = ref(null)
+  const contacts = ref(hydrateContacts(contentConfig.contacts))
+  const alarms = ref(clone(contentConfig.alarms || []))
+  const callHistory = ref((contentConfig.callHistory || []).map(hydrateCallRecord))
+  const triggeredEvents = ref([])
+  const activeStoryEvents = ref([])
+  const completedEvents = ref([])
+  const eventOutcomes = ref({})
+  const activeSmsScripts = ref([])
+  const startedAt = ref(Date.now())
+  const incomingCall = ref(null)
+  const activeCall = ref(null)
+  const callTranscript = ref([])
+  const callElapsed = ref(0)
+  const callStatus = ref('idle')
+  const outgoingDialCounts = ref({})
+  const alarmRinging = ref(null)
+  const alarmTriggerKeys = new Set()
+  const processingSmsScripts = new Set()
+
+  const activeApp = computed(() => phoneConfig.apps.find((app) => app.id === activeAppId.value))
+  const activeContact = computed(() => contacts.value.find((contact) => contact.id === activeContactId.value))
+  const unreadTotal = computed(() => contacts.value.reduce((total, contact) => total + (contact.unread || 0), 0))
+
+  function showPasscode() { passcodeVisible.value = true }
+  function pressPin(value) {
+    if (pin.value.length >= phoneConfig.security.digits) return
+    pin.value += value
+    pinError.value = false
+    if (pin.value.length !== phoneConfig.security.digits) return
+    window.setTimeout(() => {
+      if (pin.value === String(phoneConfig.security.passcode)) {
+        locked.value = false
+        passcodeVisible.value = false
+        pin.value = ''
+      } else {
+        pinError.value = true
+        window.setTimeout(() => { pin.value = ''; pinError.value = false }, 520)
+      }
+    }, 140)
+  }
+  function erasePin() { pin.value = pin.value.slice(0, -1) }
+  function lock() { activeAppId.value = null; activeContactId.value = null; passcodeVisible.value = false; locked.value = true }
+  function openApp(id) {
+    if (locked.value) return
+    const app = phoneConfig.apps.find((item) => item.id === id)
+    if (!app || app.enabled === false) return
+    activeContactId.value = null
+    activeAppId.value = id
+    if (id === 'messages') clearAppBadge(id)
+    triggerOperation('app-open', { appId: id, targetId: id })
+  }
+  function closeApp() { activeContactId.value = null; activeAppId.value = null }
+  function openContact(id) {
+    activeContactId.value = id
+    const contact = contacts.value.find((item) => item.id === id)
+    if (contact) contact.unread = 0
+    triggerOperation('content-open', { appId: 'messages', targetId: id })
+  }
+  function closeContact() { activeContactId.value = null }
+  function openContent(appId, targetId) {
+    triggerOperation('content-open', { appId, targetId })
+  }
+  function clearAppBadge(id) {
+    const app = phoneConfig.apps.find((item) => item.id === id)
+    if (app) app.badge = 0
+  }
+  function findSmsScript(scriptId) {
+    return storyConfig.smsScripts?.find((item) => item.id === scriptId)
+  }
+  function getActiveSmsScript(contactId) {
+    return activeSmsScripts.value.find((item) => item.contactId === contactId) || null
+  }
+  function activateSmsScript(scriptId, eventId = '') {
+    const script = findSmsScript(scriptId)
+    if (!script || activeSmsScripts.value.some((item) => item.id === scriptId)) return false
+    activeSmsScripts.value.push({ ...clone(script), currentIndex: 0, eventId, isTyping: false })
+    void playAutomaticSmsMessages(scriptId)
+    return true
+  }
+  function advanceSmsScript(scriptId) {
+    const script = activeSmsScripts.value.find((item) => item.id === scriptId)
+    if (!script) return false
+    script.currentIndex += 1
+    if (script.currentIndex < (script.messages?.length || 0)) {
+      void playAutomaticSmsMessages(scriptId)
+      return true
+    }
+    completeSmsScript(scriptId)
+    return false
+  }
+  function completeSmsScript(scriptId) {
+    const index = activeSmsScripts.value.findIndex((item) => item.id === scriptId)
+    if (index < 0) return
+    const [script] = activeSmsScripts.value.splice(index, 1)
+    if (script.eventId) resolveStoryOutcome(script.eventId, 'completed')
+  }
+  async function playAutomaticSmsMessages(scriptId) {
+    if (processingSmsScripts.has(scriptId)) return
+    processingSmsScripts.add(scriptId)
+    try {
+      let script = activeSmsScripts.value.find((item) => item.id === scriptId)
+      while (script) {
+        const entry = script.messages?.[script.currentIndex]
+        if (!entry || entry.side !== 'them') break
+        const expectedIndex = script.currentIndex
+        script.isTyping = true
+        const configuredDelay = Number(entry.afterMs)
+        const delay = Number.isFinite(configuredDelay) ? configuredDelay : 900 + entry.text.length * 45
+        await new Promise((resolve) => window.setTimeout(resolve, Math.max(0, delay)))
+        script = activeSmsScripts.value.find((item) => item.id === scriptId)
+        if (!script || script.currentIndex !== expectedIndex) break
+        script.isTyping = false
+        receiveMessage(script.contactId, entry.text)
+        script.currentIndex += 1
+        if (script.currentIndex >= (script.messages?.length || 0)) {
+          completeSmsScript(scriptId)
+          break
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 320))
+        script = activeSmsScripts.value.find((item) => item.id === scriptId)
+      }
+    } finally {
+      const script = activeSmsScripts.value.find((item) => item.id === scriptId)
+      if (script) script.isTyping = false
+      processingSmsScripts.delete(scriptId)
+    }
+  }
+  function addMessage(contactId, message) {
+    const contact = contacts.value.find((item) => item.id === contactId)
+    if (!contact) return
+    contact.messages.push({ id: `${contactId}-${Date.now()}-${contact.messages.length}`, stamp: formatTime(), ...message })
+    contact.time = formatTime()
+  }
+  function receiveMessage(contactId, text) {
+    addMessage(contactId, { side: 'them', text })
+    const contact = contacts.value.find((item) => item.id === contactId)
+    if (!contact) return
+    const isConversationOpen = activeAppId.value === 'messages' && activeContactId.value === contactId
+    if (isConversationOpen) return
+    contact.unread = (contact.unread || 0) + 1
+    showNotification({ appId: 'messages', contactId, title: contact.name, body: text, initials: contact.initials, color: contact.color })
+  }
+  function showNotification(payload) {
+    notification.value = { ...payload, id: Date.now() }
+    window.clearTimeout(showNotification.timer)
+    showNotification.timer = window.setTimeout(() => { notification.value = null }, 5200)
+  }
+  function dismissNotification() { notification.value = null }
+  function openNotification() {
+    const payload = notification.value
+    if (!payload) return
+    if (locked.value) { showPasscode(); return }
+    openApp(payload.appId)
+    if (payload.contactId) openContact(payload.contactId)
+    dismissNotification()
+  }
+
+  function findContact(contactId) { return contacts.value.find((item) => item.id === contactId) }
+  function hydrateCallRecord(record = {}) {
+    const contact = findContact(record.contactId)
+    return {
+      ...clone(record),
+      name: contact?.name || '未知号码',
+      avatar: contact?.avatar || '',
+      initials: contact?.initials || contact?.name?.slice(0, 1) || '?',
+      color: contact?.color || '#8b8d94',
+    }
+  }
+  function findPhoneDialogue(dialogueId, direction = '') {
+    const dialogue = storyConfig.phoneDialogues?.find((item) => item.id === dialogueId) || null
+    if (!dialogue || (direction && ![direction, 'any'].includes(dialogue.direction))) return null
+    return dialogue
+  }
+  function hydrateCall(dialogue, record = {}, fallbackContactId = '') {
+    const contactId = dialogue?.contactId || record.contactId || fallbackContactId
+    const contact = findContact(contactId)
+    return {
+      ...clone(dialogue || {}),
+      id: contactId || record.id || `call-${Date.now()}`,
+      contactId,
+      title: contact?.name || record.name || '未知号码',
+      avatar: contact?.avatar || record.avatar || '',
+      initials: contact?.initials || record.initials || contact?.name?.slice(0, 1) || '?',
+      color: contact?.color || record.color || '#8b8d94',
+      dialogueId: dialogue?.dialogueId || dialogue?.id || '',
+      conversation: clone(dialogue?.conversation || []),
+      hangupAfterMs: Number(dialogue?.hangupAfterMs ?? 3000),
+    }
+  }
+  function addCallRecord(call, outcome, direction, duration = 0) {
+    const contact = findContact(call.contactId)
+    callHistory.value.unshift({
+      id: `history-${Date.now()}`,
+      contactId: call.contactId,
+      name: call.title || contact?.name || '未知号码',
+      avatar: call.avatar || contact?.avatar || '',
+      initials: contact?.initials || call.title?.slice(0, 1) || '?',
+      color: call.color || contact?.color || '#8b8d94',
+      direction,
+      outcome,
+      time: formatTime(),
+      duration,
+    })
+  }
+  function beginCall(call, direction, eventId = '') {
+    window.clearTimeout(callTimeout)
+    window.clearTimeout(outgoingCallTimer)
+    window.clearTimeout(outgoingCloseTimer)
+    incomingCall.value = null
+    activeCall.value = { ...hydrateCall(call), direction, eventId }
+    callTranscript.value = []
+    callElapsed.value = 0
+    callStatus.value = 'connected'
+    if (direction === 'outgoing') {
+      triggerOperation('outgoing-call-accepted', { appId: 'phone', targetId: call.contactId })
+    }
+    window.clearInterval(callElapsedTimer)
+    callElapsedTimer = window.setInterval(() => { callElapsed.value += 1 }, 1000)
+    callScriptTimers.forEach((timer) => window.clearTimeout(timer))
+    callScriptTimers = []
+    let delay = 450
+    for (const line of call.conversation || []) {
+      delay += line.afterMs ?? 1200
+      callScriptTimers.push(window.setTimeout(() => callTranscript.value.push(line), delay))
+    }
+    if (call.conversation?.length) {
+      callScriptTimers.push(window.setTimeout(() => {
+        if (activeCall.value?.dialogueId === call.dialogueId && callStatus.value === 'connected') endCall()
+      }, delay + Number(call.hangupAfterMs ?? 3000)))
+    }
+  }
+  function startIncomingCall(dialogueId, eventId = '', timeoutMs = 16000) {
+    const dialogue = findPhoneDialogue(dialogueId, 'incoming')
+    if (!dialogue || incomingCall.value || activeCall.value) return
+    const call = hydrateCall(dialogue)
+    incomingCall.value = { ...call, eventId }
+    showNotification({ appId: 'phone', contactId: call.contactId, title: call.title, body: '来电' })
+    window.clearTimeout(callTimeout)
+    callTimeout = window.setTimeout(() => resolveIncomingCall('missed'), timeoutMs)
+  }
+  function resolveIncomingCall(outcome) {
+    const ringing = incomingCall.value
+    if (!ringing) return
+    window.clearTimeout(callTimeout)
+    incomingCall.value = null
+    if (notification.value?.appId === 'phone' && notification.value?.contactId === ringing.contactId) dismissNotification()
+    triggerOperation(`incoming-call-${outcome}`, { appId: 'phone', targetId: ringing.contactId })
+    if (outcome === 'accepted') beginCall(ringing, 'incoming', ringing.eventId)
+    else {
+      addCallRecord(ringing, outcome, 'incoming')
+      resolveStoryOutcome(ringing.eventId, outcome)
+    }
+  }
+  function acceptCall() { resolveIncomingCall('accepted') }
+  function rejectCall() { resolveIncomingCall('rejected') }
+  function outgoingRuleMatches(rule, dialCount) {
+    const eventId = rule.eventId || ''
+    const eventState = rule.eventState || 'any'
+    const eventTriggered = eventId ? triggeredEvents.value.includes(eventId) : false
+    if (eventId && eventState === 'triggered' && !eventTriggered) return false
+    if (eventId && eventState === 'not-triggered' && eventTriggered) return false
+    if (Number(rule.minDialCount || 0) > dialCount) return false
+    if (Number(rule.maxDialCount || 0) > 0 && dialCount > Number(rule.maxDialCount)) return false
+    return true
+  }
+  function finishUnansweredOutgoing(call) {
+    if (!activeCall.value) return
+    callStatus.value = 'unanswered'
+    addCallRecord(call, 'missed', 'outgoing')
+    triggerOperation('outgoing-call-missed', { appId: 'phone', targetId: call.contactId })
+    triggerOperation('call-ended', { appId: 'phone', targetId: call.contactId, outcome: 'missed' })
+    outgoingCloseTimer = window.setTimeout(() => {
+      activeCall.value = null
+      callTranscript.value = []
+      callStatus.value = 'idle'
+    }, 1400)
+  }
+  function startOutgoingCall(contactId, record = {}) {
+    if (incomingCall.value || activeCall.value) return
+    const baseCall = hydrateCall(null, record, contactId)
+    triggerOperation('outgoing-call', { appId: 'phone', targetId: baseCall.contactId })
+    const dialCount = (outgoingDialCounts.value[baseCall.contactId] || 0) + 1
+    outgoingDialCounts.value[baseCall.contactId] = dialCount
+    const rule = [...(storyConfig.outgoingCallRules || [])]
+      .filter((item) => item.contactId === baseCall.contactId)
+      .sort((left, right) => Number(left.order || 0) - Number(right.order || 0))
+      .find((item) => outgoingRuleMatches(item, dialCount))
+    const dialogue = rule?.dialogueId ? findPhoneDialogue(rule.dialogueId, 'outgoing') : null
+    const call = hydrateCall(dialogue, record, baseCall.contactId)
+
+    activeCall.value = { ...call, direction: 'outgoing', eventId: '' }
+    callTranscript.value = []
+    callElapsed.value = 0
+    callStatus.value = 'connecting'
+    window.clearTimeout(outgoingCallTimer)
+    window.clearTimeout(outgoingCloseTimer)
+
+    if (!rule?.answer) {
+      outgoingCallTimer = window.setTimeout(() => finishUnansweredOutgoing(call), Number(rule?.ringMs || 6500))
+      return
+    }
+    outgoingCallTimer = window.setTimeout(() => beginCall(call, 'outgoing'), Number(rule.connectAfterMs || 1200))
+  }
+  function endCall() {
+    const call = activeCall.value
+    if (!call) return
+    window.clearTimeout(outgoingCallTimer)
+    window.clearTimeout(outgoingCloseTimer)
+    window.clearInterval(callElapsedTimer)
+    callScriptTimers.forEach((timer) => window.clearTimeout(timer))
+    if (callStatus.value !== 'unanswered') addCallRecord(call, callStatus.value === 'connected' ? 'completed' : 'outgoing', call.direction, callElapsed.value)
+    const eventId = call.eventId
+    triggerOperation('call-ended', { appId: 'phone', targetId: call.contactId, outcome: callStatus.value })
+    activeCall.value = null
+    callTranscript.value = []
+    callElapsed.value = 0
+    callStatus.value = 'idle'
+    if (eventId) resolveStoryOutcome(eventId, 'accepted')
+  }
+
+  function findStoryEvent(eventId) {
+    return storyConfig.events?.find((item) => item.id === eventId)
+  }
+  function removeActiveStoryEvent(eventId) {
+    activeStoryEvents.value = activeStoryEvents.value.filter((id) => id !== eventId)
+  }
+  function activateStoryEvent(eventId, delayOverride = null) {
+    const event = findStoryEvent(eventId)
+    if (!event || completedEvents.value.includes(eventId) || activeStoryEvents.value.includes(eventId)) return
+    activeStoryEvents.value.push(eventId)
+    if (event.trigger?.type !== 'timer') return
+    const delay = delayOverride === null ? Number(event.trigger.afterMs || 0) : Number(delayOverride || 0)
+    timelineTimers.push(window.setTimeout(() => runEvent(event), delay))
+  }
+  function runEvent(event) {
+    if (!event || completedEvents.value.includes(event.id)) return
+    removeActiveStoryEvent(event.id)
+    if (!triggeredEvents.value.includes(event.id)) triggeredEvents.value.push(event.id)
+    const action = event.action || {}
+    if (action.type === 'call') {
+      startIncomingCall(action.dialogueId, event.id, action.timeoutMs)
+      return
+    }
+    if (action.type === 'sms-script') {
+      if (!activateSmsScript(action.smsScriptId, event.id)) resolveStoryOutcome(event.id, 'completed')
+      return
+    }
+    resolveStoryOutcome(event.id, 'completed')
+  }
+  function resolveStoryOutcome(eventId, outcome) {
+    if (!eventId) return
+    const event = findStoryEvent(eventId)
+    if (!event) return
+    const retry = event.retry
+    if (retry?.enabled && retry.outcomes?.includes(outcome)) {
+      timelineTimers.push(window.setTimeout(() => runEvent(event), retry.afterMs || 30000))
+      return
+    }
+    if (!completedEvents.value.includes(eventId)) completedEvents.value.push(eventId)
+    eventOutcomes.value[eventId] = outcome
+    const nextId = event.nextByOutcome?.[outcome] || event.nextByOutcome?.completed
+    if (nextId) activateStoryEvent(nextId)
+  }
+  function triggerOperation(action, payload = {}) {
+    const details = typeof payload === 'string' ? { targetId: payload } : payload
+    const matchedEvents = (storyConfig.events || []).filter((item) =>
+      activeStoryEvents.value.includes(item.id) &&
+      item.trigger?.type === 'operation' && item.trigger.action === action &&
+      (!item.trigger.appId || item.trigger.appId === details.appId) &&
+      (!item.trigger.targetId || item.trigger.targetId === details.targetId),
+    )
+    matchedEvents.forEach(runEvent)
+  }
+  function startTimeline() {
+    timelineTimers.forEach((timer) => window.clearTimeout(timer))
+    timelineTimers = []
+    activeStoryEvents.value = []
+    const events = storyConfig.events || []
+    let initialEvents = events.filter((event) => event.initialActive)
+    if (!initialEvents.length) {
+      const referenced = new Set(events.flatMap((event) => Object.values(event.nextByOutcome || {})).filter(Boolean))
+      initialEvents = events.filter((event) => !referenced.has(event.id))
+    }
+    initialEvents.forEach((event) => activateStoryEvent(event.id))
+  }
+
+  function stopAlarmSound() {
+    if (alarmAudio) { alarmAudio.pause(); alarmAudio.currentTime = 0; alarmAudio = null }
+    window.clearInterval(alarmPulse)
+    alarmPulse = null
+    if (alarmAudioContext) { alarmAudioContext.close().catch(() => {}); alarmAudioContext = null }
+  }
+  function playDefaultAlarm() {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext
+      if (!AudioContextClass) return
+      alarmAudioContext = new AudioContextClass()
+      const pulse = () => {
+        if (!alarmAudioContext) return
+        const oscillator = alarmAudioContext.createOscillator()
+        const gain = alarmAudioContext.createGain()
+        oscillator.type = 'sine'
+        oscillator.frequency.value = 880
+        gain.gain.setValueAtTime(0.0001, alarmAudioContext.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.22, alarmAudioContext.currentTime + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.0001, alarmAudioContext.currentTime + 0.46)
+        oscillator.connect(gain).connect(alarmAudioContext.destination)
+        oscillator.start()
+        oscillator.stop(alarmAudioContext.currentTime + 0.5)
+      }
+      pulse()
+      alarmPulse = window.setInterval(pulse, 720)
+    } catch { /* 浏览器可能在首次交互前阻止声音，界面仍会响铃提示。 */ }
+  }
+  function triggerAlarm(alarm) {
+    if (alarmRinging.value) return
+    alarmRinging.value = clone(alarm)
+    stopAlarmSound()
+    if (alarm.sound) {
+      alarmAudio = new Audio(alarm.sound)
+      alarmAudio.loop = true
+      alarmAudio.play().catch(playDefaultAlarm)
+    } else playDefaultAlarm()
+  }
+  function stopAlarm() { stopAlarmSound(); alarmRinging.value = null }
+  function toggleAlarm(id) {
+    const alarm = alarms.value.find((item) => item.id === id)
+    if (alarm) alarm.enabled = !alarm.enabled
+  }
+  function startAlarmClock() {
+    window.clearInterval(alarmTimer)
+    const check = () => {
+      const now = new Date()
+      const current = formatTime(now)
+      for (const alarm of alarms.value) {
+        const key = `${formatDateKey(now)}:${alarm.id}`
+        if (alarm.enabled && alarm.time === current && !alarmTriggerKeys.has(key)) {
+          alarmTriggerKeys.add(key)
+          triggerAlarm(alarm)
+        }
+      }
+    }
+    check()
+    alarmTimer = window.setInterval(check, 1000)
+  }
+  function startRuntime() { startTimeline(); startAlarmClock() }
+  function resetStory() {
+    contacts.value = hydrateContacts(contentConfig.contacts)
+    callHistory.value = (contentConfig.callHistory || []).map(hydrateCallRecord)
+    triggeredEvents.value = []
+    activeStoryEvents.value = []
+    completedEvents.value = []
+    eventOutcomes.value = {}
+    activeSmsScripts.value = []
+    outgoingDialCounts.value = {}
+    startedAt.value = Date.now()
+    notification.value = null
+    startTimeline()
+  }
+
+  return {
+    locked, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact,
+    notification, contacts, unreadTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
+    callElapsed, callStatus, alarmRinging, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
+    closeContact, openContent, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
+    toggleAlarm, stopAlarm, triggerOperation, startOutgoingCall, acceptCall, rejectCall, endCall,
+    activeStoryEvents, completedEvents, eventOutcomes, activeSmsScripts, getActiveSmsScript, advanceSmsScript, completeSmsScript,
+    resetStory, startTimeline, startRuntime,
+  }
+})

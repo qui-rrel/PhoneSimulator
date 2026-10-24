@@ -1,0 +1,14 @@
+# Vue dependencies and build output
+phone-simulator/node_modules/
+phone-simulator/dist/
+phone-simulator/.vite/
+
+# Local and temporary files
+**/~$*.xlsx
+**/__pycache__/
+*.pyc
+*.local
+*.log
+.DS_Store
+Thumbs.db
+
