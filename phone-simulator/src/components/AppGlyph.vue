@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { createDeviceDate } from '../config/phone.config'
 
 const props = defineProps({
   app: { type: Object, required: true },
@@ -12,14 +13,15 @@ let timer
 
 const isCalendar = computed(() => props.app.id === 'calendar')
 const isClock = computed(() => props.app.id === 'clock')
+const deviceDate = computed(() => createDeviceDate(now.value))
 const usesImage = computed(() => Boolean(props.app.iconSrc && !imageFailed.value && !isCalendar.value && !isClock.value))
 const glyphStyle = computed(() => (
   usesImage.value || isCalendar.value || isClock.value
     ? undefined
     : { background: props.app.color, color: props.app.iconColor || '#fff' }
 ))
-const weekday = computed(() => new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(now.value))
-const day = computed(() => now.value.getDate())
+const weekday = computed(() => new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(deviceDate.value))
+const day = computed(() => deviceDate.value.getDate())
 const hourHandStyle = computed(() => ({
   transform: `translateX(-50%) rotate(${(now.value.getHours() % 12) * 30 + now.value.getMinutes() * 0.5}deg)`,
 }))

@@ -1,13 +1,14 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ChevronLeft, Delete, Flashlight, Globe2, LockKeyhole, Camera } from 'lucide-vue-next'
-import { phoneConfig } from '../config/phone.config'
+import { createDeviceDate, phoneConfig } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
 import AppGlyph from './AppGlyph.vue'
 
 const phone = usePhoneStore()
 const now = ref(new Date())
 let timer
+const deviceDate = computed(() => createDeviceDate(now.value))
 
 const time = computed(() =>
   new Intl.DateTimeFormat('zh-CN', {
@@ -21,7 +22,7 @@ const date = computed(() =>
     month: 'long',
     day: 'numeric',
     weekday: 'long',
-  }).format(now.value),
+  }).format(deviceDate.value),
 )
 const keypad = [1, 2, 3, 4, 5, 6, 7, 8, 9, null, 0, 'delete']
 const dragStartY = ref(null)

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { CloudSun } from 'lucide-vue-next'
-import { phoneConfig } from '../config/phone.config'
+import { createDeviceDate, phoneConfig } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
 import AppIcon from './AppIcon.vue'
 import { createWeatherSnapshot } from '../utils/weather'
@@ -11,9 +11,10 @@ const dockApps = computed(() => phoneConfig.apps.filter((app) => app.enabled !==
 const gridApps = computed(() => phoneConfig.apps.filter((app) => app.enabled !== false && !app.dock))
 const now = ref(new Date())
 let timer
+const deviceDate = computed(() => createDeviceDate(now.value))
 const widgetTime = computed(() => new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }).format(now.value))
-const widgetDate = computed(() => new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(now.value))
-const weather = computed(() => createWeatherSnapshot(phoneConfig.weather, now.value))
+const widgetDate = computed(() => new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(deviceDate.value))
+const weather = computed(() => createWeatherSnapshot(phoneConfig.weather, deviceDate.value))
 onMounted(() => { timer = window.setInterval(() => (now.value = new Date()), 1000) })
 onBeforeUnmount(() => window.clearInterval(timer))
 </script>

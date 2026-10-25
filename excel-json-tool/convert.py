@@ -479,6 +479,8 @@ for row in rows("基础设置"):
     basic_fields.add(field)
     if field == "security.passcode":
         value = as_passcode(value)
+    elif field == "device.fixedDate":
+        value = "" if value in (None, "") else as_date_text(value, "基础设置中的固定日期")
     elif field == "security.digits":
         value = as_number(value)
         if value != 4:

@@ -1,9 +1,9 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { ChevronLeft, ChevronRight, List, Plus } from 'lucide-vue-next'
-import { contentConfig } from '../config/phone.config'
+import { contentConfig, createDeviceDate } from '../config/phone.config'
 defineProps({ app: { type: Object, required: true } })
-const today = new Date()
+const today = createDeviceDate()
 const shown = ref(new Date(today.getFullYear(), today.getMonth(), 1))
 const monthLabel = computed(() => `${shown.value.getFullYear()}年${shown.value.getMonth() + 1}月`)
 const days = computed(() => {

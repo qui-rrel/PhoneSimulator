@@ -2,7 +2,8 @@
   "device": {
     "width": 393,
     "height": 852,
-    "radius": 58
+    "radius": 58,
+    "fixedDate": ""
   },
   "owner": {
     "name": "张朋",
@@ -110,19 +111,19 @@
       "iconSrc": "/media/UI/AppIcon/settings-app-icon.png"
     },
     {
+      "id": "calculator",
+      "label": "计算器",
+      "enabled": true,
+      "component": "CalculatorApp",
+      "iconSrc": "/media/UI/AppIcon/calculator-app-icon.png"
+    },
+    {
       "id": "wechat",
       "label": "微信",
       "enabled": true,
       "component": "WeChatApp",
       "iconSrc": "/media/UI/AppIcon/wechat-app-icon.png",
       "badge": 1
-    },
-    {
-      "id": "calculator",
-      "label": "计算器",
-      "enabled": true,
-      "component": "CalculatorApp",
-      "iconSrc": "/media/UI/AppIcon/calculator-app-icon.png"
     }
   ],
   "lockNotifications": [

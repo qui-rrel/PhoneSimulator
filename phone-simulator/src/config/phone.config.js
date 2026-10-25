@@ -32,6 +32,20 @@ function resolveLocalTime(value) {
 }
 
 export const contentConfig = resolveLocalTime(content)
+
+export function createDeviceDate(source = new Date()) {
+  const result = new Date(source)
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(contentConfig.device?.fixedDate || '')
+  if (!match) return result
+
+  const year = Number(match[1])
+  const month = Number(match[2]) - 1
+  const day = Number(match[3])
+  result.setFullYear(year, month, day)
+  if (result.getFullYear() !== year || result.getMonth() !== month || result.getDate() !== day) return new Date(source)
+  return result
+}
+
 export const phoneConfig = {
   ...contentConfig,
   theme: { ...contentConfig.theme, wallpaper: contentConfig.theme.homeWallpaper },
