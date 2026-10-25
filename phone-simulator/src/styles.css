@@ -965,6 +965,109 @@ button {
 
 .app-window--immersive { z-index: 120; }
 
+/* Calculator */
+.calculator-app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  overflow: hidden;
+  color: #17181b;
+  background: #f7f7f8;
+  user-select: none;
+}
+
+.calculator-display {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 70px 30px 25px;
+  overflow: hidden;
+  text-align: right;
+}
+
+.calculator-expression,
+.calculator-result {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calculator-expression {
+  font-size: 52px;
+  font-weight: 450;
+  line-height: 1.08;
+  letter-spacing: -.04em;
+  transition: color .2s ease, font-size .24s ease, transform .24s ease;
+}
+
+.calculator-expression--history {
+  color: #85868a;
+  font-size: 31px;
+  font-weight: 400;
+}
+
+.calculator-result {
+  min-height: 38px;
+  margin-top: 12px;
+  color: #77787c;
+  font-size: 31px;
+  font-weight: 400;
+  line-height: 1.08;
+  transition: color .2s ease, font-size .24s ease, transform .24s ease;
+}
+
+.calculator-result--final {
+  min-height: 61px;
+  margin-top: 10px;
+  color: #08090b;
+  font-size: 57px;
+  font-weight: 500;
+}
+
+.calculator-keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 68px;
+  gap: 11px 14px;
+  padding: 0 22px 39px;
+}
+
+.calculator-key {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  border-radius: 50%;
+  color: #202124;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(32, 33, 36, .03);
+  font-size: 28px;
+  font-weight: 420;
+  line-height: 1;
+  transition: transform .1s ease, background-color .12s ease, filter .12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.calculator-key--utility,
+.calculator-key--operator {
+  background: #ececef;
+}
+
+.calculator-key--equals {
+  color: #fff;
+  background: #ff6338;
+  font-size: 36px;
+}
+
+.calculator-key:active {
+  filter: brightness(.9);
+  transform: scale(.91);
+}
+
 .app-open-enter-active {
   transition: transform 0.42s cubic-bezier(0.2, 0.86, 0.2, 1), opacity 0.28s ease, border-radius 0.42s ease;
 }

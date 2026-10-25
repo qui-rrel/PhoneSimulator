@@ -121,7 +121,7 @@ Excel 工作簿
 - `theme`：强调色、锁屏和桌面壁纸。
 - `weather`：地点、生成种子；天气由 `src/utils/weather.js` 按日期稳定生成。
 - `home`：桌面常驻问候/天气组件。
-- `apps`：App ID、组件名、图标路径、启用状态、顺序和 Dock；日历和时钟图标由程序按本地日期与时间实时绘制。
+- `apps`：App ID、组件名、图标路径、启用状态、顺序和 Dock；日历和时钟图标由程序按本地日期与时间实时绘制，计算器作为无内容表的独立交互 App 注册。
 - `gallery`、`notes`、`alarms`、`contacts`、`callHistory`、`playlist`、`browserHistory`、`lockNotifications`、`mail`、`calendarEvents`、`wechat`；微信区包含会话、朋友圈、点赞和评论，其中朋友圈 `imageSrc` 是最多 9 项的图片路径数组。
 
 重要行为：

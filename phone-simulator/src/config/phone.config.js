@@ -1,4 +1,4 @@
-import { CalendarDays, Clock3, CloudSun, Compass, Image, Mail, MessageCircle, Music2, NotebookPen, Phone, Settings } from 'lucide-vue-next'
+import { Calculator, CalendarDays, Clock3, CloudSun, Compass, Image, Mail, MessageCircle, Music2, NotebookPen, Phone, Settings } from 'lucide-vue-next'
 import content from '../data/content.json'
 
 const appFallbacks = {
@@ -14,6 +14,7 @@ const appFallbacks = {
   clock: { icon: Clock3, color: '#111318' },
   settings: { icon: Settings, color: '#9096a2' },
   wechat: { icon: MessageCircle, color: '#07c160' },
+  calculator: { icon: Calculator, color: '#f2f2f4', iconColor: '#25262a' },
 }
 const LOCAL_TIME_TOKEN = '$localTime'
 const pageOpenedTime = new Intl.DateTimeFormat('zh-CN', {

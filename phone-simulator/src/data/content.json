@@ -116,6 +116,13 @@
       "component": "WeChatApp",
       "iconSrc": "/media/UI/AppIcon/wechat-app-icon.png",
       "badge": 1
+    },
+    {
+      "id": "calculator",
+      "label": "计算器",
+      "enabled": true,
+      "component": "CalculatorApp",
+      "iconSrc": "/media/UI/AppIcon/calculator-app-icon.png"
     }
   ],
   "lockNotifications": [
