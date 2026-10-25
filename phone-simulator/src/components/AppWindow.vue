@@ -11,16 +11,22 @@ import NotesApp from '../apps/NotesApp.vue'
 import PhoneApp from '../apps/PhoneApp.vue'
 import SettingsApp from '../apps/SettingsApp.vue'
 import WeatherApp from '../apps/WeatherApp.vue'
+import WeChatApp from '../apps/WeChatApp.vue'
 import { usePhoneStore } from '../stores/phone'
 
 const phone = usePhoneStore()
-const registry = { BrowserApp, CalendarApp, MessagesApp, ClockApp, GalleryApp, MailApp, MusicApp, NotesApp, PhoneApp, SettingsApp, WeatherApp }
+const registry = { BrowserApp, CalendarApp, MessagesApp, ClockApp, GalleryApp, MailApp, MusicApp, NotesApp, PhoneApp, SettingsApp, WeatherApp, WeChatApp }
 const activeComponent = computed(() => registry[phone.activeApp?.component])
+const immersive = computed(() => (
+  phone.activeApp?.id === 'wechat' &&
+  (phone.activeContent?.targetId?.startsWith('moment-viewer:')
+    || phone.activeContent?.targetId?.startsWith('comment-viewer:'))
+))
 </script>
 
 <template>
   <Transition name="app-open" appear>
-    <section v-if="phone.activeApp" :key="phone.activeApp.id" class="app-window">
+    <section v-if="phone.activeApp" :key="phone.activeApp.id" class="app-window" :class="{ 'app-window--immersive': immersive }">
       <component :is="activeComponent" :app="phone.activeApp" />
     </section>
   </Transition>

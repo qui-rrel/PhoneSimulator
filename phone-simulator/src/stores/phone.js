@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { contentConfig, phoneConfig } from '../config/phone.config'
 import { storyConfig } from '../config/story.config'
+import { useWechatStore } from './wechat'
 import { playMessageReceiveSound, playPasscodeDeleteSound, playPasscodeDigitSound } from '../utils/sounds'
 
 const clone = (value) => JSON.parse(JSON.stringify(value))
@@ -211,6 +212,10 @@ export const usePhoneStore = defineStore('phone', () => {
     const app = phoneConfig.apps.find((item) => item.id === id)
     if (app) app.badge = 0
   }
+  function setAppBadge(id, count) {
+    const app = phoneConfig.apps.find((item) => item.id === id)
+    if (app) app.badge = Math.max(0, Number(count) || 0)
+  }
   function findSmsScript(scriptId) {
     return storyConfig.smsScripts?.find((item) => item.id === scriptId)
   }
@@ -299,7 +304,8 @@ export const usePhoneStore = defineStore('phone', () => {
     if (!payload) return
     if (locked.value) { showPasscode(); return }
     openApp(payload.appId)
-    if (payload.contactId) openContact(payload.contactId)
+    if (payload.appId === 'messages' && payload.contactId) openContact(payload.contactId)
+    else if (payload.targetId) openContent(payload.appId, payload.targetId)
     dismissNotification()
   }
 
@@ -484,7 +490,13 @@ export const usePhoneStore = defineStore('phone', () => {
     const event = findStoryEvent(eventId)
     if (!event || completedEvents.value.includes(eventId) || activeStoryEvents.value.includes(eventId)) return
     activeStoryEvents.value.push(eventId)
-    if (event.trigger?.type !== 'timer') return
+    if (event.trigger?.type !== 'timer') {
+      const action = event.trigger?.action
+      const targetId = event.trigger?.targetId
+      if (action === 'moment-liked' && targetId && useWechatStore().isMomentLiked(targetId)) runEvent(event)
+      if (action === 'moment-unliked' && targetId && !useWechatStore().isMomentLiked(targetId)) runEvent(event)
+      return
+    }
     const delay = delayOverride === null ? Number(event.trigger.afterMs || 0) : Number(delayOverride || 0)
     timelineTimers.push(window.setTimeout(() => runEvent(event), delay))
   }
@@ -499,6 +511,22 @@ export const usePhoneStore = defineStore('phone', () => {
     }
     if (action.type === 'sms-script') {
       if (!activateSmsScript(action.smsScriptId, event.id)) resolveStoryOutcome(event.id, 'completed')
+      return
+    }
+    if (action.type === 'wechat-script') {
+      if (!useWechatStore().activateScript(action.wechatScriptId, event.id)) resolveStoryOutcome(event.id, 'completed')
+      return
+    }
+    if (action.type === 'moment-publish') {
+      if (!useWechatStore().activatePublishScript(action.publishScriptId, event.id)) resolveStoryOutcome(event.id, 'completed')
+      return
+    }
+    if (action.type === 'moment-comment') {
+      if (!useWechatStore().activateCommentScript(action.commentScriptId, event.id)) resolveStoryOutcome(event.id, 'completed')
+      return
+    }
+    if (action.type === 'moment-interactions') {
+      if (!useWechatStore().activateInteractionScript(action.interactionScriptId, event.id)) resolveStoryOutcome(event.id, 'completed')
       return
     }
     resolveStoryOutcome(event.id, 'completed')
@@ -611,6 +639,7 @@ export const usePhoneStore = defineStore('phone', () => {
     outgoingDialCounts.value = {}
     startedAt.value = Date.now()
     notification.value = null
+    useWechatStore().reset()
     startTimeline()
   }
 
@@ -618,9 +647,9 @@ export const usePhoneStore = defineStore('phone', () => {
     locked, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact, activeContent,
     notification, contacts, unreadTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
     callElapsed, callStatus, alarmRinging, canNavigateBack, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
-    closeContact, openContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
+    closeContact, openContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification, setAppBadge,
     toggleAlarm, stopAlarm, triggerOperation, startOutgoingCall, acceptCall, rejectCall, endCall,
     activeStoryEvents, completedEvents, eventOutcomes, activeSmsScripts, getActiveSmsScript, advanceSmsScript, completeSmsScript,
-    resetStory, startTimeline, startRuntime,
+    resolveStoryOutcome, resetStory, startTimeline, startRuntime,
   }
 })

@@ -108,6 +108,14 @@
       "enabled": true,
       "component": "SettingsApp",
       "iconSrc": "/media/UI/AppIcon/settings-app-icon.png"
+    },
+    {
+      "id": "wechat",
+      "label": "微信",
+      "enabled": true,
+      "component": "WeChatApp",
+      "iconSrc": "/media/UI/AppIcon/wechat-app-icon.png",
+      "badge": 1
     }
   ],
   "lockNotifications": [
@@ -358,5 +366,210 @@
   ],
   "site": {
     "title": "张朋's Phone"
+  },
+  "wechat": {
+    "profile": {
+      "nickname": "小满",
+      "wechatId": "wx_phone_story",
+      "avatar": "",
+      "initials": "我",
+      "color": "#596579",
+      "momentsCover": ""
+    },
+    "contacts": [
+      {
+        "id": "wx-chen",
+        "nickname": "陈希",
+        "remark": "",
+        "wechatId": "chenxi_01",
+        "avatar": "",
+        "initials": "陈",
+        "color": "#7D8EF2"
+      },
+      {
+        "id": "wx-lin",
+        "nickname": "林遥",
+        "remark": "",
+        "wechatId": "linyao_02",
+        "avatar": "",
+        "initials": "林",
+        "color": "#59AA85"
+      },
+      {
+        "id": "wx-zhou",
+        "nickname": "周然",
+        "remark": "",
+        "wechatId": "zhouran_03",
+        "avatar": "",
+        "initials": "周",
+        "color": "#EC8C5A"
+      }
+    ],
+    "groups": [
+      {
+        "id": "wx-group-weekend",
+        "name": "周末计划",
+        "memberIds": [
+          "SELF",
+          "wx-chen",
+          "wx-lin",
+          "wx-zhou"
+        ]
+      }
+    ],
+    "conversations": [
+      {
+        "id": "wx-chat-chen",
+        "type": "direct",
+        "targetId": "wx-chen",
+        "order": 1,
+        "time": "$localTime",
+        "unread": 1,
+        "muted": false
+      },
+      {
+        "id": "wx-chat-weekend",
+        "type": "group",
+        "targetId": "wx-group-weekend",
+        "order": 2,
+        "time": "昨天",
+        "unread": 0,
+        "muted": false
+      }
+    ],
+    "messages": [
+      {
+        "id": "wx-msg-1",
+        "conversationId": "wx-chat-chen",
+        "order": 1,
+        "senderId": "wx-chen",
+        "type": "text",
+        "text": "晚上一起吃饭吗？😊",
+        "mediaSrc": "",
+        "time": "今天 10:10",
+        "read": false
+      },
+      {
+        "id": "wx-msg-2",
+        "conversationId": "wx-chat-chen",
+        "order": 2,
+        "senderId": "SELF",
+        "type": "text",
+        "text": "好呀，六点见。",
+        "mediaSrc": "",
+        "time": "今天 10:12",
+        "read": true
+      },
+      {
+        "id": "wx-msg-3",
+        "conversationId": "wx-chat-weekend",
+        "order": 1,
+        "senderId": "wx-lin",
+        "type": "text",
+        "text": "周末天气不错，去公园吗？",
+        "mediaSrc": "",
+        "time": "昨天 18:20",
+        "read": true
+      },
+      {
+        "id": "wx-msg-4",
+        "conversationId": "wx-chat-weekend",
+        "order": 2,
+        "senderId": "wx-zhou",
+        "type": "image",
+        "text": "",
+        "mediaSrc": "/media/Album/img1.jpg",
+        "time": "昨天 18:22",
+        "read": true
+      }
+    ],
+    "moments": [
+      {
+        "id": "wx-moment-1",
+        "authorId": "wx-lin",
+        "text": "今天也要认真生活 ✨",
+        "imageSrc": [
+          "/media/Album/img2.jpg"
+        ],
+        "time": "2小时前",
+        "order": 1,
+        "initiallyVisible": true
+      },
+      {
+        "id": "wx-moment-4-grid",
+        "authorId": "wx-zhou",
+        "text": "四张图会固定排成 2×2。",
+        "imageSrc": [
+          "/media/Album/img1.jpg",
+          "/media/Album/img2.jpg",
+          "/media/Album/img3.jpg",
+          "/media/Album/img4.jpg"
+        ],
+        "time": "昨天",
+        "order": 2,
+        "initiallyVisible": true
+      },
+      {
+        "id": "wx-moment-6-grid",
+        "authorId": "wx-chen",
+        "text": "周末相册九宫格测试 📷",
+        "imageSrc": [
+          "/media/Album/img3.jpg",
+          "/media/Album/img4.jpg",
+          "/media/Album/img5.jpg",
+          "/media/Album/img6.jpg",
+          "/media/Album/img7.jpg",
+          "/media/Album/img8.jpg"
+        ],
+        "time": "3天前",
+        "order": 3,
+        "initiallyVisible": true
+      },
+      {
+        "id": "wx-moment-story",
+        "authorId": "wx-chen",
+        "text": "这条朋友圈由剧情稍后展示。",
+        "imageSrc": [
+          "/media/Album/img1.jpg",
+          "/media/Album/img5.jpg",
+          "/media/Album/img8.jpg"
+        ],
+        "time": "刚刚",
+        "order": 4,
+        "initiallyVisible": false
+      }
+    ],
+    "momentLikes": [
+      {
+        "momentId": "wx-moment-1",
+        "contactId": "wx-chen",
+        "order": 1
+      },
+      {
+        "momentId": "wx-moment-1",
+        "contactId": "wx-zhou",
+        "order": 2
+      }
+    ],
+    "momentComments": [
+      {
+        "id": "wx-comment-1",
+        "momentId": "wx-moment-1",
+        "authorId": "wx-chen",
+        "replyToCommentId": "",
+        "text": "拍得真好看！",
+        "imageSrc": "",
+        "order": 1
+      },
+      {
+        "id": "wx-comment-2",
+        "momentId": "wx-moment-1",
+        "authorId": "wx-lin",
+        "replyToCommentId": "wx-comment-1",
+        "text": "谢谢～",
+        "imageSrc": "/media/Album/img3.jpg",
+        "order": 2
+      }
+    ]
   }
 }

@@ -135,6 +135,47 @@ HEADER_ALIASES = {
     "接通等待（秒）": "connectAfterMs",
     "接通等待（毫秒）": "connectAfterMs",
     "主动通话对白 ID": "dialogueId",
+    "微信昵称": "nickname",
+    "微信号": "wechatId",
+    "朋友圈封面路径（可空）": "momentsCover",
+    "微信联系人 ID": "contactId",
+    "备注名（可空）": "remark",
+    "群聊 ID": "groupId",
+    "群聊名称": "name",
+    "成员序号": "order",
+    "会话 ID": "conversationId",
+    "会话类型": "type",
+    "会话目标 ID": "targetId",
+    "会话序号": "order",
+    "消息类型": "type",
+    "发送人 ID": "senderId",
+    "图片或表情路径（可空）": "mediaSrc",
+    "朋友圈 ID": "momentId",
+    "发布人 ID": "authorId",
+    "朋友圈正文（可空）": "text",
+    "朋友圈图片（可空）": "imageSrc",
+    "朋友圈图片路径（每项一行，最多 9 张，可空）": "imageSrc",
+    "是否初始显示": "initiallyVisible",
+    "点赞人 ID": "contactId",
+    "评论 ID": "id",
+    "评论人 ID": "authorId",
+    "回复对象 ID（可空）": "replyToCommentId",
+    "回复的评论 ID（可空）": "replyToCommentId",
+    "评论内容（可空）": "text",
+    "评论图片路径（可空）": "imageSrc",
+    "微信剧情 ID": "wechatScriptId",
+    "发布剧情 ID": "publishScriptId",
+    "生成的朋友圈 ID": "momentId",
+    "发布正文（可空）": "text",
+    "发布时间（可空）": "time",
+    "玩家评论剧情 ID": "commentScriptId",
+    "生成的评论 ID": "commentId",
+    "互动剧情 ID": "interactionScriptId",
+    "互动类型": "type",
+    "互动人 ID（可空）": "actorId",
+    "互动延迟（秒）": "afterMs",
+    "是否生成朋友圈消息": "notify",
+    "朋友圈消息文案（可空）": "notificationText",
 }
 
 EXPECTED_HEADERS = {
@@ -157,6 +198,19 @@ EXPECTED_HEADERS = {
     "剧情事件": {"id", "triggerType", "actionType"},
     "剧情分支": {"id", "retryEnabled"},
     "主动通话规则": {"contactId", "order", "answer"},
+    "微信账号": {"nickname", "wechatId"},
+    "微信联系人": {"contactId", "nickname"},
+    "微信群聊": {"groupId", "name"},
+    "微信群成员": {"groupId", "contactId", "order"},
+    "微信会话": {"conversationId", "type", "targetId", "order", "unread"},
+    "微信消息": {"conversationId", "id", "sequence", "senderId", "type"},
+    "朋友圈": {"momentId", "authorId", "order"},
+    "朋友圈点赞": {"momentId", "contactId", "order"},
+    "朋友圈评论": {"id", "momentId", "authorId", "order"},
+    "微信剧情": {"wechatScriptId", "conversationId", "sequence", "senderId", "type"},
+    "朋友圈发布剧情": {"publishScriptId", "momentId"},
+    "朋友圈玩家评论剧情": {"commentScriptId", "commentId", "momentId"},
+    "朋友圈互动剧情": {"interactionScriptId", "sequence", "type", "momentId"},
 }
 
 SHEET_ALIASES = {
@@ -181,6 +235,10 @@ TRIGGER_ACTION_ALIASES = {
     "拒接来电": "incoming-call-rejected",
     "错过来电": "incoming-call-missed",
     "通话结束": "call-ended",
+    "朋友圈已点赞": "moment-liked",
+    "朋友圈已取消赞": "moment-unliked",
+    "朋友圈评论已发送": "moment-comment-sent",
+    "朋友圈已发布": "moment-published",
     "message-input": "message-input",
     "app-open": "app-open",
     "content-open": "content-open",
@@ -191,16 +249,32 @@ TRIGGER_ACTION_ALIASES = {
     "incoming-call-rejected": "incoming-call-rejected",
     "incoming-call-missed": "incoming-call-missed",
     "call-ended": "call-ended",
+    "moment-liked": "moment-liked",
+    "moment-unliked": "moment-unliked",
+    "moment-comment-sent": "moment-comment-sent",
+    "moment-published": "moment-published",
     "": "",
 }
 ACTION_ALIASES = {
     "收到电话": "call",
     "执行短信剧情": "sms-script",
+    "执行微信剧情": "wechat-script",
+    "执行朋友圈发布剧情": "moment-publish",
+    "执行朋友圈玩家评论剧情": "moment-comment",
+    "执行朋友圈互动剧情": "moment-interactions",
     "仅衔接下一节点": "none",
     "call": "call",
     "sms-script": "sms-script",
+    "wechat-script": "wechat-script",
+    "moment-publish": "moment-publish",
+    "moment-comment": "moment-comment",
+    "moment-interactions": "moment-interactions",
     "none": "none",
 }
+WECHAT_CONVERSATION_TYPE_ALIASES = {"单聊": "direct", "群聊": "group", "direct": "direct", "group": "group"}
+WECHAT_MESSAGE_TYPE_ALIASES = {"文字": "text", "图片": "image", "表情图片": "sticker", "text": "text", "image": "image", "sticker": "sticker"}
+MOMENT_INTERACTION_TYPE_ALIASES = {"显示朋友圈": "show-moment", "点赞": "like", "取消赞": "unlike", "评论": "comment", "show-moment": "show-moment", "like": "like", "unlike": "unlike", "comment": "comment"}
+WECHAT_SELF_ID = "SELF"
 OUTCOME_ALIASES = {"接听": "accepted", "拒接": "rejected", "未接": "missed", "accepted": "accepted", "rejected": "rejected", "missed": "missed"}
 RETRY_OUTCOME_OPTIONS = {"接听": "accepted", "拒接": "rejected", "未接": "missed"}
 DIAL_EVENT_STATE_ALIASES = {"任意": "any", "已触发": "triggered", "未触发": "not-triggered", "any": "any", "triggered": "triggered", "not-triggered": "not-triggered", "": "any"}
@@ -339,6 +413,13 @@ def as_date_text(value, label):
 
 def as_list(value):
     return [item.strip() for item in re.split(r"\s*\|\|\s*|\r?\n", str(value or "")) if item.strip()]
+
+
+def as_line_list(value, label, max_items=None):
+    items = [item.strip() for item in re.split(r"\r?\n", as_text(value)) if item.strip()]
+    if max_items is not None and len(items) > max_items:
+        raise ValueError(f"{label}：最多填写 {max_items} 项，当前填写了 {len(items)} 项。")
+    return items
 
 
 def as_retry_outcomes(value, event_id):
@@ -525,6 +606,301 @@ for item in content["callHistory"]:
     if item.get("contactId") and item["contactId"] not in contact_ids:
         raise ValueError(f"通话记录 {item['id']!r}：联系人 ID {item['contactId']!r} 不存在。")
 
+wechat_account_rows = rows("微信账号")
+if len(wechat_account_rows) != 1:
+    raise ValueError("微信账号：必须且只能填写一行玩家自己的微信账号。")
+wechat_account = wechat_account_rows[0]
+wechat = {
+    "profile": {
+        "nickname": as_text(wechat_account.get("nickname", "")),
+        "wechatId": as_text(wechat_account.get("wechatId", "")),
+        "avatar": as_text(wechat_account.get("avatar", "")),
+        "initials": as_text(wechat_account.get("initials", "")),
+        "color": as_text(wechat_account.get("color", "")),
+        "momentsCover": as_text(wechat_account.get("momentsCover", "")),
+    },
+    "contacts": [],
+    "groups": [],
+    "conversations": [],
+    "messages": [],
+    "moments": [],
+    "momentLikes": [],
+    "momentComments": [],
+}
+if not wechat["profile"]["nickname"] or not wechat["profile"]["wechatId"]:
+    raise ValueError("微信账号：昵称和微信号不能为空。")
+
+for row in rows("微信联系人"):
+    wechat["contacts"].append({
+        "id": as_text(row.get("contactId", "")),
+        "nickname": as_text(row.get("nickname", "")),
+        "remark": as_text(row.get("remark", "")),
+        "wechatId": as_text(row.get("wechatId", "")),
+        "avatar": as_text(row.get("avatar", "")),
+        "initials": as_text(row.get("initials", "")),
+        "color": as_text(row.get("color", "")),
+    })
+wechat_contact_ids = unique_ids(wechat["contacts"], "id", "微信联系人")
+for contact in wechat["contacts"]:
+    if not contact["nickname"]:
+        raise ValueError(f"微信联系人 {contact['id']!r}：昵称不能为空。")
+
+members_by_group = {}
+member_sequences = set()
+group_member_ids = set()
+for row in rows("微信群成员"):
+    group_id = as_text(row.get("groupId", ""))
+    member_id = as_text(row.get("contactId", ""))
+    order = as_number(row.get("order", 0))
+    key = (group_id, order)
+    if key in member_sequences:
+        raise ValueError(f"微信群成员 {group_id!r}：成员序号 {order!r} 重复。")
+    member_sequences.add(key)
+    member_key = (group_id, member_id)
+    if member_key in group_member_ids:
+        raise ValueError(f"微信群成员 {group_id!r}：成员 {member_id!r} 重复。")
+    group_member_ids.add(member_key)
+    if member_id != WECHAT_SELF_ID and member_id not in wechat_contact_ids:
+        raise ValueError(f"微信群成员 {group_id!r}：成员 ID {member_id!r} 不在“微信联系人”中，也不是 SELF。")
+    members_by_group.setdefault(group_id, []).append((order, member_id))
+
+for row in rows("微信群聊"):
+    group_id = as_text(row.get("groupId", ""))
+    members = [item[1] for item in sorted(members_by_group.get(group_id, []), key=lambda item: item[0])]
+    if len(members) < 2:
+        raise ValueError(f"微信群聊 {group_id!r}：至少需要在“微信群成员”中配置两名成员。")
+    if WECHAT_SELF_ID not in members:
+        raise ValueError(f"微信群聊 {group_id!r}：成员中必须包含玩家自己 SELF。")
+    name = as_text(row.get("name", ""))
+    if not name:
+        raise ValueError(f"微信群聊 {group_id!r}：群聊名称不能为空。")
+    wechat["groups"].append({"id": group_id, "name": name, "memberIds": members})
+wechat_group_ids = unique_ids(wechat["groups"], "id", "微信群聊")
+for group_id in members_by_group:
+    if group_id not in wechat_group_ids:
+        raise ValueError(f"微信群成员：群聊 ID {group_id!r} 在“微信群聊”中不存在。")
+
+for row in rows("微信会话"):
+    conversation_type = WECHAT_CONVERSATION_TYPE_ALIASES.get(as_text(row.get("type", "")), as_text(row.get("type", "")))
+    if conversation_type not in {"direct", "group"}:
+        raise ValueError("微信会话：会话类型必须选择“单聊”或“群聊”。")
+    target_id = as_text(row.get("targetId", ""))
+    if conversation_type == "direct" and target_id not in wechat_contact_ids:
+        raise ValueError(f"微信会话：单聊目标 {target_id!r} 在“微信联系人”中不存在。")
+    if conversation_type == "group" and target_id not in wechat_group_ids:
+        raise ValueError(f"微信会话：群聊目标 {target_id!r} 在“微信群聊”中不存在。")
+    wechat["conversations"].append({
+        "id": as_text(row.get("conversationId", "")),
+        "type": conversation_type,
+        "targetId": target_id,
+        "order": as_number(row.get("order", 0)),
+        "time": as_display_time(row.get("time", "")),
+        "unread": as_number(row.get("unread", 0)),
+        "muted": as_bool(row.get("muted", False)),
+    })
+wechat_conversation_ids = unique_ids(wechat["conversations"], "id", "微信会话")
+wechat_conversation_map = {item["id"]: item for item in wechat["conversations"]}
+wechat_group_map = {item["id"]: item for item in wechat["groups"]}
+
+message_sequences = set()
+for row in rows("微信消息"):
+    conversation_id = as_text(row.get("conversationId", ""))
+    if conversation_id not in wechat_conversation_ids:
+        raise ValueError(f"微信消息：会话 ID {conversation_id!r} 在“微信会话”中不存在。")
+    sequence = as_number(row.get("sequence", 0))
+    key = (conversation_id, sequence)
+    if key in message_sequences:
+        raise ValueError(f"微信消息 {conversation_id!r}：消息序号 {sequence!r} 重复。")
+    message_sequences.add(key)
+    message_type = WECHAT_MESSAGE_TYPE_ALIASES.get(as_text(row.get("type", "")), as_text(row.get("type", "")))
+    if message_type not in {"text", "image", "sticker"}:
+        raise ValueError("微信消息：消息类型必须选择“文字”“图片”或“表情图片”。")
+    sender_id = as_text(row.get("senderId", ""))
+    if sender_id != WECHAT_SELF_ID and sender_id not in wechat_contact_ids:
+        raise ValueError(f"微信消息：发送人 ID {sender_id!r} 不在“微信联系人”中，也不是 SELF。")
+    conversation = wechat_conversation_map[conversation_id]
+    if conversation["type"] == "direct" and sender_id not in {WECHAT_SELF_ID, conversation["targetId"]}:
+        raise ValueError(f"微信消息 {conversation_id!r}：单聊发送人只能是 SELF 或会话联系人。")
+    if conversation["type"] == "group" and sender_id not in wechat_group_map[conversation["targetId"]]["memberIds"]:
+        raise ValueError(f"微信消息 {conversation_id!r}：发送人 {sender_id!r} 不是该群成员。")
+    text = as_text(row.get("text", ""))
+    media_src = as_text(row.get("mediaSrc", ""))
+    if message_type == "text" and not text:
+        raise ValueError(f"微信消息 {conversation_id!r}：文字消息内容不能为空。")
+    if message_type in {"image", "sticker"} and not media_src:
+        raise ValueError(f"微信消息 {conversation_id!r}：图片或表情消息必须填写素材路径。")
+    wechat["messages"].append({
+        "id": as_text(row.get("id", "")),
+        "conversationId": conversation_id,
+        "order": sequence,
+        "senderId": sender_id,
+        "type": message_type,
+        "text": text,
+        "mediaSrc": media_src,
+        "time": as_display_time(row.get("time", "")),
+        "read": as_bool(row.get("read", True)),
+    })
+unique_ids(wechat["messages"], "id", "微信消息")
+
+for row in rows("朋友圈"):
+    author_id = as_text(row.get("authorId", ""))
+    if author_id != WECHAT_SELF_ID and author_id not in wechat_contact_ids:
+        raise ValueError(f"朋友圈：发布人 ID {author_id!r} 在“微信联系人”中不存在，也不是 SELF。")
+    text = as_text(row.get("text", ""))
+    image_srcs = as_line_list(row.get("imageSrc", ""), "朋友圈图片", max_items=9)
+    if not text and not image_srcs:
+        raise ValueError("朋友圈：正文和图片至少填写一项。")
+    wechat["moments"].append({
+        "id": as_text(row.get("momentId", "")),
+        "authorId": author_id,
+        "text": text,
+        "imageSrc": image_srcs,
+        "time": as_display_time(row.get("time", "")),
+        "order": as_number(row.get("order", 0)),
+        "initiallyVisible": as_bool(row.get("initiallyVisible", True)),
+    })
+wechat["moments"].sort(key=lambda item: item["order"])
+initial_moment_ids = unique_ids(wechat["moments"], "id", "朋友圈")
+
+story["momentPublishScripts"] = []
+for row in rows("朋友圈发布剧情"):
+    text = as_text(row.get("text", ""))
+    image_srcs = as_line_list(row.get("imageSrc", ""), "朋友圈发布剧情图片", max_items=9)
+    if not text and not image_srcs:
+        raise ValueError("朋友圈发布剧情：发布正文和图片至少填写一项。")
+    story["momentPublishScripts"].append({
+        "id": as_text(row.get("publishScriptId", "")),
+        "momentId": as_text(row.get("momentId", "")),
+        "text": text,
+        "keystrokes": as_text(row.get("keystrokes", "")),
+        "imageSrc": image_srcs,
+        "time": as_display_time(row.get("time", "")),
+    })
+publish_script_ids = unique_ids(story["momentPublishScripts"], "id", "朋友圈发布剧情")
+published_moment_ids = unique_ids(story["momentPublishScripts"], "momentId", "朋友圈发布剧情生成的朋友圈")
+duplicate_moments = initial_moment_ids & published_moment_ids
+if duplicate_moments:
+    raise ValueError(f"朋友圈发布剧情：生成的朋友圈 ID 与初始朋友圈重复：{sorted(duplicate_moments)!r}。")
+wechat_moment_ids = initial_moment_ids | published_moment_ids
+
+story["momentCommentScripts"] = []
+for row in rows("朋友圈玩家评论剧情"):
+    moment_id = as_text(row.get("momentId", ""))
+    if moment_id not in wechat_moment_ids:
+        raise ValueError(f"朋友圈玩家评论剧情：朋友圈 ID {moment_id!r} 不存在。")
+    text = as_text(row.get("text", ""))
+    image_src = as_text(row.get("imageSrc", ""))
+    if not text and not image_src:
+        raise ValueError(f"朋友圈玩家评论剧情 {moment_id!r}：文字和图片至少填写一项。")
+    story["momentCommentScripts"].append({
+        "id": as_text(row.get("commentScriptId", "")),
+        "commentId": as_text(row.get("commentId", "")),
+        "momentId": moment_id,
+        "replyToCommentId": as_text(row.get("replyToCommentId", "")),
+        "text": text,
+        "keystrokes": as_text(row.get("keystrokes", "")),
+        "imageSrc": image_src,
+    })
+comment_script_ids = unique_ids(story["momentCommentScripts"], "id", "朋友圈玩家评论剧情")
+player_comment_ids = unique_ids(story["momentCommentScripts"], "commentId", "朋友圈玩家评论剧情生成的评论")
+
+story["momentInteractionScripts"] = []
+interaction_scripts = {}
+interaction_sequences = set()
+for row in rows("朋友圈互动剧情"):
+    script_id = as_text(row.get("interactionScriptId", ""))
+    sequence = as_number(row.get("sequence", 0))
+    key = (script_id, sequence)
+    if key in interaction_sequences:
+        raise ValueError(f"朋友圈互动剧情 {script_id!r}：互动序号 {sequence!r} 重复。")
+    interaction_sequences.add(key)
+    action_type = MOMENT_INTERACTION_TYPE_ALIASES.get(as_text(row.get("type", "")), as_text(row.get("type", "")))
+    if action_type not in {"show-moment", "like", "unlike", "comment"}:
+        raise ValueError(f"朋友圈互动剧情 {script_id!r}：互动类型无效。")
+    moment_id = as_text(row.get("momentId", ""))
+    if moment_id not in wechat_moment_ids:
+        raise ValueError(f"朋友圈互动剧情 {script_id!r}：朋友圈 ID {moment_id!r} 不存在。")
+    actor_id = as_text(row.get("actorId", ""))
+    if action_type != "show-moment" and actor_id not in wechat_contact_ids:
+        raise ValueError(f"朋友圈互动剧情 {script_id!r}：互动人 {actor_id!r} 必须存在于微信联系人。")
+    text = as_text(row.get("text", ""))
+    image_src = as_text(row.get("imageSrc", ""))
+    if action_type == "comment" and not text and not image_src:
+        raise ValueError(f"朋友圈互动剧情 {script_id!r}：评论文字和图片至少填写一项。")
+    action = {
+        "order": sequence,
+        "type": action_type,
+        "momentId": moment_id,
+        "actorId": actor_id,
+        "commentId": as_text(row.get("commentId", "")),
+        "replyToCommentId": as_text(row.get("replyToCommentId", "")),
+        "text": text,
+        "imageSrc": image_src,
+        "afterMs": seconds_to_ms(row.get("afterMs", ""), 0),
+        "notify": as_bool(row.get("notify", False)),
+        "notificationText": as_text(row.get("notificationText", "")),
+    }
+    interaction_scripts.setdefault(script_id, {"id": script_id, "actions": []})["actions"].append(action)
+for script in interaction_scripts.values():
+    script["actions"].sort(key=lambda item: item["order"])
+    for action in script["actions"]:
+        action.pop("order", None)
+    story["momentInteractionScripts"].append(script)
+interaction_script_ids = unique_ids(story["momentInteractionScripts"], "id", "朋友圈互动剧情")
+interaction_comment_rows = [action for script in story["momentInteractionScripts"] for action in script["actions"] if action["type"] == "comment"]
+interaction_comment_ids = unique_ids(interaction_comment_rows, "commentId", "朋友圈互动剧情生成的评论") if interaction_comment_rows else set()
+
+like_keys = set()
+for row in rows("朋友圈点赞"):
+    moment_id = as_text(row.get("momentId", ""))
+    contact_id = as_text(row.get("contactId", ""))
+    if moment_id not in wechat_moment_ids or (contact_id != WECHAT_SELF_ID and contact_id not in wechat_contact_ids):
+        raise ValueError(f"朋友圈点赞：朋友圈 {moment_id!r} 或联系人 {contact_id!r} 不存在。")
+    key = (moment_id, contact_id)
+    if key in like_keys:
+        raise ValueError(f"朋友圈点赞：{moment_id!r} 中联系人 {contact_id!r} 重复点赞。")
+    like_keys.add(key)
+    wechat["momentLikes"].append({"momentId": moment_id, "contactId": contact_id, "order": as_number(row.get("order", 0))})
+
+for row in rows("朋友圈评论"):
+    moment_id = as_text(row.get("momentId", ""))
+    author_id = as_text(row.get("authorId", ""))
+    reply_to_comment_id = as_text(row.get("replyToCommentId", ""))
+    if moment_id not in wechat_moment_ids:
+        raise ValueError(f"朋友圈评论：朋友圈 ID {moment_id!r} 不存在。")
+    if author_id != WECHAT_SELF_ID and author_id not in wechat_contact_ids:
+        raise ValueError(f"朋友圈评论 {moment_id!r}：评论人不在“微信联系人”中，也不是 SELF。")
+    comment_text = as_text(row.get("text", ""))
+    image_src = as_text(row.get("imageSrc", ""))
+    if not comment_text and not image_src:
+        raise ValueError(f"朋友圈评论 {moment_id!r}：评论文字和图片至少填写一项。")
+    wechat["momentComments"].append({
+        "id": as_text(row.get("id", "")),
+        "momentId": moment_id,
+        "authorId": author_id,
+        "replyToCommentId": reply_to_comment_id,
+        "text": comment_text,
+        "imageSrc": image_src,
+        "order": as_number(row.get("order", 0)),
+    })
+initial_comment_ids = unique_ids(wechat["momentComments"], "id", "朋友圈评论")
+all_comment_ids = initial_comment_ids | player_comment_ids | interaction_comment_ids
+if len(all_comment_ids) != len(initial_comment_ids) + len(player_comment_ids) + len(interaction_comment_ids):
+    raise ValueError("朋友圈评论：初始评论、玩家评论剧情和互动剧情生成的评论 ID 不能重复。")
+for comment in wechat["momentComments"]:
+    reply_id = comment.get("replyToCommentId")
+    if reply_id and reply_id not in all_comment_ids:
+        raise ValueError(f"朋友圈评论 {comment['id']!r}：回复的评论 ID {reply_id!r} 不存在。")
+for script in story["momentCommentScripts"]:
+    reply_id = script.get("replyToCommentId")
+    if reply_id and reply_id not in all_comment_ids:
+        raise ValueError(f"朋友圈玩家评论剧情 {script['id']!r}：回复的评论 ID {reply_id!r} 不存在。")
+for action in interaction_comment_rows:
+    reply_id = action.get("replyToCommentId")
+    if reply_id and reply_id not in all_comment_ids:
+        raise ValueError(f"朋友圈互动剧情评论 {action['commentId']!r}：回复的评论 ID {reply_id!r} 不存在。")
+content["wechat"] = wechat
+
 story.pop("conversationScripts", None)
 story.pop("calls", None)
 story["smsScripts"] = []
@@ -563,6 +939,52 @@ sms_script_ids = unique_ids(story["smsScripts"], "id", "短信剧情")
 for script in story["smsScripts"]:
     if script["contactId"] not in contact_ids:
         raise ValueError(f"短信剧情 {script['id']!r}：联系人 ID {script['contactId']!r} 在“联系人”中不存在。")
+
+story["wechatScripts"] = []
+wechat_scripts = {}
+wechat_script_sequences = set()
+for row in rows("微信剧情"):
+    script_id = as_text(row.get("wechatScriptId", ""))
+    conversation_id = as_text(row.get("conversationId", ""))
+    if conversation_id not in wechat_conversation_ids:
+        raise ValueError(f"微信剧情 {script_id!r}：会话 ID {conversation_id!r} 不存在。")
+    sequence = as_number(row.get("sequence", 0))
+    key = (script_id, sequence)
+    if key in wechat_script_sequences:
+        raise ValueError(f"微信剧情 {script_id!r}：消息序号 {sequence!r} 重复。")
+    wechat_script_sequences.add(key)
+    script = wechat_scripts.setdefault(script_id, {"id": script_id, "conversationId": conversation_id, "messages": []})
+    if script["conversationId"] != conversation_id:
+        raise ValueError(f"微信剧情 {script_id!r}：同一剧情 ID 的会话 ID 必须保持一致。")
+    sender_id = as_text(row.get("senderId", ""))
+    if sender_id != WECHAT_SELF_ID and sender_id not in wechat_contact_ids:
+        raise ValueError(f"微信剧情 {script_id!r}：发送人 {sender_id!r} 不存在。")
+    conversation = wechat_conversation_map[conversation_id]
+    if conversation["type"] == "direct" and sender_id not in {WECHAT_SELF_ID, conversation["targetId"]}:
+        raise ValueError(f"微信剧情 {script_id!r}：单聊发送人只能是 SELF 或会话联系人。")
+    if conversation["type"] == "group" and sender_id not in wechat_group_map[conversation["targetId"]]["memberIds"]:
+        raise ValueError(f"微信剧情 {script_id!r}：发送人 {sender_id!r} 不是群成员。")
+    message_type = WECHAT_MESSAGE_TYPE_ALIASES.get(as_text(row.get("type", "")), as_text(row.get("type", "")))
+    if message_type not in {"text", "image", "sticker"}:
+        raise ValueError(f"微信剧情 {script_id!r}：消息类型无效。")
+    text = as_text(row.get("text", ""))
+    media_src = as_text(row.get("mediaSrc", ""))
+    if message_type == "text" and not text:
+        raise ValueError(f"微信剧情 {script_id!r}：文字消息不能为空。")
+    if message_type in {"image", "sticker"} and not media_src:
+        raise ValueError(f"微信剧情 {script_id!r}：图片或表情消息必须填写素材路径。")
+    message = {"order": sequence, "senderId": sender_id, "type": message_type, "text": text, "mediaSrc": media_src}
+    if sender_id == WECHAT_SELF_ID:
+        message["keystrokes"] = as_text(row.get("keystrokes", ""))
+    else:
+        message["afterMs"] = seconds_to_ms(row.get("afterMs", ""), 1.2)
+    script["messages"].append(message)
+for script in wechat_scripts.values():
+    script["messages"].sort(key=lambda item: item["order"])
+    for message in script["messages"]:
+        message.pop("order", None)
+    story["wechatScripts"].append(script)
+wechat_script_ids = unique_ids(story["wechatScripts"], "id", "微信剧情")
 
 story["phoneDialogues"] = []
 for row in rows("电话剧情"):
@@ -647,9 +1069,9 @@ for row in rows("剧情事件"):
 
     action_type = ACTION_ALIASES.get(str(row["actionType"]).strip(), str(row["actionType"]).strip())
     action = {"type": action_type}
-    if action_type not in {"call", "sms-script", "none"}:
-        raise ValueError(f"剧情事件 {event_id!r}：发生内容必须选择“执行短信剧情”“收到电话”或“仅衔接下一节点”。")
-    for key in ["smsScriptId", "dialogueId"]:
+    if action_type not in {"call", "sms-script", "wechat-script", "moment-publish", "moment-comment", "moment-interactions", "none"}:
+        raise ValueError(f"剧情事件 {event_id!r}：发生内容必须选择有效的短信、微信、朋友圈、电话或衔接动作。")
+    for key in ["smsScriptId", "wechatScriptId", "publishScriptId", "commentScriptId", "interactionScriptId", "dialogueId"]:
         if row.get(key):
             action[key] = as_text(row[key])
     if row["timeoutMs"] != "":
@@ -709,12 +1131,38 @@ for event in story["events"]:
         raise ValueError(f"剧情事件 {event['id']!r}：发生内容为“执行短信剧情”时必须填写短信剧情 ID。")
     if sms_script_id and sms_script_id not in sms_script_ids:
         raise ValueError(f"剧情事件 {event['id']!r}：短信剧情 ID {sms_script_id!r} 不存在。")
+    wechat_script_id = event["action"].get("wechatScriptId")
+    if event["action"].get("type") == "wechat-script" and not wechat_script_id:
+        raise ValueError(f"剧情事件 {event['id']!r}：发生内容为“执行微信剧情”时必须填写微信剧情 ID。")
+    if wechat_script_id and wechat_script_id not in wechat_script_ids:
+        raise ValueError(f"剧情事件 {event['id']!r}：微信剧情 ID {wechat_script_id!r} 不存在。")
+    publish_script_id = event["action"].get("publishScriptId")
+    if event["action"].get("type") == "moment-publish" and not publish_script_id:
+        raise ValueError(f"剧情事件 {event['id']!r}：执行朋友圈发布剧情时必须填写发布剧情 ID。")
+    if publish_script_id and publish_script_id not in publish_script_ids:
+        raise ValueError(f"剧情事件 {event['id']!r}：朋友圈发布剧情 ID {publish_script_id!r} 不存在。")
+    comment_script_id = event["action"].get("commentScriptId")
+    if event["action"].get("type") == "moment-comment" and not comment_script_id:
+        raise ValueError(f"剧情事件 {event['id']!r}：执行朋友圈玩家评论剧情时必须填写玩家评论剧情 ID。")
+    if comment_script_id and comment_script_id not in comment_script_ids:
+        raise ValueError(f"剧情事件 {event['id']!r}：朋友圈玩家评论剧情 ID {comment_script_id!r} 不存在。")
+    interaction_script_id = event["action"].get("interactionScriptId")
+    if event["action"].get("type") == "moment-interactions" and not interaction_script_id:
+        raise ValueError(f"剧情事件 {event['id']!r}：执行朋友圈互动剧情时必须填写互动剧情 ID。")
+    if interaction_script_id and interaction_script_id not in interaction_script_ids:
+        raise ValueError(f"剧情事件 {event['id']!r}：朋友圈互动剧情 ID {interaction_script_id!r} 不存在。")
     trigger_app_id = event["trigger"].get("appId")
     if trigger_app_id and trigger_app_id not in app_ids:
         raise ValueError(f"剧情事件 {event['id']!r}：操作应用 ID {trigger_app_id!r} 不存在。")
     trigger_target_id = event["trigger"].get("targetId")
-    if event["trigger"].get("action") in {"message-input", "outgoing-call", "outgoing-call-accepted", "outgoing-call-missed", "incoming-call-accepted", "incoming-call-rejected", "incoming-call-missed", "call-ended"} and trigger_target_id and trigger_target_id not in contact_ids:
+    contact_actions = {"outgoing-call", "outgoing-call-accepted", "outgoing-call-missed", "incoming-call-accepted", "incoming-call-rejected", "incoming-call-missed", "call-ended"}
+    if event["trigger"].get("action") in contact_actions and trigger_target_id and trigger_target_id not in contact_ids:
         raise ValueError(f"剧情事件 {event['id']!r}：触发对象 ID {trigger_target_id!r} 不是有效联系人 ID。")
+    if event["trigger"].get("action") == "message-input" and trigger_target_id:
+        trigger_app_id = event["trigger"].get("appId")
+        valid_targets = wechat_conversation_ids if trigger_app_id == "wechat" else contact_ids
+        if trigger_target_id not in valid_targets:
+            raise ValueError(f"剧情事件 {event['id']!r}：触发对象 ID {trigger_target_id!r} 与对应聊天应用不匹配。")
     for next_id in event["nextByOutcome"].values():
         if next_id and next_id not in event_ids:
             raise ValueError(f"剧情事件 {event['id']!r}：后续事件 ID {next_id!r} 不存在。")

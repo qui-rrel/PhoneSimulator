@@ -163,6 +163,166 @@
         "afterMs": 30000,
         "outcomes": []
       }
+    },
+    {
+      "id": "wx-example-timer",
+      "initialActive": true,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 6000
+      },
+      "action": {
+        "type": "wechat-script",
+        "wechatScriptId": "wx-example-timer-receive"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "wx-example-outgoing",
+      "initialActive": true,
+      "trigger": {
+        "type": "timer"
+      },
+      "action": {
+        "type": "wechat-script",
+        "wechatScriptId": "wx-example-outgoing"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "wx-moment-demo",
+      "initialActive": true,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 3000
+      },
+      "action": {
+        "type": "moment-interactions",
+        "interactionScriptId": "wx-moment-interactions-demo"
+      },
+      "nextByOutcome": {
+        "completed": "wx-player-comment-event",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "wx-player-comment-event",
+      "initialActive": false,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 0
+      },
+      "action": {
+        "type": "moment-comment",
+        "commentScriptId": "wx-player-comment-demo"
+      },
+      "nextByOutcome": {
+        "completed": "wx-player-reply-event",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "wx-player-reply-event",
+      "initialActive": false,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 0
+      },
+      "action": {
+        "type": "moment-comment",
+        "commentScriptId": "wx-player-reply-demo"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "wx-publish-event",
+      "initialActive": true,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 4000
+      },
+      "action": {
+        "type": "moment-publish",
+        "publishScriptId": "wx-publish-demo"
+      },
+      "nextByOutcome": {
+        "completed": "wx-after-publish-event",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "wx-after-publish-event",
+      "initialActive": false,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 1000
+      },
+      "action": {
+        "type": "moment-interactions",
+        "interactionScriptId": "wx-after-publish-demo"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
     }
   ],
   "smsScripts": [
@@ -292,6 +452,221 @@
       "dialogueId": "out-yao-default",
       "ringMs": 6500,
       "connectAfterMs": 1200
+    }
+  ],
+  "wechatScripts": [
+    {
+      "id": "wx-script-demo",
+      "conversationId": "wx-chat-chen",
+      "messages": [
+        {
+          "senderId": "wx-chen",
+          "type": "text",
+          "text": "到家后告诉我一声",
+          "mediaSrc": "",
+          "afterMs": 1200
+        },
+        {
+          "senderId": "SELF",
+          "type": "text",
+          "text": "已经到啦 😊",
+          "mediaSrc": "",
+          "keystrokes": "yijingdaola"
+        },
+        {
+          "senderId": "wx-chen",
+          "type": "sticker",
+          "text": "",
+          "mediaSrc": "/media/UI/AppIcon/wechat-app-icon.png",
+          "afterMs": 1200
+        }
+      ]
+    },
+    {
+      "id": "wx-example-timer-receive",
+      "conversationId": "wx-chat-chen",
+      "messages": [
+        {
+          "senderId": "wx-chen",
+          "type": "text",
+          "text": "我刚拍到一张照片，发你看看。",
+          "mediaSrc": "",
+          "afterMs": 1000
+        },
+        {
+          "senderId": "wx-chen",
+          "type": "image",
+          "text": "",
+          "mediaSrc": "/media/Album/img1.jpg",
+          "afterMs": 1000
+        },
+        {
+          "senderId": "SELF",
+          "type": "text",
+          "text": "看到了，很好看 😊",
+          "mediaSrc": "",
+          "keystrokes": "kandaolehenhaokan"
+        },
+        {
+          "senderId": "SELF",
+          "type": "image",
+          "text": "",
+          "mediaSrc": "/media/Album/img2.jpg",
+          "keystrokes": ""
+        }
+      ]
+    },
+    {
+      "id": "wx-example-outgoing",
+      "conversationId": "wx-chat-weekend",
+      "messages": [
+        {
+          "senderId": "SELF",
+          "type": "text",
+          "text": "我先发一张今天拍的照片。",
+          "mediaSrc": "",
+          "keystrokes": "woxianfayizhangjintianpaidezhaopian"
+        },
+        {
+          "senderId": "SELF",
+          "type": "image",
+          "text": "",
+          "mediaSrc": "/media/Album/img3.jpg",
+          "keystrokes": ""
+        },
+        {
+          "senderId": "wx-lin",
+          "type": "text",
+          "text": "收到了，我也回你一张。",
+          "mediaSrc": "",
+          "afterMs": 1200
+        },
+        {
+          "senderId": "wx-lin",
+          "type": "image",
+          "text": "",
+          "mediaSrc": "/media/Album/img4.jpg",
+          "afterMs": 1000
+        }
+      ]
+    }
+  ],
+  "momentPublishScripts": [
+    {
+      "id": "wx-publish-demo",
+      "momentId": "wx-self-published-demo",
+      "text": "今天把几张照片整理出来啦 😊",
+      "keystrokes": "jintianbazhangzhaopianzhenglile",
+      "imageSrc": [
+        "/media/Album/img2.jpg",
+        "/media/Album/img4.jpg",
+        "/media/Album/img6.jpg"
+      ],
+      "time": "刚刚"
+    }
+  ],
+  "momentCommentScripts": [
+    {
+      "id": "wx-player-comment-demo",
+      "commentId": "wx-player-comment-1",
+      "momentId": "wx-moment-1",
+      "replyToCommentId": "",
+      "text": "这组照片很好看，我也存一张 😊",
+      "keystrokes": "zhezuzhaopianhenhaokanwoyecunyizhang",
+      "imageSrc": "/media/Album/img5.jpg"
+    },
+    {
+      "id": "wx-player-reply-demo",
+      "commentId": "wx-player-reply-1",
+      "momentId": "wx-moment-story",
+      "replyToCommentId": "wx-interaction-comment-1",
+      "text": "原来你也喜欢这张！",
+      "keystrokes": "yuanlainiyeyexihuanzhezhang",
+      "imageSrc": ""
+    }
+  ],
+  "momentInteractionScripts": [
+    {
+      "id": "wx-moment-interactions-demo",
+      "actions": [
+        {
+          "type": "show-moment",
+          "momentId": "wx-moment-story",
+          "actorId": "",
+          "commentId": "",
+          "replyToCommentId": "",
+          "text": "",
+          "imageSrc": "",
+          "afterMs": 0,
+          "notify": false,
+          "notificationText": ""
+        },
+        {
+          "type": "like",
+          "momentId": "wx-moment-story",
+          "actorId": "wx-lin",
+          "commentId": "",
+          "replyToCommentId": "",
+          "text": "",
+          "imageSrc": "",
+          "afterMs": 600,
+          "notify": true,
+          "notificationText": "林遥赞了这条朋友圈"
+        },
+        {
+          "type": "comment",
+          "momentId": "wx-moment-story",
+          "actorId": "wx-zhou",
+          "commentId": "wx-interaction-comment-1",
+          "replyToCommentId": "",
+          "text": "这张也太有氛围了！",
+          "imageSrc": "/media/Album/img7.jpg",
+          "afterMs": 800,
+          "notify": true,
+          "notificationText": "周然评论了这条朋友圈"
+        },
+        {
+          "type": "comment",
+          "momentId": "wx-moment-story",
+          "actorId": "wx-chen",
+          "commentId": "wx-interaction-reply-1",
+          "replyToCommentId": "wx-interaction-comment-1",
+          "text": "我也这么觉得～",
+          "imageSrc": "",
+          "afterMs": 800,
+          "notify": true,
+          "notificationText": "陈希回复了周然"
+        }
+      ]
+    },
+    {
+      "id": "wx-after-publish-demo",
+      "actions": [
+        {
+          "type": "like",
+          "momentId": "wx-self-published-demo",
+          "actorId": "wx-lin",
+          "commentId": "",
+          "replyToCommentId": "",
+          "text": "",
+          "imageSrc": "",
+          "afterMs": 800,
+          "notify": true,
+          "notificationText": "林遥赞了你刚发布的朋友圈"
+        },
+        {
+          "type": "comment",
+          "momentId": "wx-self-published-demo",
+          "actorId": "wx-chen",
+          "commentId": "wx-after-publish-comment",
+          "replyToCommentId": "",
+          "text": "终于整理出来啦！",
+          "imageSrc": "",
+          "afterMs": 900,
+          "notify": true,
+          "notificationText": "陈希评论了你刚发布的朋友圈"
+        }
+      ]
     }
   ]
 }

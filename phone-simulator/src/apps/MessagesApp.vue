@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { ChevronLeft, MoreHorizontal, Plus, Search, Send, Smile, Video } from 'lucide-vue-next'
 import { usePhoneStore } from '../stores/phone'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
+import { createTypingPlan } from '../utils/typing'
 
 defineProps({ app: { type: Object, required: true } })
 
@@ -12,6 +13,10 @@ const draft = ref('')
 const typingDraft = ref(false)
 const keyboardVisible = ref(false)
 const activeKey = ref('')
+const typingToken = ref(0)
+const typedSteps = ref(0)
+const contactDrafts = ref({})
+const keyboardLayoutTimer = ref(null)
 
 const contact = computed(() => phone.activeContact)
 const currentStage = computed(() => {
@@ -28,9 +33,18 @@ const contactTyping = computed(() => Boolean(currentStage.value?.isTyping))
 const keyboardRows = [['Q','W','E','R','T','Y','U','I','O','P'], ['A','S','D','F','G','H','J','K','L'], ['Z','X','C','V','B','N','M']]
 const conversationPreview = (item) => item.messages?.at(-1)?.text || ''
 
-async function scrollToBottom() {
+async function scrollToBottom(smooth = false) {
   await nextTick()
-  if (messagePane.value) messagePane.value.scrollTop = messagePane.value.scrollHeight
+  if (messagePane.value) messagePane.value.scrollTo({
+    top: messagePane.value.scrollHeight,
+    behavior: smooth ? 'smooth' : 'auto',
+  })
+}
+
+function alignLatestAfterKeyboardLayout() {
+  window.clearTimeout(keyboardLayoutTimer.value)
+  window.requestAnimationFrame(() => { void scrollToBottom(true) })
+  keyboardLayoutTimer.value = window.setTimeout(() => { void scrollToBottom(true) }, 280)
 }
 
 async function openContact(id) {
@@ -39,29 +53,46 @@ async function openContact(id) {
 }
 
 async function typePresetReply() {
-  if (!contact.value || typingDraft.value || contactTyping.value || draft.value) return
+  if (!contact.value) return
   keyboardVisible.value = true
   phone.triggerOperation('message-input', { appId: 'messages', targetId: contact.value.id })
   await nextTick()
+  alignLatestAfterKeyboardLayout()
   const stage = currentStage.value
-  if (!stage) return
+  if (!stage || typingDraft.value || contactTyping.value) return
   const nextEntry = stage.messages?.[stage.currentIndex]
   if (nextEntry?.side === 'them') return
   const line = currentPlayerLine.value
-  if (!line) return
+  if (!line || draft.value === line) return
   typingDraft.value = true
-  draft.value = ''
-  const keystrokes = currentPlayerEntry.value?.keystrokes || line.replace(/\s/g, '')
-  for (let index = 0; index < keystrokes.length; index += 1) {
-    activeKey.value = keystrokes[index].toUpperCase()
+  typingToken.value += 1
+  const token = typingToken.value
+  const plan = createTypingPlan(line, currentPlayerEntry.value?.keystrokes)
+  if (!plan.keystrokes.length) {
+    draft.value = line
+    typingDraft.value = false
+    return
+  }
+  for (let index = typedSteps.value; index < plan.keystrokes.length; index += 1) {
+    if (token !== typingToken.value || !keyboardVisible.value) { typingDraft.value = false; return }
+    activeKey.value = plan.keystrokes[index].toUpperCase()
     playKeyboardTapSound()
-    const textLength = Math.max(1, Math.floor(((index + 1) / keystrokes.length) * line.length))
-    draft.value = line.slice(0, textLength)
+    typedSteps.value = index + 1
+    const textLength = Math.max(1, Math.floor((typedSteps.value / plan.keystrokes.length) * plan.typeableCount))
+    draft.value = plan.render(textLength)
     await new Promise((resolve) => window.setTimeout(resolve, 58 + Math.random() * 34))
   }
   draft.value = line
   activeKey.value = ''
   typingDraft.value = false
+}
+
+function closeKeyboard() {
+  typingToken.value += 1
+  typingDraft.value = false
+  keyboardVisible.value = false
+  activeKey.value = ''
+  nextTick(alignLatestAfterKeyboardLayout)
 }
 
 function tapKey(key) {
@@ -78,11 +109,20 @@ async function sendPresetReply() {
   playMessageSendSound()
   phone.addMessage(id, { side: 'me', text: draft.value, read: true })
   draft.value = ''
+  typedSteps.value = 0
+  delete contactDrafts.value[id]
   phone.advanceSmsScript(stage.id)
   await scrollToBottom()
 }
 
 watch(() => contact.value?.messages.length, scrollToBottom)
+watch(() => contact.value?.id, (id, previous) => {
+  if (previous) contactDrafts.value[previous] = { text: draft.value, typedSteps: typedSteps.value }
+  const saved = contactDrafts.value[id] || {}
+  draft.value = saved.text || ''
+  typedSteps.value = saved.typedSteps || 0
+  closeKeyboard()
+})
 </script>
 
 <template>
@@ -132,7 +172,7 @@ watch(() => contact.value?.messages.length, scrollToBottom)
         <button type="button" aria-label="视频通话"><Video :size="21" /></button>
       </header>
 
-      <div ref="messagePane" class="message-pane">
+      <div ref="messagePane" class="message-pane" @pointerdown="closeKeyboard">
         <div class="date-pill">今天</div>
         <div
           v-for="message in contact.messages"
@@ -178,7 +218,7 @@ watch(() => contact.value?.messages.length, scrollToBottom)
           <div v-for="(row, rowIndex) in keyboardRows" :key="rowIndex" class="keyboard-row">
             <button v-for="key in row" :key="key" type="button" :class="{ active: activeKey === key }" @click="tapKey(key)">{{ key }}</button>
           </div>
-          <div class="keyboard-bottom"><button type="button" @click="playKeyboardTapSound">123</button><button class="keyboard-space" type="button" @click="playKeyboardTapSound">空格</button><button type="button" @click="keyboardVisible = false">完成</button></div>
+          <div class="keyboard-bottom"><button type="button" @click="playKeyboardTapSound">123</button><button class="keyboard-space" type="button" @click="playKeyboardTapSound">空格</button><button type="button" @click="closeKeyboard">完成</button></div>
         </section>
       </Transition>
     </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import { phoneConfig } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
@@ -17,6 +17,10 @@ const EDGE_BACK_THRESHOLD = 64
 const edgeStart = ref(null)
 const edgeOffset = ref(0)
 const edgeY = ref(0)
+const mouseScrolling = ref(false)
+const mouseScrollGesture = ref(null)
+const suppressMouseScrollClick = ref(false)
+let mouseScrollClickTimer = null
 const edgeReady = computed(() => edgeOffset.value >= EDGE_BACK_THRESHOLD)
 const edgeIndicatorStyle = computed(() => ({
   top: `${edgeY.value}px`,
@@ -28,6 +32,74 @@ const frameStyle = computed(() => ({
   '--phone-wallpaper': phoneConfig.theme.wallpaper,
   '--phone-wallpaper-overlay': phoneConfig.theme.wallpaperOverlay,
 }))
+
+function findVerticalScroller(target, boundary) {
+  let element = target instanceof Element ? target : target?.parentElement
+  while (element && element !== boundary) {
+    const style = window.getComputedStyle(element)
+    if (/(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight + 1) return element
+    element = element.parentElement
+  }
+  return null
+}
+
+function beginMouseScroll(event) {
+  if (event.pointerType !== 'mouse' || event.button !== 0) return
+  const scroller = findVerticalScroller(event.target, event.currentTarget)
+  if (!scroller) return
+  mouseScrollGesture.value = {
+    pointerId: event.pointerId,
+    screen: event.currentTarget,
+    scroller,
+    startX: event.clientX,
+    startY: event.clientY,
+    startScrollTop: scroller.scrollTop,
+    dragging: false,
+  }
+}
+
+function moveMouseScroll(event) {
+  const gesture = mouseScrollGesture.value
+  if (!gesture || gesture.pointerId !== event.pointerId) return
+  const offsetX = event.clientX - gesture.startX
+  const offsetY = event.clientY - gesture.startY
+  if (!gesture.dragging) {
+    if (Math.abs(offsetX) > 8 && Math.abs(offsetX) > Math.abs(offsetY)) {
+      mouseScrollGesture.value = null
+      return
+    }
+    if (Math.abs(offsetY) < 5 || Math.abs(offsetY) <= Math.abs(offsetX)) return
+    gesture.dragging = true
+    mouseScrolling.value = true
+    gesture.screen.setPointerCapture?.(event.pointerId)
+  }
+  event.preventDefault()
+  gesture.scroller.scrollTop = gesture.startScrollTop - offsetY
+}
+
+function finishMouseScroll(event, cancelled = false) {
+  const gesture = mouseScrollGesture.value
+  if (!gesture || gesture.pointerId !== event.pointerId) return
+  if (gesture.dragging) {
+    if (gesture.screen.hasPointerCapture?.(event.pointerId)) gesture.screen.releasePointerCapture(event.pointerId)
+    if (!cancelled) {
+      suppressMouseScrollClick.value = true
+      window.clearTimeout(mouseScrollClickTimer)
+      mouseScrollClickTimer = window.setTimeout(() => { suppressMouseScrollClick.value = false }, 0)
+    }
+  }
+  mouseScrollGesture.value = null
+  mouseScrolling.value = false
+}
+
+function blockMouseScrollClick(event) {
+  if (!suppressMouseScrollClick.value) return
+  event.preventDefault()
+  event.stopPropagation()
+  suppressMouseScrollClick.value = false
+}
+
+onBeforeUnmount(() => window.clearTimeout(mouseScrollClickTimer))
 
 function beginEdgeBack(event) {
   if (!phone.canNavigateBack) return
@@ -71,7 +143,15 @@ function cancelEdgeBack() {
     <div class="side-button side-button--left-b"></div>
     <div class="side-button side-button--right"></div>
 
-    <div class="phone-screen">
+    <div
+      class="phone-screen"
+      :class="{ 'phone-screen--mouse-scrolling': mouseScrolling }"
+      @pointerdown.capture="beginMouseScroll"
+      @pointermove.capture="moveMouseScroll"
+      @pointerup.capture="finishMouseScroll"
+      @pointercancel.capture="(event) => finishMouseScroll(event, true)"
+      @click.capture="blockMouseScrollClick"
+    >
       <div class="wallpaper"></div>
       <HomeScreen v-if="!phone.locked" :class="{ 'home-screen--app-open': phone.activeApp }" />
       <LockScreen v-else />

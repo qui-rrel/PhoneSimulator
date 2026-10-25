@@ -13,6 +13,7 @@ const appFallbacks = {
   weather: { icon: CloudSun, color: '#4fa2f5' },
   clock: { icon: Clock3, color: '#111318' },
   settings: { icon: Settings, color: '#9096a2' },
+  wechat: { icon: MessageCircle, color: '#07c160' },
 }
 const LOCAL_TIME_TOKEN = '$localTime'
 const pageOpenedTime = new Intl.DateTimeFormat('zh-CN', {

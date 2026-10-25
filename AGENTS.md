@@ -122,7 +122,7 @@ Excel 工作簿
 - `weather`：地点、生成种子；天气由 `src/utils/weather.js` 按日期稳定生成。
 - `home`：桌面常驻问候/天气组件。
 - `apps`：App ID、组件名、图标路径、启用状态、顺序和 Dock；日历和时钟图标由程序按本地日期与时间实时绘制。
-- `gallery`、`notes`、`alarms`、`contacts`、`callHistory`、`playlist`、`browserHistory`、`lockNotifications`、`mail`、`calendarEvents`。
+- `gallery`、`notes`、`alarms`、`contacts`、`callHistory`、`playlist`、`browserHistory`、`lockNotifications`、`mail`、`calendarEvents`、`wechat`；微信区包含会话、朋友圈、点赞和评论，其中朋友圈 `imageSrc` 是最多 9 项的图片路径数组。
 
 重要行为：
 
@@ -133,12 +133,19 @@ Excel 工作簿
 - 当前联系人聊天界面已打开时，该联系人新短信不弹顶部通知；在其他联系人或其他 App 时要弹。
 - 闹钟命中当前本地 `HH:MM` 且已开启时响铃；无音频路径时合成默认铃声。
 - 音乐 MP3 存在时以媒体元数据时长为准；退出 App 后继续播放，只有暂停操作停止。
+- 微信使用独立联系人 ID，支持单聊、群聊、文字/图片/表情图片、群头像拼接和会话通知；朋友圈支持玩家点赞、剧情式发布、图文评论/回复、联系人自动互动和内部消息列表。玩家微信身份统一来自 `wechat.profile`，运行状态位于 `src/stores/wechat.js`。
+- 微信聊天时间按会话分组，相同显示时间仅在第一条消息上方出现；剧情消息使用发送时的本地分钟时间。
+- 微信玩家文字回复复用短信的屏幕键盘模拟，按 `keystrokes` 逐键高亮；emoji 不生成按键事件，只在正文对应位置直接显示。
 
 ## 6. 剧情运行模型
 
 `story.json` 当前顶层内容：
 
 - `smsScripts`：一段短信剧情一个 ID，内部 `messages` 一句一行。
+- `wechatScripts`：一段微信剧情一个 ID，关联会话并支持文字、图片、表情图片和群成员发送人。
+- `momentPublishScripts`：玩家发布朋友圈的预设文字、键盘序列和图片。
+- `momentCommentScripts`：玩家评论或回复朋友圈的预设文字、键盘序列和单张图片。
+- `momentInteractionScripts`：联系人显示朋友圈、点赞、取消赞、评论、回复和内部消息。
 - `phoneDialogues`：一段完整电话对白一个 ID，包含联系人、方向、逐句内容和 `hangupAfterMs`。
 - `outgoingCallRules`：主动拨号匹配规则。
 - `events`：可激活的剧情节点组成的事件图。
@@ -151,6 +158,10 @@ Excel 工作簿
 4. `runEvent()` 当前支持：
    - `call`：发起来电。
    - `sms-script`：激活一整段短信剧情。
+   - `wechat-script`：激活一整段微信剧情。
+   - `moment-publish`：激活一段玩家发布朋友圈剧情。
+   - `moment-comment`：激活一段玩家评论或回复朋友圈剧情。
+   - `moment-interactions`：执行一段联系人朋友圈互动剧情。
    - `none`：不展示新内容，直接完成并衔接。
 5. `resolveStoryOutcome()` 根据 `nextByOutcome` 激活下一个节点；若 `retry.enabled` 且当前结果在 `retry.outcomes` 中，则等待后重试本节点。
 
@@ -170,6 +181,10 @@ Excel 工作簿
 - `incoming-call-rejected`
 - `incoming-call-missed`
 - `call-ended`
+- `moment-liked`
+- `moment-unliked`
+- `moment-comment-sent`
+- `moment-published`
 
 新增 App 或内容页时：
 
@@ -216,6 +231,7 @@ Excel 工作簿
 ### UI 与交互
 
 - 移动端优先，保持现有手机安全区、状态栏和底部 Home Indicator。
+- `PhoneShell.vue` 为桌面细指针设备提供通用的鼠标纵向拖动滚动；新增可滚动页面应继续使用标准 `overflow-y: auto/scroll`，以自动继承该行为。
 - 尽量复用现有颜色变量、圆角、阴影和动画命名。
 - App 打开/关闭应保留动画，不应突然切换。
 - 设置、浏览历史等只展示页面不要添加未要求的假功能。
