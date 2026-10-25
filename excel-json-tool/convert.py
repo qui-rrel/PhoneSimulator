@@ -36,7 +36,6 @@ HEADER_ALIASES = {
     "图标色": "iconColor",
     "图标色（可空）": "iconColor",
     "放在底部栏": "dock",
-    "未读角标": "badge",
     "照片 ID": "id",
     "图片路径": "src",
     "占位渐变": "gradient",
@@ -520,8 +519,6 @@ if "桌面应用" in workbook.sheetnames:
         }
         if as_bool(row.get("dock")):
             app["dock"] = True
-        if row.get("badge") not in (None, ""):
-            app["badge"] = as_number(row["badge"])
         apps.append(app)
     app_ids = unique_ids(apps, "id", "桌面应用")
     content["apps"] = apps

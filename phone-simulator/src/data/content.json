@@ -34,8 +34,7 @@
       "enabled": true,
       "component": "MessagesApp",
       "iconSrc": "/media/UI/AppIcon/messages-app-icon.png",
-      "dock": true,
-      "badge": 2
+      "dock": true
     },
     {
       "id": "phone",
@@ -122,8 +121,7 @@
       "label": "微信",
       "enabled": true,
       "component": "WeChatApp",
-      "iconSrc": "/media/UI/AppIcon/wechat-app-icon.png",
-      "badge": 1
+      "iconSrc": "/media/UI/AppIcon/wechat-app-icon.png"
     }
   ],
   "lockNotifications": [

@@ -39,11 +39,6 @@ export const useWechatStore = defineStore('wechat', () => {
 
   function attachPhone(phone) {
     phoneBridge = phone
-    syncAppBadge()
-  }
-
-  function syncAppBadge() {
-    phoneBridge?.setAppBadge('wechat', unreadTotal.value)
   }
 
   function findContact(contactId) {
@@ -91,7 +86,6 @@ export const useWechatStore = defineStore('wechat', () => {
     const conversation = findConversation(conversationId)
     if (!conversation) return
     conversation.unread = 0
-    syncAppBadge()
   }
 
   function addMessage(conversationId, message) {
@@ -122,7 +116,6 @@ export const useWechatStore = defineStore('wechat', () => {
     const isOpen = phoneBridge?.activeAppId === 'wechat' && phoneBridge?.activeContent?.targetId === conversationId
     if (isOpen) return
     conversation.unread = Number(conversation.unread || 0) + 1
-    syncAppBadge()
     const sender = findContact(created.senderId)
     const title = conversationTitle(conversation)
     const senderName = sender?.remark || sender?.nickname || sender?.name || ''
@@ -403,7 +396,6 @@ export const useWechatStore = defineStore('wechat', () => {
     processingScripts.clear()
     interactionTokens.forEach((item) => { item.cancelled = true })
     interactionTokens.clear()
-    syncAppBadge()
   }
 
   return {

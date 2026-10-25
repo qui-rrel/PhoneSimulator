@@ -36,6 +36,7 @@ export const usePhoneStore = defineStore('phone', () => {
   const activeContent = ref(null)
   const notification = ref(null)
   const contacts = ref(hydrateContacts(contentConfig.contacts))
+  const mail = ref(clone(contentConfig.mail || []))
   const alarms = ref(clone(contentConfig.alarms || []))
   const callHistory = ref((contentConfig.callHistory || []).map(hydrateCallRecord))
   const triggeredEvents = ref([])
@@ -57,6 +58,7 @@ export const usePhoneStore = defineStore('phone', () => {
   const activeApp = computed(() => phoneConfig.apps.find((app) => app.id === activeAppId.value))
   const activeContact = computed(() => contacts.value.find((contact) => contact.id === activeContactId.value))
   const unreadTotal = computed(() => contacts.value.reduce((total, contact) => total + (contact.unread || 0), 0))
+  const unreadMailTotal = computed(() => mail.value.reduce((total, item) => total + (item.unread ? 1 : 0), 0))
   const canNavigateBack = computed(() => Boolean(
     !locked.value &&
     activeAppId.value &&
@@ -185,7 +187,6 @@ export const usePhoneStore = defineStore('phone', () => {
     activeContactId.value = null
     activeAppId.value = id
     if (changed) pushNavigationHistory()
-    if (id === 'messages') clearAppBadge(id)
     triggerOperation('app-open', { appId: id, targetId: id })
   }
   function closeApp() { navigateHome() }
@@ -200,6 +201,7 @@ export const usePhoneStore = defineStore('phone', () => {
   }
   function closeContact() { navigateBack() }
   function openContent(appId, targetId) {
+    if (appId === 'mail') markMailRead(targetId)
     activeContent.value = { appId, targetId }
     pushNavigationHistory()
     triggerOperation('content-open', { appId, targetId })
@@ -208,13 +210,9 @@ export const usePhoneStore = defineStore('phone', () => {
     activeContent.value = { appId, targetId }
     replaceNavigationHistory()
   }
-  function clearAppBadge(id) {
-    const app = phoneConfig.apps.find((item) => item.id === id)
-    if (app) app.badge = 0
-  }
-  function setAppBadge(id, count) {
-    const app = phoneConfig.apps.find((item) => item.id === id)
-    if (app) app.badge = Math.max(0, Number(count) || 0)
+  function markMailRead(id) {
+    const item = mail.value.find((entry) => entry.id === id)
+    if (item) item.unread = false
   }
   function findSmsScript(scriptId) {
     return storyConfig.smsScripts?.find((item) => item.id === scriptId)
@@ -630,6 +628,7 @@ export const usePhoneStore = defineStore('phone', () => {
   function startRuntime() { startNavigation(); startTimeline(); startAlarmClock() }
   function resetStory() {
     contacts.value = hydrateContacts(contentConfig.contacts)
+    mail.value = clone(contentConfig.mail || [])
     callHistory.value = (contentConfig.callHistory || []).map(hydrateCallRecord)
     triggeredEvents.value = []
     activeStoryEvents.value = []
@@ -645,9 +644,9 @@ export const usePhoneStore = defineStore('phone', () => {
 
   return {
     locked, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact, activeContent,
-    notification, contacts, unreadTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
+    notification, contacts, unreadTotal, mail, unreadMailTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
     callElapsed, callStatus, alarmRinging, canNavigateBack, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
-    closeContact, openContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification, setAppBadge,
+    closeContact, openContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
     toggleAlarm, stopAlarm, triggerOperation, startOutgoingCall, acceptCall, rejectCall, endCall,
     activeStoryEvents, completedEvents, eventOutcomes, activeSmsScripts, getActiveSmsScript, advanceSmsScript, completeSmsScript,
     resolveStoryOutcome, resetStory, startTimeline, startRuntime,

@@ -3,12 +3,20 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { CloudSun } from 'lucide-vue-next'
 import { createDeviceDate, phoneConfig } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
+import { useWechatStore } from '../stores/wechat'
 import AppIcon from './AppIcon.vue'
 import { createWeatherSnapshot } from '../utils/weather'
 
 const phone = usePhoneStore()
+const wechat = useWechatStore()
 const dockApps = computed(() => phoneConfig.apps.filter((app) => app.enabled !== false && app.dock))
 const gridApps = computed(() => phoneConfig.apps.filter((app) => app.enabled !== false && !app.dock))
+const appBadges = computed(() => ({
+  messages: phone.unreadTotal,
+  mail: phone.unreadMailTotal,
+  wechat: wechat.unreadTotal,
+}))
+const appBadge = (appId) => appBadges.value[appId] || 0
 const now = ref(new Date())
 let timer
 const deviceDate = computed(() => createDeviceDate(now.value))
@@ -43,7 +51,7 @@ onBeforeUnmount(() => window.clearInterval(timer))
           v-for="app in gridApps"
           :key="app.id"
           :app="app"
-          :badge="app.id === 'messages' ? phone.unreadTotal : app.badge"
+          :badge="appBadge(app.id)"
           @open="phone.openApp"
         />
       </div>
@@ -58,7 +66,7 @@ onBeforeUnmount(() => window.clearInterval(timer))
         v-for="app in dockApps"
         :key="app.id"
         :app="app"
-        :badge="app.id === 'messages' ? phone.unreadTotal : app.badge"
+        :badge="appBadge(app.id)"
         compact
         @open="phone.openApp"
       />
