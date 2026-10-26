@@ -3,7 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import {
   Blocks, ChevronLeft, ChevronRight, CirclePlus, Compass, ContactRound, Gamepad2, Heart,
   Image as ImageIcon, MessageCircle, MessageSquare, Mic, MoreHorizontal, Music2, Plus,
-  ScanLine, Search, Settings, ShoppingBag, Smile, UserRound,
+  Phone, ScanLine, Search, Settings, ShoppingBag, Smile, UserRound, Video,
 } from 'lucide-vue-next'
 import WechatAvatar from '../components/WechatAvatar.vue'
 import WeChatMoments from './WeChatMoments.vue'
@@ -272,6 +272,14 @@ watch(() => messages.value.length, scrollToBottom)
             <div class="wechat-message__content">
               <small v-if="group && row.message.senderId !== 'SELF'">{{ contactName(sender(row.message)) }}</small>
               <p v-if="row.message.type === 'text'" class="wechat-bubble">{{ row.message.text }}</p>
+              <p
+                v-else-if="row.message.type === 'voice-call' || row.message.type === 'video-call'"
+                class="wechat-bubble wechat-call-record"
+              >
+                <span>{{ wechat.messagePreview(row.message) }}</span>
+                <Phone v-if="row.message.type === 'voice-call'" :size="17" aria-hidden="true" />
+                <Video v-else :size="17" aria-hidden="true" />
+              </p>
               <img v-else class="wechat-message-media" :src="row.message.mediaSrc" :alt="row.message.type === 'image' ? '图片消息' : '表情消息'" />
             </div>
             <WechatAvatar v-if="row.message.senderId === 'SELF'" :person="{ ...wechat.profile, nickname: wechat.profile.nickname }" :size="38" />

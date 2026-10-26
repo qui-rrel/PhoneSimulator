@@ -1519,6 +1519,16 @@ button {
   text-align: left;
 }
 
+.notes-list button.is-pinned { padding-right: 38px; }
+
+.notes-pin {
+  position: absolute;
+  top: 12px;
+  right: 13px;
+  color: #d39f0a;
+  transform: rotate(-25deg);
+}
+
 .notes-list button + button::before {
   position: absolute;
   top: 0;
@@ -2521,6 +2531,8 @@ button {
 .wechat-message__content > small { display: block; margin: -1px 0 4px 3px; color: #8c8c8c; font-size: 10px; }
 .wechat-bubble { position: relative; margin: 0; padding: 9px 11px; border-radius: 4px; background: #fff; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
 .wechat-message--me .wechat-bubble { background: #95ec69; }
+.wechat-call-record { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.wechat-call-record svg { flex: none; stroke-width: 1.8; }
 .wechat-message-media { max-width: 150px; max-height: 185px; display: block; border-radius: 5px; object-fit: contain; }
 .wechat-typing { margin: 8px 0 8px 47px; color: #9a9a9a; font-size: 11px; }
 

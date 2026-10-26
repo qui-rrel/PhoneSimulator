@@ -11,6 +11,14 @@ const formatTime = (date = new Date()) => new Intl.DateTimeFormat('zh-CN', {
   minute: '2-digit',
   hour12: false,
 }).format(date)
+const formatCallDuration = (seconds) => {
+  const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0))
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const remainingSeconds = totalSeconds % 60
+  const clock = [minutes, remainingSeconds].map((part) => String(part).padStart(2, '0')).join(':')
+  return hours > 0 ? `${String(hours).padStart(2, '0')}:${clock}` : clock
+}
 
 let phoneBridge = null
 const processingScripts = new Set()
@@ -75,6 +83,9 @@ export const useWechatStore = defineStore('wechat', () => {
     if (!message) return ''
     if (message.type === 'image') return '[图片]'
     if (message.type === 'sticker') return '[表情]'
+    if (message.type === 'voice-call' || message.type === 'video-call') {
+      return message.connected ? `通话时长 ${formatCallDuration(message.duration)}` : '已取消'
+    }
     return message.text || ''
   }
 

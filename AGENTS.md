@@ -123,7 +123,7 @@ Excel 工作簿
 - `weather`：地点、生成种子；天气由 `src/utils/weather.js` 按日期稳定生成。
 - `home`：桌面常驻问候/天气组件。
 - `apps`：App ID、组件名、图标路径、启用状态、顺序和 Dock；不保存未读角标。日历和时钟图标由程序按本地日期与时间实时绘制，计算器作为无内容表的独立交互 App 注册。
-- `gallery`、`notes`、`alarms`、`contacts`、`callHistory`、`playlist`、`browserHistory`、`lockNotifications`、`mail`、`calendarEvents`、`wechat`；微信区包含会话、朋友圈、点赞和评论，其中朋友圈 `imageSrc` 是最多 9 项的图片路径数组。
+- `gallery`、`notes`、`alarms`、`contacts`、`callHistory`、`playlist`、`browserHistory`、`lockNotifications`、`mail`、`calendarEvents`、`wechat`；备忘录可通过 `pinned` 置顶，多个置顶项保持 Excel 行顺序，非置顶项按更新时间倒序；微信区包含会话、朋友圈、点赞和评论，其中朋友圈 `imageSrc` 是最多 9 项的图片路径数组。
 
 重要行为：
 
@@ -135,7 +135,7 @@ Excel 工作簿
 - 桌面未读角标由应用内容状态实时计算：信息汇总联系人 `unread`，邮件汇总邮件 `unread`，微信汇总会话 `unread`；不得在桌面应用表或 `apps[]` 中维护静态角标。
 - 闹钟命中当前本地 `HH:MM` 且已开启时响铃；无音频路径时合成默认铃声。
 - 音乐 MP3 存在时以媒体元数据时长为准；退出 App 后继续播放，只有暂停操作停止。
-- 微信使用独立联系人 ID，支持单聊、群聊、文字/图片/表情图片、群头像拼接和会话通知；朋友圈支持玩家点赞、剧情式发布、图文评论/回复、联系人自动互动和内部消息列表。玩家微信身份统一来自 `wechat.profile`，运行状态位于 `src/stores/wechat.js`。
+- 微信使用独立联系人 ID，支持单聊、群聊、文字/图片/表情图片、群头像拼接和会话通知；初始聊天记录可使用 `voice-call` / `video-call` 展示通话时长或“已取消”，两者均为不可交互的历史气泡；朋友圈支持玩家点赞、剧情式发布、图文评论/回复、联系人自动互动和内部消息列表。玩家微信身份统一来自 `wechat.profile`，运行状态位于 `src/stores/wechat.js`。
 - 微信聊天时间按会话分组，相同显示时间仅在第一条消息上方出现；剧情消息使用发送时的本地分钟时间。
 - 微信玩家文字回复复用短信的屏幕键盘模拟，按 `keystrokes` 逐键高亮；emoji 不生成按键事件，只在正文对应位置直接显示。
 
@@ -210,8 +210,9 @@ Excel 工作簿
 - `phoneDialogues` 的 ID 表示一段对白，不表示联系人；一个联系人可拥有多段对白。
 - 对白自身定义 `contactId` 和 `direction`；事件或主动通话规则只引用 `dialogueId`。
 - 没有匹配主动通话规则时默认无人接听。
-- 规则按 `order` 从小到大匹配，可限制事件状态和拨打次数。
+- 规则按 `order` 从小到大匹配，可限制拨打次数，并通过 `conditions` 组合任意数量的剧情事件状态或结果条件；同一规则下的条件全部使用 AND 匹配。
 - 来电和主动通话在最后一句展示后等待 `hangupAfterMs` 再自动挂断。
+- 通话接通后不允许玩家主动挂断；通话页保留挂断按钮外观，但按钮不执行任何操作。来电接通前的拒接仍然有效。
 
 ## 7. 前端扩展规范
 

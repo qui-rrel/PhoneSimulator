@@ -38,7 +38,7 @@ const callStatusText = computed(() => {
         <button type="button" aria-label="静音">
           <img src="/media/UI/CallIcon/mute-call-icon.png" alt="" />
         </button>
-        <button type="button" aria-label="结束通话" @click="phone.endCall">
+        <button type="button" aria-label="结束通话（不可操作）">
           <img src="/media/UI/CallIcon/decline-call-icon.png" alt="" />
         </button>
       </div>

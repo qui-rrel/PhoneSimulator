@@ -391,7 +391,7 @@ export const usePhoneStore = defineStore('phone', () => {
     }
     if (call.conversation?.length) {
       callScriptTimers.push(window.setTimeout(() => {
-        if (activeCall.value?.dialogueId === call.dialogueId && callStatus.value === 'connected') endCall()
+        if (activeCall.value?.dialogueId === call.dialogueId && callStatus.value === 'connected') finishCall()
       }, delay + Number(call.hangupAfterMs ?? 3000)))
     }
   }
@@ -419,12 +419,28 @@ export const usePhoneStore = defineStore('phone', () => {
   }
   function acceptCall() { resolveIncomingCall('accepted') }
   function rejectCall() { resolveIncomingCall('rejected') }
+  function outgoingConditionMatches(condition) {
+    const eventId = condition.targetId || ''
+    if (!eventId) return false
+    if (condition.type === 'event-state') {
+      const active = activeStoryEvents.value.includes(eventId)
+      const triggered = triggeredEvents.value.includes(eventId)
+      const completed = completedEvents.value.includes(eventId)
+      if (condition.value === 'not-triggered') return !active && !triggered && !completed
+      if (condition.value === 'in-progress') return !completed && (active || triggered)
+      if (condition.value === 'completed') return completed
+      return false
+    }
+    if (condition.type === 'event-outcome') return eventOutcomes.value[eventId] === condition.value
+    return false
+  }
   function outgoingRuleMatches(rule, dialCount) {
-    const eventId = rule.eventId || ''
-    const eventState = rule.eventState || 'any'
-    const eventTriggered = eventId ? triggeredEvents.value.includes(eventId) : false
-    if (eventId && eventState === 'triggered' && !eventTriggered) return false
-    if (eventId && eventState === 'not-triggered' && eventTriggered) return false
+    const legacyState = rule.eventState === 'triggered' ? 'completed' : rule.eventState
+    const legacyConditions = rule.eventId && legacyState && legacyState !== 'any'
+      ? [{ type: 'event-state', targetId: rule.eventId, value: legacyState }]
+      : []
+    const conditions = Array.isArray(rule.conditions) ? rule.conditions : legacyConditions
+    if (!conditions.every(outgoingConditionMatches)) return false
     if (Number(rule.minDialCount || 0) > dialCount) return false
     if (Number(rule.maxDialCount || 0) > 0 && dialCount > Number(rule.maxDialCount)) return false
     return true
@@ -462,7 +478,7 @@ export const usePhoneStore = defineStore('phone', () => {
     }
     outgoingCallTimer = window.setTimeout(() => beginCall(call, 'outgoing'), Number(rule.connectAfterMs || 1200))
   }
-  function endCall() {
+  function finishCall() {
     const call = activeCall.value
     if (!call || callStatus.value === 'ended') return
     const endedStatus = callStatus.value
@@ -647,7 +663,7 @@ export const usePhoneStore = defineStore('phone', () => {
     notification, contacts, unreadTotal, mail, unreadMailTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
     callElapsed, callStatus, alarmRinging, canNavigateBack, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
     closeContact, openContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
-    toggleAlarm, stopAlarm, triggerOperation, startOutgoingCall, acceptCall, rejectCall, endCall,
+    toggleAlarm, stopAlarm, triggerOperation, startOutgoingCall, acceptCall, rejectCall,
     activeStoryEvents, completedEvents, eventOutcomes, activeSmsScripts, getActiveSmsScript, advanceSmsScript, completeSmsScript,
     resolveStoryOutcome, resetStory, startTimeline, startRuntime,
   }

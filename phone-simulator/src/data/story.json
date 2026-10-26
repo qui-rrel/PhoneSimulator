@@ -442,16 +442,16 @@
   ],
   "outgoingCallRules": [
     {
+      "id": "yao-rule-1",
       "contactId": "yao",
       "order": 1,
-      "eventId": "",
-      "eventState": "any",
       "minDialCount": 0,
       "maxDialCount": 0,
       "answer": true,
       "dialogueId": "out-yao-default",
       "ringMs": 6500,
-      "connectAfterMs": 1200
+      "connectAfterMs": 1200,
+      "conditions": []
     }
   ],
   "wechatScripts": [

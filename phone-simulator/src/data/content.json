@@ -148,7 +148,32 @@
       "title": "购物清单",
       "excerpt": "胶卷、苏打水、电池",
       "updatedAt": "2026-10-17",
-      "body": "□ 胶卷\n□ 苏打水\n□ 相机电池\n□ 牛皮纸信封"
+      "body": "□ 胶卷\n□ 苏打水\n□ 相机电池\n□ 牛皮纸信封",
+      "pinned": true
+    },
+    {
+      "id": "n2",
+      "title": "灵感记录",
+      "excerpt": "首页排版和交互想法",
+      "updatedAt": "2026-10-12 09:30",
+      "body": "• 调整标题层级\n• 检查按钮动效\n• 补充测试文案",
+      "pinned": true
+    },
+    {
+      "id": "n3",
+      "title": "周末安排",
+      "excerpt": "整理照片、买花、给相机充电",
+      "updatedAt": "2026-10-25 18:30",
+      "body": "□ 整理照片\n□ 买花\n□ 给相机充电",
+      "pinned": false
+    },
+    {
+      "id": "n4",
+      "title": "读书摘记",
+      "excerpt": "喜欢的句子和章节记录",
+      "updatedAt": "2026-10-24 21:10",
+      "body": "第三章：记录喜欢的句子。\n第五章：整理阅读后的想法。",
+      "pinned": false
     }
   ],
   "gallery": [
@@ -487,6 +512,56 @@
         "mediaSrc": "/media/Album/img1.jpg",
         "time": "昨天 18:22",
         "read": true
+      },
+      {
+        "id": "wx-call-v-ok",
+        "conversationId": "wx-chat-chen",
+        "order": 3,
+        "senderId": "SELF",
+        "type": "voice-call",
+        "text": "",
+        "mediaSrc": "",
+        "time": "今天 10:20",
+        "read": true,
+        "connected": true,
+        "duration": 32
+      },
+      {
+        "id": "wx-call-v-cancel",
+        "conversationId": "wx-chat-chen",
+        "order": 4,
+        "senderId": "SELF",
+        "type": "voice-call",
+        "text": "",
+        "mediaSrc": "",
+        "time": "今天 10:22",
+        "read": true,
+        "connected": false
+      },
+      {
+        "id": "wx-call-video-ok",
+        "conversationId": "wx-chat-chen",
+        "order": 5,
+        "senderId": "wx-chen",
+        "type": "video-call",
+        "text": "",
+        "mediaSrc": "",
+        "time": "今天 10:24",
+        "read": true,
+        "connected": true,
+        "duration": 75
+      },
+      {
+        "id": "wx-call-video-cancel",
+        "conversationId": "wx-chat-chen",
+        "order": 6,
+        "senderId": "wx-chen",
+        "type": "video-call",
+        "text": "",
+        "mediaSrc": "",
+        "time": "今天 10:26",
+        "read": true,
+        "connected": false
       }
     ],
     "moments": [

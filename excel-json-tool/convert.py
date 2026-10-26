@@ -45,6 +45,7 @@ HEADER_ALIASES = {
     "列表摘要": "excerpt",
     "更新时间": "updatedAt",
     "正文": "body",
+    "是否置顶": "pinned",
     "闹钟 ID": "id",
     "时间": "time",
     "标签": "label",
@@ -134,6 +135,11 @@ HEADER_ALIASES = {
     "接通等待（秒）": "connectAfterMs",
     "接通等待（毫秒）": "connectAfterMs",
     "主动通话对白 ID": "dialogueId",
+    "规则 ID": "ruleId",
+    "条件序号": "sequence",
+    "条件类型": "conditionType",
+    "条件对象 ID": "targetId",
+    "条件值": "conditionValue",
     "微信昵称": "nickname",
     "微信号": "wechatId",
     "朋友圈封面路径（可空）": "momentsCover",
@@ -149,6 +155,8 @@ HEADER_ALIASES = {
     "消息类型": "type",
     "发送人 ID": "senderId",
     "图片或表情路径（可空）": "mediaSrc",
+    "是否接通（可空）": "connected",
+    "通话时长（秒，可空）": "duration",
     "朋友圈 ID": "momentId",
     "发布人 ID": "authorId",
     "朋友圈正文（可空）": "text",
@@ -197,6 +205,7 @@ EXPECTED_HEADERS = {
     "剧情事件": {"id", "triggerType", "actionType"},
     "剧情分支": {"id", "retryEnabled"},
     "主动通话规则": {"contactId", "order", "answer"},
+    "主动通话条件": {"ruleId", "sequence", "conditionType", "targetId", "conditionValue"},
     "微信账号": {"nickname", "wechatId"},
     "微信联系人": {"contactId", "nickname"},
     "微信群聊": {"groupId", "name"},
@@ -271,12 +280,51 @@ ACTION_ALIASES = {
     "none": "none",
 }
 WECHAT_CONVERSATION_TYPE_ALIASES = {"单聊": "direct", "群聊": "group", "direct": "direct", "group": "group"}
-WECHAT_MESSAGE_TYPE_ALIASES = {"文字": "text", "图片": "image", "表情图片": "sticker", "text": "text", "image": "image", "sticker": "sticker"}
+WECHAT_MESSAGE_TYPE_ALIASES = {
+    "文字": "text",
+    "图片": "image",
+    "表情图片": "sticker",
+    "语音通话": "voice-call",
+    "视频通话": "video-call",
+    "text": "text",
+    "image": "image",
+    "sticker": "sticker",
+    "voice-call": "voice-call",
+    "video-call": "video-call",
+}
 MOMENT_INTERACTION_TYPE_ALIASES = {"显示朋友圈": "show-moment", "点赞": "like", "取消赞": "unlike", "评论": "comment", "show-moment": "show-moment", "like": "like", "unlike": "unlike", "comment": "comment"}
 WECHAT_SELF_ID = "SELF"
 OUTCOME_ALIASES = {"接听": "accepted", "拒接": "rejected", "未接": "missed", "accepted": "accepted", "rejected": "rejected", "missed": "missed"}
 RETRY_OUTCOME_OPTIONS = {"接听": "accepted", "拒接": "rejected", "未接": "missed"}
-DIAL_EVENT_STATE_ALIASES = {"任意": "any", "已触发": "triggered", "未触发": "not-triggered", "any": "any", "triggered": "triggered", "not-triggered": "not-triggered", "": "any"}
+DIAL_EVENT_STATE_ALIASES = {
+    "任意": "any",
+    "已触发": "completed",
+    "未触发": "not-triggered",
+    "进行中": "in-progress",
+    "已完成": "completed",
+    "any": "any",
+    "triggered": "completed",
+    "not-triggered": "not-triggered",
+    "in-progress": "in-progress",
+    "completed": "completed",
+    "": "any",
+}
+CALL_RULE_CONDITION_TYPE_ALIASES = {
+    "剧情事件状态": "event-state",
+    "剧情事件结果": "event-outcome",
+    "event-state": "event-state",
+    "event-outcome": "event-outcome",
+}
+CALL_RULE_OUTCOME_ALIASES = {
+    "接听": "accepted",
+    "拒接": "rejected",
+    "未接": "missed",
+    "完成": "completed",
+    "accepted": "accepted",
+    "rejected": "rejected",
+    "missed": "missed",
+    "completed": "completed",
+}
 DIRECTION_ALIASES = {"呼入": "incoming", "呼出": "outgoing", "incoming": "incoming", "outgoing": "outgoing"}
 DIALOGUE_DIRECTION_ALIASES = {"来电": "incoming", "主动拨打": "outgoing", "通用": "any", "incoming": "incoming", "outgoing": "outgoing", "any": "any"}
 CALL_OUTCOME_ALIASES = {
@@ -537,6 +585,7 @@ content["notes"] = [{
     "excerpt": as_text(row.get("excerpt", "")),
     "updatedAt": as_display_time(row.get("updatedAt", "")),
     "body": as_text(row.get("body", "")),
+    "pinned": as_bool(row.get("pinned", False)),
 } for row in rows("备忘录")]
 content["alarms"] = [{"id": as_text(row["id"]), "time": as_time_text(row["time"], "闹钟"), "label": as_text(row.get("label", "")), "enabled": as_bool(row["enabled"]), "sound": as_text(row.get("sound", ""))} for row in rows("闹钟")]
 content["playlist"] = [{"id": as_text(row["id"]), "title": as_text(row["title"]), "artist": as_text(row.get("artist", "")), "src": as_text(row.get("src", "")), "cover": as_text(row.get("cover", "")), "color": as_text(row.get("color", "")), "duration": as_number(row.get("duration", ""), 0)} for row in rows("音乐")]
@@ -712,8 +761,8 @@ for row in rows("微信消息"):
         raise ValueError(f"微信消息 {conversation_id!r}：消息序号 {sequence!r} 重复。")
     message_sequences.add(key)
     message_type = WECHAT_MESSAGE_TYPE_ALIASES.get(as_text(row.get("type", "")), as_text(row.get("type", "")))
-    if message_type not in {"text", "image", "sticker"}:
-        raise ValueError("微信消息：消息类型必须选择“文字”“图片”或“表情图片”。")
+    if message_type not in {"text", "image", "sticker", "voice-call", "video-call"}:
+        raise ValueError("微信消息：消息类型必须选择“文字”“图片”“表情图片”“语音通话”或“视频通话”。")
     sender_id = as_text(row.get("senderId", ""))
     if sender_id != WECHAT_SELF_ID and sender_id not in wechat_contact_ids:
         raise ValueError(f"微信消息：发送人 ID {sender_id!r} 不在“微信联系人”中，也不是 SELF。")
@@ -728,7 +777,28 @@ for row in rows("微信消息"):
         raise ValueError(f"微信消息 {conversation_id!r}：文字消息内容不能为空。")
     if message_type in {"image", "sticker"} and not media_src:
         raise ValueError(f"微信消息 {conversation_id!r}：图片或表情消息必须填写素材路径。")
-    wechat["messages"].append({
+    connected_raw = row.get("connected", "")
+    duration_raw = row.get("duration", "")
+    is_call_record = message_type in {"voice-call", "video-call"}
+    if is_call_record and as_text(connected_raw) == "":
+        raise ValueError(f"微信消息 {conversation_id!r}：通话记录必须填写“是否接通”。")
+    if is_call_record and (text or media_src):
+        raise ValueError(f"微信消息 {conversation_id!r}：通话记录不需要填写消息内容或素材路径。")
+    connected = as_bool(connected_raw) if is_call_record else False
+    duration = None
+    if is_call_record and connected:
+        if as_text(duration_raw) == "":
+            raise ValueError(f"微信消息 {conversation_id!r}：已接通的通话记录必须填写通话时长。")
+        duration = as_number(duration_raw)
+        if duration < 0:
+            raise ValueError(f"微信消息 {conversation_id!r}：通话时长不能小于 0 秒。")
+        if not float(duration).is_integer():
+            raise ValueError(f"微信消息 {conversation_id!r}：通话时长必须填写整数秒。")
+    if is_call_record and not connected and as_text(duration_raw) != "":
+        raise ValueError(f"微信消息 {conversation_id!r}：未接通的通话记录请留空通话时长。")
+    if not is_call_record and (as_text(connected_raw) != "" or as_text(duration_raw) != ""):
+        raise ValueError(f"微信消息 {conversation_id!r}：只有语音或视频通话记录可以填写接通状态和通话时长。")
+    message = {
         "id": as_text(row.get("id", "")),
         "conversationId": conversation_id,
         "order": sequence,
@@ -738,7 +808,12 @@ for row in rows("微信消息"):
         "mediaSrc": media_src,
         "time": as_display_time(row.get("time", "")),
         "read": as_bool(row.get("read", True)),
-    })
+    }
+    if is_call_record:
+        message["connected"] = connected
+        if connected:
+            message["duration"] = int(duration)
+    wechat["messages"].append(message)
 unique_ids(wechat["messages"], "id", "微信消息")
 
 for row in rows("朋友圈"):
@@ -1033,18 +1108,64 @@ for dialogue in story["phoneDialogues"]:
 story["outgoingCallRules"] = []
 if "主动通话规则" in workbook.sheetnames:
     for row in rows("主动通话规则"):
-        story["outgoingCallRules"].append({
-            "contactId": as_text(row["contactId"]),
-            "order": as_number(row["order"]),
-            "eventId": as_text(row.get("eventId", "")),
-            "eventState": DIAL_EVENT_STATE_ALIASES.get(as_text(row.get("eventState", "")), as_text(row.get("eventState", ""))),
+        contact_id = as_text(row["contactId"])
+        order = as_number(row["order"])
+        rule_id = as_text(row.get("ruleId", "")) or f"{contact_id}-rule-{order}"
+        rule = {
+            "id": rule_id,
+            "contactId": contact_id,
+            "order": order,
             "minDialCount": as_number(row.get("minDialCount", ""), 0),
             "maxDialCount": as_number(row.get("maxDialCount", ""), 0),
             "answer": as_bool(row["answer"]),
             "dialogueId": as_text(row.get("dialogueId", "")),
             "ringMs": seconds_to_ms(row.get("ringMs", ""), 6.5),
             "connectAfterMs": seconds_to_ms(row.get("connectAfterMs", ""), 1.2),
+            "conditions": [],
+        }
+        legacy_event_id = as_text(row.get("eventId", ""))
+        legacy_event_state = DIAL_EVENT_STATE_ALIASES.get(as_text(row.get("eventState", "")), as_text(row.get("eventState", "")))
+        if legacy_event_id and legacy_event_state != "any":
+            rule["conditions"].append({
+                "order": 0,
+                "type": "event-state",
+                "targetId": legacy_event_id,
+                "value": legacy_event_state,
+            })
+        story["outgoingCallRules"].append(rule)
+outgoing_rule_ids = unique_ids(story["outgoingCallRules"], "id", "主动通话规则")
+outgoing_rule_map = {item["id"]: item for item in story["outgoingCallRules"]}
+
+condition_sequences = set()
+if "主动通话条件" in workbook.sheetnames:
+    for row in rows("主动通话条件"):
+        rule_id = as_text(row["ruleId"])
+        if rule_id not in outgoing_rule_ids:
+            raise ValueError(f"主动通话条件：规则 ID {rule_id!r} 在“主动通话规则”中不存在。")
+        sequence = as_number(row["sequence"])
+        sequence_key = (rule_id, sequence)
+        if sequence_key in condition_sequences:
+            raise ValueError(f"主动通话条件 {rule_id!r}：条件序号 {sequence!r} 重复。")
+        condition_sequences.add(sequence_key)
+        condition_type = CALL_RULE_CONDITION_TYPE_ALIASES.get(as_text(row["conditionType"]), as_text(row["conditionType"]))
+        raw_value = as_text(row["conditionValue"])
+        if condition_type == "event-state":
+            condition_value = DIAL_EVENT_STATE_ALIASES.get(raw_value, raw_value)
+        elif condition_type == "event-outcome":
+            condition_value = CALL_RULE_OUTCOME_ALIASES.get(raw_value, raw_value)
+        else:
+            condition_value = raw_value
+        outgoing_rule_map[rule_id]["conditions"].append({
+            "order": sequence,
+            "type": condition_type,
+            "targetId": as_text(row["targetId"]),
+            "value": condition_value,
         })
+
+for rule in story["outgoingCallRules"]:
+    rule["conditions"].sort(key=lambda item: item["order"])
+    for condition in rule["conditions"]:
+        condition.pop("order", None)
 story["outgoingCallRules"].sort(key=lambda item: (item["contactId"], item["order"]))
 
 branch_rows = rows("剧情分支") if "剧情分支" in workbook.sheetnames else []
@@ -1098,15 +1219,22 @@ for row in rows("剧情事件"):
 
 event_ids = unique_ids(story["events"], "id", "剧情事件")
 for rule in story["outgoingCallRules"]:
+    rule_id = rule.get("id")
     contact_id = rule.get("contactId")
     if contact_id not in contact_ids:
         raise ValueError(f"主动通话规则：联系人 ID {contact_id!r} 不存在。")
-    event_state = rule.get("eventState", "any")
-    if event_state not in {"any", "triggered", "not-triggered"}:
-        raise ValueError(f"主动通话规则 {contact_id!r}：剧情事件状态必须是“任意”“已触发”或“未触发”。")
-    event_id = rule.get("eventId")
-    if event_id and event_id not in event_ids:
-        raise ValueError(f"主动通话规则 {contact_id!r}：条件剧情事件 ID {event_id!r} 不存在。")
+    for condition in rule.get("conditions", []):
+        condition_type = condition.get("type")
+        condition_value = condition.get("value")
+        target_id = condition.get("targetId")
+        if condition_type not in {"event-state", "event-outcome"}:
+            raise ValueError(f"主动通话条件 {rule_id!r}：条件类型必须是“剧情事件状态”或“剧情事件结果”。")
+        if target_id not in event_ids:
+            raise ValueError(f"主动通话条件 {rule_id!r}：条件对象 ID {target_id!r} 在“剧情事件”中不存在。")
+        if condition_type == "event-state" and condition_value not in {"not-triggered", "in-progress", "completed"}:
+            raise ValueError(f"主动通话条件 {rule_id!r}：剧情事件状态必须是“未触发”“进行中”或“已完成”。")
+        if condition_type == "event-outcome" and condition_value not in {"accepted", "rejected", "missed", "completed"}:
+            raise ValueError(f"主动通话条件 {rule_id!r}：剧情事件结果必须是“接听”“拒接”“未接”或“完成”。")
     dialogue_id = rule.get("dialogueId")
     if rule.get("answer") and not dialogue_id:
         raise ValueError(f"主动通话规则 {contact_id!r}：对方接听时必须填写电话对白 ID。")
