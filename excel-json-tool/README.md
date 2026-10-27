@@ -4,6 +4,12 @@
 
 整个项目的安装、GitHub Desktop 备份和 Cloudflare Pages 发布步骤见[仓库总说明](../README.md)。Vue 前端功能和运行时结构见[前端说明](../phone-simulator/README.md)。
 
+新对话开始处理 Excel 或字段任务时，先确认三件事：
+
+1. `outputs/phone-config-template.xlsx` 是唯一正式内容工作簿，`content.json` 和 `story.json` 是它的生成结果。
+2. Excel 与 JSON 不一致不一定是错误；作者可能正在编辑工作簿但尚未准备发布。运行转换器前先确认用户意图。
+3. 新增或改名字段不是只改 Excel：还要同步 `convert.py`、运行时 JSON 结构、Vue 读取代码、表内说明与相关 README。
+
 ## 目录内容
 
 ```text
@@ -22,6 +28,8 @@ excel-json-tool/
 ```
 
 转换器使用脚本自身所在目录推导路径，所以整个 `PhoneSimulator` 文件夹移动或重命名后仍能工作；但 `excel-json-tool/` 和 `phone-simulator/` 必须继续保持同级。
+
+不要在 `outputs/` 中长期维护第二份手工复制的正式工作簿。临时测试文件应输出到明确的临时目录，并避免覆盖作者正在编辑的文件。
 
 ## 第一次使用
 
@@ -69,6 +77,7 @@ npm run build
 - ID 用来跨表关联，必须保持唯一、稳定，并避免空格和临时中文描述。
 - 数据行的显示顺序或序号决定同类内容的排列与执行顺序。
 - 表格顶部的说明优先于通用说明，特别是素材路径和占位素材的优先级。
+- 非“填写说明”工作表的表头必须同时保留中文字段名和同格第二行的 JSON 字段名；修改 schema 时不要只改其中一行。
 
 例如，短信记录和短信剧情中的“联系人 ID”必须能在“联系人”表找到；剧情事件引用的短信剧情 ID、电话对白 ID、后续事件 ID 也必须存在。转换器会检查常见的重复 ID 和缺失关联。
 
@@ -194,6 +203,18 @@ python convert.py --input .\outputs\another-config.xlsx --out-dir .\json-output
 ```
 
 指定路径时仍建议先备份目标 JSON。正式项目内容建议始终回写默认位置，避免网页仍在读取旧文件。
+
+## 修改工作簿结构时
+
+新增工作表、字段或枚举选项时，至少检查以下位置：
+
+1. 工作簿顶部填写说明、中文/英文字段名、示例、列宽、冻结、边框和数据验证。
+2. `convert.py` 的表头别名、必需列、枚举映射、解析与跨表关联验证。
+3. `content.json` 或 `story.json` 的目标结构，以及前端实际读取该结构的组件或 store。
+4. 本 README、前端 README 和根 `AGENTS.md` 中涉及该行为的说明。
+5. 在允许更新 JSON 时运行 `python convert.py`，再到前端目录运行 `npm run build`。
+
+旧工作簿需要兼容时，优先在转换器中提供明确迁移或别名映射；不能兼容时，应让转换错误说明旧字段如何改写，而不是静默忽略数据。
 
 ## GitHub 备份注意事项
 

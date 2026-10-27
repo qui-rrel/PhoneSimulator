@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#e9eee8" />
+    <title>剧情示意地图生成器</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./map-core.js" defer></script>
+    <script src="./generator.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="m3 7 8-3 10 3 8-3v21l-8 3-10-3-8 3Z" />
+            <path d="M11 4v21M21 7v21" />
+            <circle cx="16" cy="15" r="3.3" />
+          </svg>
+        </span>
+        <div>
+          <p>OFFLINE MAP MAKER</p>
+          <h1>剧情示意地图生成器</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="button secondary" id="choose-folder" type="button">
+          <span aria-hidden="true">⌂</span> 选择输出文件夹
+        </button>
+        <label class="button secondary file-button" for="load-svg">
+          <span aria-hidden="true">↥</span> 载入 SVG
+        </label>
+        <input id="load-svg" type="file" accept="image/svg+xml,.svg" hidden />
+        <button class="button primary" id="save-svg" type="button">
+          <span aria-hidden="true">↓</span> 保存 SVG
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="control-panel" aria-label="地图参数">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">MAP BRIEF</p>
+            <h2>地点信息</h2>
+          </div>
+          <span class="offline-badge">离线运行</span>
+        </div>
+
+        <form id="map-form" autocomplete="off">
+          <div class="field full">
+            <label for="place-name">地点名称</label>
+            <input id="place-name" name="placeName" value="星河剧场" maxlength="40" required />
+          </div>
+
+          <div class="field-pair">
+            <div class="field">
+              <label for="city">城市</label>
+              <input id="city" name="city" value="临川市" maxlength="20" />
+            </div>
+            <div class="field">
+              <label for="district">区域</label>
+              <input id="district" name="district" value="南城区" maxlength="20" />
+            </div>
+          </div>
+
+          <div class="field-pair">
+            <div class="field">
+              <label for="main-road">主要道路</label>
+              <input id="main-road" name="mainRoad" value="青梧路" maxlength="24" required />
+            </div>
+            <div class="field narrow-field">
+              <label for="street-number">门牌号</label>
+              <input id="street-number" name="streetNumber" value="88号" maxlength="16" />
+            </div>
+          </div>
+
+          <div class="field full">
+            <label for="address">完整地址</label>
+            <input id="address" name="address" value="临川市南城区青梧路88号" maxlength="80" />
+            <small>完整地址写入 SVG metadata，默认不画在地图上。</small>
+          </div>
+
+          <div class="section-divider"><span>地图风格</span></div>
+
+          <div class="field-pair">
+            <div class="field">
+              <label for="preset">场景类型</label>
+              <select id="preset" name="preset">
+                <option value="downtown">市中心</option>
+                <option value="residential">住宅区</option>
+                <option value="commercial" selected>商业区</option>
+                <option value="park">公园周边</option>
+                <option value="campus">校园园区</option>
+                <option value="suburban">郊区</option>
+                <option value="riverside">滨河区域</option>
+                <option value="industrial">工业园区</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="palette">配色</label>
+              <select id="palette" name="palette">
+                <option value="classic" selected>清淡地图</option>
+                <option value="warm">暖灰地图</option>
+                <option value="fresh">清新地图</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="range-field">
+            <div class="range-heading">
+              <label for="density">街区密度</label>
+              <output id="density-value" for="density">68</output>
+            </div>
+            <input id="density" name="density" type="range" min="0" max="100" value="68" />
+            <div class="range-labels"><span>疏朗</span><span>密集</span></div>
+          </div>
+
+          <div class="range-field">
+            <div class="range-heading">
+              <label for="regularity">道路规整度</label>
+              <output id="regularity-value" for="regularity">72</output>
+            </div>
+            <input id="regularity" name="regularity" type="range" min="0" max="100" value="72" />
+            <div class="range-labels"><span>自然</span><span>规整</span></div>
+          </div>
+
+          <div class="toggle-grid">
+            <label class="toggle-card">
+              <input id="river" name="river" type="checkbox" />
+              <span class="switch" aria-hidden="true"></span>
+              <span><strong>河流与滨水带</strong><small>滨河预设会自动启用</small></span>
+            </label>
+            <label class="toggle-card">
+              <input id="subway" name="subway" type="checkbox" checked />
+              <span class="switch" aria-hidden="true"></span>
+              <span><strong>地铁站</strong><small>显示线路号与站名</small></span>
+            </label>
+          </div>
+
+          <div class="subway-fields" id="subway-fields">
+            <div class="field-pair">
+              <div class="field narrow-field">
+                <label for="subway-line">线路号</label>
+                <input id="subway-line" name="subwayLine" value="6" maxlength="4" />
+              </div>
+              <div class="field">
+                <label for="station-name">站点名称</label>
+                <input id="station-name" name="stationName" value="青梧路站" maxlength="24" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider"><span>随机种子与输出</span></div>
+
+          <div class="seed-row">
+            <div class="field">
+              <label for="seed">地图种子</label>
+              <input id="seed" name="seed" value="20261028" maxlength="40" />
+            </div>
+            <button class="icon-button" id="random-seed" type="button" aria-label="换一个随机种子" title="换一个随机种子">↻</button>
+          </div>
+
+          <div class="field full">
+            <label for="filename">输出文件名</label>
+            <input id="filename" value="map-星河剧场-20261028.svg" maxlength="100" />
+          </div>
+
+          <div class="generate-actions">
+            <button class="button secondary wide" id="generate-one" type="button">生成当前地图</button>
+            <button class="button dark wide" id="generate-nine" type="button">生成 9 个候选</button>
+          </div>
+        </form>
+      </aside>
+
+      <section class="preview-area" aria-label="地图预览">
+        <div class="preview-toolbar">
+          <div>
+            <p class="eyebrow">LIVE PREVIEW</p>
+            <h2 id="preview-title">星河剧场</h2>
+          </div>
+          <div class="preview-meta">
+            <span id="active-seed">种子 20261028</span>
+            <span>1000 × 1400 SVG</span>
+          </div>
+        </div>
+
+        <div class="preview-stage">
+          <div class="phone-frame" aria-label="生成地图预览">
+            <div class="phone-speaker" aria-hidden="true"></div>
+            <img id="map-preview" alt="星河剧场示意地图预览" />
+            <div class="preview-pin" aria-hidden="true">
+              <span></span>
+              <strong id="pin-label">星河剧场</strong>
+            </div>
+          </div>
+          <div class="preview-note">
+            <span class="note-dot"></span>
+            <p>蓝色定位点仅用于预览，不会写入导出的 SVG。地点名称和主要道路会保留。</p>
+          </div>
+        </div>
+
+        <section class="candidate-section" id="candidate-section" hidden>
+          <div class="candidate-heading">
+            <div>
+              <p class="eyebrow">VARIATIONS</p>
+              <h3>选择一个候选</h3>
+            </div>
+            <p>每张候选都有独立种子，选中后可继续调整并保存。</p>
+          </div>
+          <div class="candidate-grid" id="candidate-grid"></div>
+        </section>
+
+        <div class="status-bar" id="status" role="status" aria-live="polite">
+          <span class="status-indicator"></span>
+          <span id="status-text">准备就绪。地图生成过程完全离线。</span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

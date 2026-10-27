@@ -9,6 +9,7 @@
 3. 先阅读根目录 `README.md`，再按任务阅读：
    - 前端任务：`phone-simulator/README.md`。
    - Excel、字段或转换任务：`excel-json-tool/README.md` 与 `excel-json-tool/convert.py`。
+   - 地图生成工具任务：`map-generator/README.md`。
 4. 检查相关文件的当前内容后再编辑。项目可能处于“用户正在改 Excel、尚未重新生成 JSON”的中间状态，Excel 与 JSON 不一致不一定是错误。
 5. 用户已授权在本仓库范围内完成明确提出的修改，不需要仅因文件位于 `PhoneSimulator` 内反复询问是否可以改；但仍应保护用户未要求覆盖的内容和素材。
 
@@ -26,6 +27,16 @@ PhoneSimulator 是一个移动端优先的静态叙事网页，模拟一部可�
 - 不复制参考作品中的人物照片、音乐或文案。可以使用通用手机 App 图标、通用 UI 模式和用户自己提供的素材。
 - 不是每个装饰按钮都必须可用，但已经声明可交互的功能必须保持一致、可理解。
 
+### 当前实现基线
+
+- 已注册 App：信息、电话、微信、音乐、浏览器、照片、备忘录、邮件、日历、天气、时钟、计算器和设置。
+- 微信通讯录暂不可进入；发现页只有朋友圈可进入；“我”页仅展示。不要因为界面存在按钮就擅自补充未要求的交互。
+- 短信和微信玩家回复均使用预设文案与屏幕键盘模拟；按键不会自由录入配置外文字，发送按钮才完成对应剧情节点。
+- 电话接通后只能按对白配置自动结束，玩家不能主动挂断；来电接通前仍可拒接或等待超时。
+- 主动通话规则使用稳定规则 ID，并可通过独立条件表组合事件状态、事件结果和拨打次数。一个规则内所有条件均为 AND；OR 通过多条规则表达。
+- 朋友圈支持初始化内容、最多九图、查看大图、自由点赞/取消赞、剧情式发布、文字与单图评论/回复、联系人互动及内部消息列表。
+- 计算器是无独立内容表的自由交互 App；浏览记录、设置和部分装饰入口保持展示状态。
+
 ## 3. 仓库结构
 
 ```text
@@ -38,6 +49,12 @@ PhoneSimulator/
 │  ├─ requirements.txt
 │  ├─ README.md
 │  └─ outputs/phone-config-template.xlsx
+├─ map-generator/
+│  ├─ index.html
+│  ├─ map-core.js
+│  ├─ generator.js
+│  ├─ styles.css
+│  └─ outputs/
 └─ phone-simulator/
    ├─ package.json
    ├─ vite.config.js
@@ -58,6 +75,7 @@ PhoneSimulator/
 
 - `excel-json-tool/outputs/phone-config-template.xlsx`：创作者编辑的主要内容源和完整示例。
 - `excel-json-tool/convert.py`：读取固定中文工作表结构、验证关联并生成 JSON。
+- `map-generator/`：可独立发给剧情策划的离线 SVG 地图制作工具；不参与前端运行或编译。
 - `phone-simulator/src/data/content.json`：网页加载时已经存在的手机内容。
 - `phone-simulator/src/data/story.json`：剧情脚本、电话对白、主动通话规则和事件图。
 - `phone-simulator/public/media/`：由 `/media/...` URL 直接访问的图片和音频。
@@ -149,7 +167,7 @@ Excel 工作簿
 - `momentCommentScripts`：玩家评论或回复朋友圈的预设文字、键盘序列和单张图片。
 - `momentInteractionScripts`：联系人显示朋友圈、点赞、取消赞、评论、回复和内部消息。
 - `phoneDialogues`：一段完整电话对白一个 ID，包含联系人、方向、逐句内容和 `hangupAfterMs`。
-- `outgoingCallRules`：主动拨号匹配规则。
+- `outgoingCallRules`：主动拨号匹配规则。每条规则有稳定 ID、拨打次数范围和 `conditions`；条件可引用事件状态或最终结果。
 - `events`：可激活的剧情节点组成的事件图。
 
 ### 事件生命周期
@@ -211,6 +229,7 @@ Excel 工作簿
 - 对白自身定义 `contactId` 和 `direction`；事件或主动通话规则只引用 `dialogueId`。
 - 没有匹配主动通话规则时默认无人接听。
 - 规则按 `order` 从小到大匹配，可限制拨打次数，并通过 `conditions` 组合任意数量的剧情事件状态或结果条件；同一规则下的条件全部使用 AND 匹配。
+- 事件状态分为 `not-triggered`、`in-progress`、`completed`；事件结果可匹配 `accepted`、`rejected`、`missed`、`completed`。没有条件的规则不限制剧情状态。
 - 来电和主动通话在最后一句展示后等待 `hangupAfterMs` 再自动挂断。
 - 通话接通后不允许玩家主动挂断；通话页保留挂断按钮外观，但按钮不执行任何操作。来电接通前的拒接仍然有效。
 
@@ -283,6 +302,18 @@ npm run build
 - 仓库布局、安装、GitHub、Cloudflare：根 `README.md`。
 - Vue 功能、运行命令、JSON 和扩展方式：`phone-simulator/README.md`。
 - Excel 表结构、填写格式和转换器：`excel-json-tool/README.md`。
+- 地图生成参数、导出和恢复方式：`map-generator/README.md`。
 - 长期架构、开发约束和新聊天接手信息：本 `AGENTS.md`。
 
 文档示例一律使用相对路径或通用占位路径，不写当前电脑的实际位置。项目移动后，除了 GitHub Desktop 重新关联本地仓库，不应要求修改任何源代码路径。
+
+## 11. 新对话接手检查表
+
+新开发对话开始处理任务前，按以下顺序快速确认：
+
+1. 读取本文件、根 README 和任务对应的子目录 README。
+2. 检查 `git status --short` 和相关文件 diff，区分已有用户修改与本次任务范围。
+3. 确认本次修改的权威来源：作品内容通常从 Excel 开始，运行时行为从 Vue/Pinia 开始，生成 JSON 不作为长期手工配置源。
+4. 若任务修改 schema，列出需要同步的 Excel、转换器、JSON、前端读取和文档，避免只改一层。
+5. 若用户正在编辑 Excel 或明确要求暂不转换，不运行转换器；否则在 schema 或正式内容修改完成后重新生成 JSON。
+6. 最后按风险做结构验证和 `npm run build`，保留无关改动，并在交付说明中列出修改范围和验证结果。

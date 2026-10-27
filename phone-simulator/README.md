@@ -1,6 +1,6 @@
 # PhoneSimulator Web
 
-这是 PhoneSimulator 的 Vue 前端。它在浏览器中呈现一部可操作的手机，并由 JSON 驱动初始内容、短信剧情、电话对白和事件分支。页面面向手机尺寸设计，也可以在桌面浏览器中以手机外壳形式预览。
+这是 PhoneSimulator 的 Vue 前端。它在浏览器中呈现一部可操作的手机，并由 JSON 驱动初始内容、短信/微信剧情、电话对白、朋友圈互动和事件分支。页面面向手机尺寸设计，也可以在桌面浏览器中以手机外壳形式预览。
 
 完整项目还包含 Excel 配置工具。第一次使用、GitHub Desktop 备份和 Cloudflare Pages 发布步骤见[仓库总说明](../README.md)。
 
@@ -12,6 +12,17 @@
 - Lucide Vue Next：通用界面图标。
 
 没有后端、数据库或 AI API。当前内容都在本地 JSON 与 `public/media/` 中，生产构建可直接发布为静态网站。
+
+运行时数据流：
+
+```text
+src/data/content.json + src/data/story.json
+  -> src/config/*.config.js
+  -> Pinia stores
+  -> src/apps/ 与 src/components/
+```
+
+作品内容通常不直接编辑 JSON，而是修改 Excel 后通过转换器生成。涉及架构和协作约束时先阅读根目录 [AGENTS.md](../AGENTS.md)。
 
 ## 安装和运行
 
@@ -53,6 +64,15 @@ npm run build
 - 闹钟开关和到点响铃；未配置铃声时使用浏览器合成音。
 - 浏览器历史和设置页目前只展示，不修改真实设备设置。
 
+## 当前交互边界
+
+- 微信底部“通讯录”不可进入；“发现”仅朋友圈可进入；“我”页面只展示账号资料。
+- 微信初始语音/视频通话记录只是聊天历史气泡，不会从微信聊天中发起真实通话。
+- 朋友圈可自由点赞和取消赞，但发布、评论、回复的可发送内容由当前剧情脚本决定；没有匹配脚本时仍能打开界面或键盘，但不能发送。
+- 短信和微信键盘只模拟预设输入过程；玩家可以按键获得反馈，但不能自由改变配置文案。
+- 电话接通后的挂断按钮保留真实界面外观但不响应，只能等待对白自动结束；来电接通前仍可拒接。
+- 浏览记录、设置和未声明可用的装饰按钮只负责展示，不应自动扩展成真实浏览器或系统设置。
+
 ## 推荐的内容编辑流程
 
 不要直接在 Vue 模板中写作品内容。推荐通过仓库中的 Excel 配置：
@@ -66,6 +86,8 @@ npm run build
 Excel 是便于创作者编辑的内容源，JSON 是网页实际读取的运行时数据。表格说明和字段格式见 [Excel 工具 README](../excel-json-tool/README.md)。
 
 如果只是在排查程序，也可以阅读 JSON，但不要在不知情的情况下同时修改 Excel 和 JSON：下次转换会以 Excel 内容覆盖生成的 JSON。
+
+如果用户明确说正在编辑 Excel、只想暂存表格，或要求暂不更新 JSON，不要运行转换器。Excel 与 JSON 在这种中间状态下暂时不一致是允许的。
 
 ## 初始内容 `content.json`
 
@@ -202,6 +224,25 @@ phone-simulator/
 ```
 
 新增 App 时应新建独立的 `src/apps/*App.vue`，在 `src/components/AppWindow.vue` 注册组件，并在 `src/config/phone.config.js` 注册图标。可触发剧情的页面操作应调用 `phone.openContent(...)` 或 `phone.triggerOperation(...)`，不要为单个 App 再写一套剧情系统。
+
+### 运行时状态归属
+
+- `src/stores/phone.js`：锁屏、导航、短信、通知、电话、闹钟和通用剧情事件。
+- `src/stores/wechat.js`：微信会话、群聊、朋友圈、微信输入与朋友圈剧情状态。
+- `src/stores/music.js`：退出音乐 App 后仍需继续保留的播放状态。
+- 页面内部、退出后无需保留的选择状态放在对应 Vue 组件中，不复制第二套联系人或剧情状态。
+
+### 常见修改入口
+
+| 任务 | 主要文件 |
+| --- | --- |
+| 新增或调整 App 页面 | `src/apps/`、`src/components/AppWindow.vue`、`src/config/phone.config.js` |
+| 调整手机壳、状态栏、锁屏或桌面 | `src/components/`、`src/styles.css` |
+| 修改电话、短信、通知或事件推进 | `src/stores/phone.js` |
+| 修改微信、群聊或朋友圈交互 | `src/apps/WeChatApp.vue`、`src/apps/WeChatMoments.vue`、`src/stores/wechat.js` |
+| 修改音乐跨页面播放 | `src/stores/music.js`、`src/apps/MusicApp.vue` |
+| 修改作品内容或新增配置字段 | `../excel-json-tool/outputs/phone-config-template.xlsx`、`../excel-json-tool/convert.py`、`src/data/*.json` |
+| 修改全局视觉或通用动画 | `src/styles.css` |
 
 更完整的代码约定和新聊天接手说明见仓库根目录的 [AGENTS.md](../AGENTS.md)。
 

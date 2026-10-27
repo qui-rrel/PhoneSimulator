@@ -1,6 +1,6 @@
 # PhoneSimulator
 
-PhoneSimulator 是一个以 Vue 3 和 Vite 构建的移动端叙事网页。它把锁屏、桌面、短信、电话、音乐、相册、邮件等界面组合成一部可操作的虚拟手机，并通过 Excel 与 JSON 配置初始内容和剧情流程。
+PhoneSimulator 是一个以 Vue 3 和 Vite 构建的移动端叙事网页。它把锁屏、桌面、短信、电话、微信、朋友圈、音乐、相册、邮件、日历、天气、时钟和计算器等界面组合成一部可操作的虚拟手机，并通过 Excel 与 JSON 配置初始内容和剧情流程。
 
 项目不依赖 AI 接口。消息、通话和剧情分支均来自预先配置的内容，适合制作“捡手机文学”、互动同人 Demo 或其他手机界面叙事作品。
 
@@ -11,15 +11,48 @@ PhoneSimulator/
 ├─ AGENTS.md             给后续开发者和代码助手的项目说明
 ├─ README.md             整个仓库的使用、备份与发布说明
 ├─ excel-json-tool/      Excel 配置表与转换脚本
+├─ map-generator/        独立离线 SVG 剧情地图制作工具
 └─ phone-simulator/      Vue 前端、运行时 JSON 与网页素材
 ```
 
 - 日常编写内容：修改 `excel-json-tool/outputs/phone-config-template.xlsx`。
 - 生成网页配置：运行 `excel-json-tool/convert.py`。
+- 制作剧情地图：用 Chrome 或 Edge 双击 `map-generator/index.html`。
 - 开发和编译网页：进入 `phone-simulator/` 执行 npm 命令。
-- 更详细的字段说明见 [Excel 工具说明](excel-json-tool/README.md)，前端结构见 [Vue 项目说明](phone-simulator/README.md)。
+- 更详细的字段说明见 [Excel 工具说明](excel-json-tool/README.md)，地图制作见 [地图生成器说明](map-generator/README.md)，前端结构见 [Vue 项目说明](phone-simulator/README.md)。
+
+## 新对话或新开发者快速接手
+
+建议按以下顺序建立上下文：
+
+1. 阅读根目录 [AGENTS.md](AGENTS.md)，了解架构、配置数据流、剧情运行模型和修改约束。
+2. 运行 `git status --short`，确认仓库是否存在尚未提交的用户修改；不要用重置或整目录覆盖清理未知变更。
+3. 前端任务继续阅读 [phone-simulator/README.md](phone-simulator/README.md)；Excel、字段或转换任务继续阅读 [excel-json-tool/README.md](excel-json-tool/README.md) 和 `excel-json-tool/convert.py`；地图制作工具任务阅读 [map-generator/README.md](map-generator/README.md)。
+4. 修改前检查相关文件的当前内容。Excel 与 JSON 暂时不一致可能只是作者正在编辑表格、还没有运行转换器。
+5. 完成代码或配置修改后，按任务运行转换与编译；默认不需要启动长期开发服务器或自行做视觉验收。
+
+五份说明文档的职责如下：
+
+| 文档 | 主要用途 |
+| --- | --- |
+| `README.md` | 安装、常用命令、GitHub 备份、Cloudflare Pages 发布 |
+| `AGENTS.md` | 新开发聊天的架构背景、行为约束、修改与验证规则 |
+| `phone-simulator/README.md` | Vue 功能、JSON 结构、剧情运行和代码入口 |
+| `excel-json-tool/README.md` | 工作表、字段格式、跨表关联和转换器使用 |
+| `map-generator/README.md` | 离线 SVG 地图生成、种子复现、保存和参数恢复 |
+
+## 当前实现概览
+
+- 内容源：唯一正式工作簿是 `excel-json-tool/outputs/phone-config-template.xlsx`；转换后生成前端读取的 `content.json` 和 `story.json`。
+- 叙事能力：短信、微信、来电、主动通话、朋友圈发布/评论/互动均可由事件图组合，支持计时、玩家操作、结果分支与重试。
+- 电话规则：主动通话可按拨打次数及任意数量的剧情事件状态/结果条件匹配；同一规则内的条件全部为 AND。
+- 微信：使用独立联系人 ID，支持单聊、群聊、图文/表情消息、通话历史气泡、朋友圈多图、点赞、评论、回复和内部消息。
+- 真实感交互：动态日期/时间、天气、未读角标、闹钟、持续播放音乐、置顶备忘录、可自由使用的计算器和桌面鼠标拖动滚动。
+- 当前边界：微信通讯录不可进入；发现页只有朋友圈可进入；“我”页、浏览记录和设置等部分页面以展示为主。
 
 ## 本地使用
+
+`map-generator/` 不需要安装依赖或启动服务器。使用 Chrome 或 Edge 双击 `map-generator/index.html`，选择 `map-generator/outputs/` 作为输出文件夹，即可生成和保存 SVG。该工具不会参与 `phone-simulator/` 的运行或编译。
 
 需要安装：
 
