@@ -8,6 +8,7 @@ import ClockApp from '../apps/ClockApp.vue'
 import GalleryApp from '../apps/GalleryApp.vue'
 import MusicApp from '../apps/MusicApp.vue'
 import MailApp from '../apps/MailApp.vue'
+import MapsApp from '../apps/MapsApp.vue'
 import NotesApp from '../apps/NotesApp.vue'
 import PhoneApp from '../apps/PhoneApp.vue'
 import SettingsApp from '../apps/SettingsApp.vue'
@@ -16,7 +17,7 @@ import WeChatApp from '../apps/WeChatApp.vue'
 import { usePhoneStore } from '../stores/phone'
 
 const phone = usePhoneStore()
-const registry = { BrowserApp, CalculatorApp, CalendarApp, MessagesApp, ClockApp, GalleryApp, MailApp, MusicApp, NotesApp, PhoneApp, SettingsApp, WeatherApp, WeChatApp }
+const registry = { BrowserApp, CalculatorApp, CalendarApp, MessagesApp, ClockApp, GalleryApp, MailApp, MapsApp, MusicApp, NotesApp, PhoneApp, SettingsApp, WeatherApp, WeChatApp }
 const activeComponent = computed(() => registry[phone.activeApp?.component])
 const immersive = computed(() => (
   phone.activeApp?.id === 'wechat' &&

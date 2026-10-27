@@ -2671,6 +2671,62 @@ button {
 .keyboard-rise-enter-active, .keyboard-rise-leave-active { transition: transform .24s ease, opacity .2s ease; }
 .keyboard-rise-enter-from, .keyboard-rise-leave-to { opacity: 0; transform: translateY(100%); }
 
+/* Maps */
+.maps-app {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  color: #17181d;
+  background: #e8ebe5;
+}
+.maps-canvas { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; background: #e9ece6; }
+.maps-canvas:active,.maps-canvas--dragging { cursor: grabbing; }
+.maps-image { position: absolute; top: 50%; left: 50%; width: 620px; max-width: none; display: block; user-select: none; pointer-events: none; filter: saturate(.94) contrast(.98); will-change: transform; }
+.maps-image-error { position: absolute; inset: 0 0 330px; display: grid; place-content: center; justify-items: center; gap: 8px; color: #8d9299; background: linear-gradient(145deg,#edf0eb,#dfe5de); font-size: 12px; }
+.maps-focus { position: absolute; z-index: 3; top: 39%; left: 50%; display: flex; flex-direction: column; align-items: center; transform: translate(-50%,-50%); pointer-events: none; }
+.maps-focus i { position: relative; width: 17px; height: 17px; border: 4px solid #fff; border-radius: 50%; background: #0a84ff; box-shadow: 0 2px 7px rgba(0,78,174,.45); }
+.maps-focus i::before { position: absolute; width: 31px; height: 31px; margin: -11px; border: 4px solid rgba(10,132,255,.22); border-radius: 50%; content: ''; }
+.maps-focus strong { max-width: 190px; overflow: hidden; margin-top: 7px; padding: 5px 9px; border-radius: 7px; color: #15599a; background: rgba(255,255,255,.95); box-shadow: 0 3px 10px rgba(32,53,76,.18); font-size: 12px; line-height: 1; white-space: nowrap; text-overflow: ellipsis; }
+.maps-float-controls { position: absolute; z-index: 4; top: 78px; right: 14px; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; color: #0a84ff; background: rgba(255,255,255,.94); box-shadow: 0 4px 14px rgba(29,43,55,.16); pointer-events: none; }
+.maps-float-controls span { width: 45px; height: 45px; display: grid; place-items: center; }
+.maps-float-controls span + span { border-top: 1px solid #d9dadd; }
+.maps-sheet { position: absolute; z-index: 8; right: 0; bottom: 0; left: 0; border-radius: 20px 20px 0 0; background: #f4f4f7; box-shadow: 0 -7px 22px rgba(37,44,54,.12); }
+.maps-sheet-handle { width: 47px; height: 5px; margin: 8px auto 10px; border-radius: 4px; background: #b9bbc1; }
+.maps-library { height: 397px; overflow-y: auto; padding: 0 16px 43px; scrollbar-width: none; }
+.maps-search { height: 43px; display: flex; align-items: center; gap: 8px; padding: 0 13px; border-radius: 11px; color: #92949b; background: #e4e4e9; font-size: 16px; }
+.maps-section-heading { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 10px; }
+.maps-section-heading h2 { margin: 0; color: #888a91; font-size: 14px; font-weight: 700; }
+.maps-section-heading--recent { margin-top: 20px; }
+.maps-favorites { display: flex; gap: 13px; overflow-x: auto; padding: 0 2px 3px; scrollbar-width: none; }
+.maps-favorites button,.maps-add-place { width: 68px; flex: 0 0 68px; display: flex; flex-direction: column; align-items: center; color: #25262a; }
+.maps-place-icon { width: 38px; height: 38px; display: grid; place-items: center; flex: none; border: 2px solid #fff; border-radius: 50%; color: #fff; box-shadow: 0 1px 5px rgba(24,28,34,.14); }
+.maps-place-icon--large { width: 56px; height: 56px; border-width: 0; box-shadow: none; }
+.maps-favorites strong,.maps-add-place strong { max-width: 76px; overflow: hidden; margin-top: 7px; font-size: 11px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+.maps-favorites small,.maps-add-place small { max-width: 76px; overflow: hidden; margin-top: 2px; color: #a1a2a8; font-size: 9px; white-space: nowrap; text-overflow: ellipsis; }
+.maps-add-place span { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; color: #0a84ff; background: #e1e2e8; }
+.maps-recent { overflow: hidden; border-radius: 12px; background: #fff; }
+.maps-recent button { width: 100%; min-height: 57px; display: flex; align-items: center; gap: 10px; padding: 8px 11px; text-align: left; }
+.maps-recent button + button .maps-recent-copy { border-top: 1px solid #e1e1e4; }
+.maps-recent-copy { min-width: 0; min-height: 49px; display: flex; flex: 1; flex-direction: column; justify-content: center; }
+.maps-recent-copy strong { overflow: hidden; font-size: 14px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.maps-recent-copy small { overflow: hidden; margin-top: 2px; color: #92949b; font-size: 10px; white-space: nowrap; text-overflow: ellipsis; }
+.maps-recent button > svg { flex: none; color: #b3b5bb; }
+.maps-empty { margin: 24px 0 12px; color: #a2a4aa; text-align: center; font-size: 11px; }
+.maps-detail { min-height: 349px; padding: 0 16px 47px; }
+.maps-detail-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 7px 1px 13px; }
+.maps-detail-header h2 { max-width: 260px; overflow: hidden; margin: 0; font-size: 27px; letter-spacing: -.04em; white-space: nowrap; text-overflow: ellipsis; }
+.maps-detail-header p { margin: 3px 0 0; color: #96989f; font-size: 14px; }
+.maps-detail-header button { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: #777980; background: #e2e3e8; }
+.maps-detail-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.maps-detail-action { min-width: 0; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border-radius: 11px; color: #0a84ff; background: #fff; font-size: 10px; font-weight: 600; }
+.maps-detail-action--current { color: #fff; background: #0a84ff; }
+.maps-detail-action.is-favorite { color: #0a84ff; }
+.maps-detail-card { overflow: hidden; margin-top: 12px; border-radius: 12px; background: #fff; }
+.maps-detail-card div { min-height: 65px; display: flex; flex-direction: column; justify-content: center; padding: 9px 14px; }
+.maps-detail-card div + div { border-top: 1px solid #dedfe3; }
+.maps-detail-card span { color: #96989f; font-size: 10px; }
+.maps-detail-card strong { margin-top: 3px; font-size: 15px; font-weight: 500; }
+
 /* Calls and alarms */
 .call-overlay, .alarm-overlay { position: absolute; z-index: 210; inset: 0; color: #fff; background: linear-gradient(180deg,#26313f,#10151c 58%,#050607); }
 .call-overlay { display: flex; flex-direction: column; align-items: center; padding: 105px 20px 35px; }

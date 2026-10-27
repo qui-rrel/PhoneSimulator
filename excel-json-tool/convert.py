@@ -92,6 +92,14 @@ HEADER_ALIASES = {
     "日期": "date",
     "事件名称": "title",
     "颜色": "color",
+    "地点 ID": "id",
+    "地点名称": "name",
+    "地点类型": "type",
+    "地址": "address",
+    "SVG 路径": "mapSrc",
+    "是否初始收藏": "favorite",
+    "是否初始最近": "recent",
+    "保存日期（初始收藏填写）": "savedDate",
     "短信剧情 ID": "smsScriptId",
     "消息序号": "sequence",
     "键盘按键序列": "keystrokes",
@@ -199,6 +207,7 @@ EXPECTED_HEADERS = {
     "锁屏通知": {"id", "appId", "body"},
     "邮件": {"id", "from", "subject"},
     "日历": {"id", "date", "title"},
+    "地图地点": {"id", "name", "type", "address", "mapSrc"},
     "短信剧情": {"smsScriptId", "contactId", "sequence", "side", "text"},
     "电话剧情": {"dialogueId", "direction", "contactId", "hangupAfterMs"},
     "电话剧情内容": {"dialogueId", "sequence", "side", "text"},
@@ -228,6 +237,37 @@ SHEET_ALIASES = {
 
 NUMBER_FIELDS = {"device.width", "device.height", "device.radius", "security.digits", "weather.seed"}
 BOOLEAN_FIELDS = {"home.showGreetingWidget"}
+
+MAP_TYPE_ALIASES = {
+    "住宅": "home",
+    "工作地点": "work",
+    "餐饮": "dining",
+    "咖啡": "cafe",
+    "商店": "shop",
+    "酒店": "hotel",
+    "交通": "transport",
+    "医院": "hospital",
+    "学校": "school",
+    "公园": "park",
+    "景点": "landmark",
+    "舞蹈室": "dance-studio",
+    "录音室": "recording-studio",
+    "其他": "other",
+    "home": "home",
+    "work": "work",
+    "dining": "dining",
+    "cafe": "cafe",
+    "shop": "shop",
+    "hotel": "hotel",
+    "transport": "transport",
+    "hospital": "hospital",
+    "school": "school",
+    "park": "park",
+    "landmark": "landmark",
+    "dance-studio": "dance-studio",
+    "recording-studio": "recording-studio",
+    "other": "other",
+}
 
 SIDE_ALIASES = {"我": "me", "对方": "them", "me": "me", "them": "them"}
 TRIGGER_ALIASES = {"计时触发": "timer", "操作触发": "operation", "timer": "timer", "operation": "operation"}
@@ -602,6 +642,41 @@ content["callHistory"] = [{
 content["mail"] = [{"id": as_text(row["id"]), "from": as_text(row["from"]), "subject": as_text(row["subject"]), "preview": as_text(row.get("preview", "")), "time": as_display_time(row.get("time", "")), "unread": as_bool(row.get("unread", False)), "body": as_text(row.get("body", ""))} for row in rows("邮件")]
 content["calendarEvents"] = [{"id": as_text(row["id"]), "date": as_date_text(row["date"], "日历"), "title": as_text(row["title"]), "time": as_display_time(row.get("time", "")), "color": as_text(row.get("color", ""))} for row in rows("日历")]
 
+if "地图地点" in workbook.sheetnames:
+    content["mapLocations"] = []
+    for row in sorted(rows("地图地点"), key=lambda item: as_number(item.get("order", 0))):
+        location_id = as_text(row["id"])
+        location_name = as_text(row["name"])
+        address = as_text(row["address"])
+        if not location_id or not location_name or not address:
+            raise ValueError("地图地点：地点 ID、地点名称和地址均为必填项。")
+        map_type_source = as_text(row["type"])
+        map_type = MAP_TYPE_ALIASES.get(map_type_source)
+        if not map_type:
+            raise ValueError(f"地图地点 {location_id!r}：地点类型 {map_type_source!r} 无效。")
+        map_src = as_text(row["mapSrc"])
+        if not re.match(r"^/media/.+\.svg(?:[?#].*)?$", map_src, re.IGNORECASE):
+            raise ValueError(f"地图地点 {location_id!r}：SVG 路径必须填写 /media/...svg 本地路径。")
+        favorite = as_bool(row.get("favorite", False))
+        saved_date = "" if row.get("savedDate", "") in (None, "") else as_date_text(row["savedDate"], f"地图地点 {location_id!r} 的保存日期")
+        if favorite and not saved_date:
+            raise ValueError(f"地图地点 {location_id!r}：初始收藏为“是”时必须填写保存日期。")
+        if not favorite and saved_date:
+            raise ValueError(f"地图地点 {location_id!r}：未初始收藏时请留空保存日期。")
+        content["mapLocations"].append({
+            "id": location_id,
+            "order": as_number(row.get("order", 0)),
+            "name": location_name,
+            "type": map_type,
+            "address": address,
+            "mapSrc": map_src,
+            "favorite": favorite,
+            "recent": as_bool(row.get("recent", False)),
+            "savedDate": saved_date,
+        })
+else:
+    content["mapLocations"] = []
+
 for collection_name, label in [
     ("gallery", "相册"),
     ("notes", "备忘录"),
@@ -612,6 +687,7 @@ for collection_name, label in [
     ("callHistory", "通话记录"),
     ("mail", "邮件"),
     ("calendarEvents", "日历"),
+    ("mapLocations", "地图地点"),
 ]:
     unique_ids(content[collection_name], "id", label)
 

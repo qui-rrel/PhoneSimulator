@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { contentConfig, phoneConfig } from '../config/phone.config'
 import { storyConfig } from '../config/story.config'
+import { useMapsStore } from './maps'
 import { useWechatStore } from './wechat'
 import { playMessageReceiveSound, playPasscodeDeleteSound, playPasscodeDigitSound } from '../utils/sounds'
 
@@ -654,6 +655,7 @@ export const usePhoneStore = defineStore('phone', () => {
     outgoingDialCounts.value = {}
     startedAt.value = Date.now()
     notification.value = null
+    useMapsStore().reset()
     useWechatStore().reset()
     startTimeline()
   }
