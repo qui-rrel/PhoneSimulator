@@ -8,6 +8,7 @@ import {
 import WechatAvatar from '../components/WechatAvatar.vue'
 import WeChatMoments from './WeChatMoments.vue'
 import { usePhoneStore } from '../stores/phone'
+import { useMapsStore } from '../stores/maps'
 import { useWechatStore } from '../stores/wechat'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
 import { createTypingPlan } from '../utils/typing'
@@ -15,6 +16,7 @@ import { createTypingPlan } from '../utils/typing'
 defineProps({ app: { type: Object, required: true } })
 
 const phone = usePhoneStore()
+const maps = useMapsStore()
 const wechat = useWechatStore()
 const tab = ref('chats')
 const messagePane = ref(null)
@@ -109,6 +111,17 @@ function openMoments() {
 
 function openMomentImage(moment, index) {
   phone.openContent('wechat', `moment-viewer:${moment.id}:${index}`)
+}
+
+function openMapLocation(message) {
+  const locationId = String(message?.mapLocationId || '').trim()
+  if (!locationId || !maps.addRecentAndSelect(locationId)) return
+  phone.openAppContent('maps', locationId)
+}
+
+function mapLocationLabel(message) {
+  const location = maps.locationById(message?.mapLocationId)
+  return location ? `打开${location.name}的地图定位` : '打开地图定位'
 }
 
 function replaceViewerIndex(index) {
@@ -280,6 +293,20 @@ watch(() => messages.value.length, scrollToBottom)
                 <Phone v-if="row.message.type === 'voice-call'" :size="17" aria-hidden="true" />
                 <Video v-else :size="17" aria-hidden="true" />
               </p>
+              <button
+                v-else-if="row.message.type === 'location'"
+                class="wechat-location-card"
+                type="button"
+                :aria-label="mapLocationLabel(row.message)"
+                @click.stop="openMapLocation(row.message)"
+              >
+                <img
+                  class="wechat-message-media"
+                  :src="row.message.mediaSrc"
+                  :alt="mapLocationLabel(row.message)"
+                  draggable="false"
+                />
+              </button>
               <img v-else class="wechat-message-media" :src="row.message.mediaSrc" :alt="row.message.type === 'image' ? '图片消息' : '表情消息'" />
             </div>
             <WechatAvatar v-if="row.message.senderId === 'SELF'" :person="{ ...wechat.profile, nickname: wechat.profile.nickname }" :size="38" />

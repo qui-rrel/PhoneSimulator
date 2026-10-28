@@ -166,6 +166,7 @@ HEADER_ALIASES = {
     "消息类型": "type",
     "发送人 ID": "senderId",
     "图片或表情路径（可空）": "mediaSrc",
+    "地图地点 ID（定位填写）": "mapLocationId",
     "是否接通（可空）": "connected",
     "通话时长（秒，可空）": "duration",
     "朋友圈 ID": "momentId",
@@ -328,11 +329,13 @@ WECHAT_MESSAGE_TYPE_ALIASES = {
     "文字": "text",
     "图片": "image",
     "表情图片": "sticker",
+    "定位": "location",
     "语音通话": "voice-call",
     "视频通话": "video-call",
     "text": "text",
     "image": "image",
     "sticker": "sticker",
+    "location": "location",
     "voice-call": "voice-call",
     "video-call": "video-call",
 }
@@ -709,6 +712,7 @@ for collection_name, label in [
     ("mapLocations", "地图地点"),
 ]:
     unique_ids(content[collection_name], "id", label)
+map_location_ids = unique_ids(content["mapLocations"], "id", "地图地点")
 
 messages_by_contact = {}
 for row in rows("短信记录"):
@@ -856,8 +860,8 @@ for row in rows("微信消息"):
         raise ValueError(f"微信消息 {conversation_id!r}：消息序号 {sequence!r} 重复。")
     message_sequences.add(key)
     message_type = WECHAT_MESSAGE_TYPE_ALIASES.get(as_text(row.get("type", "")), as_text(row.get("type", "")))
-    if message_type not in {"text", "image", "sticker", "voice-call", "video-call"}:
-        raise ValueError("微信消息：消息类型必须选择“文字”“图片”“表情图片”“语音通话”或“视频通话”。")
+    if message_type not in {"text", "image", "sticker", "location", "voice-call", "video-call"}:
+        raise ValueError("微信消息：消息类型必须选择“文字”“图片”“表情图片”“定位”“语音通话”或“视频通话”。")
     sender_id = as_text(row.get("senderId", ""))
     if sender_id != WECHAT_SELF_ID and sender_id not in wechat_contact_ids:
         raise ValueError(f"微信消息：发送人 ID {sender_id!r} 不在“微信联系人”中，也不是 SELF。")
@@ -868,10 +872,17 @@ for row in rows("微信消息"):
         raise ValueError(f"微信消息 {conversation_id!r}：发送人 {sender_id!r} 不是该群成员。")
     text = as_text(row.get("text", ""))
     media_src = as_text(row.get("mediaSrc", ""))
+    map_location_id = as_text(row.get("mapLocationId", ""))
     if message_type == "text" and not text:
         raise ValueError(f"微信消息 {conversation_id!r}：文字消息内容不能为空。")
-    if message_type in {"image", "sticker"} and not media_src:
-        raise ValueError(f"微信消息 {conversation_id!r}：图片或表情消息必须填写素材路径。")
+    if message_type in {"image", "sticker", "location"} and not media_src:
+        raise ValueError(f"微信消息 {conversation_id!r}：图片、表情或定位消息必须填写素材路径。")
+    if message_type == "location" and not map_location_id:
+        raise ValueError(f"微信消息 {conversation_id!r}：定位消息必须填写地图地点 ID。")
+    if message_type == "location" and map_location_id not in map_location_ids:
+        raise ValueError(f"微信消息 {conversation_id!r}：地图地点 ID {map_location_id!r} 在“地图地点”中不存在。")
+    if message_type != "location" and map_location_id:
+        raise ValueError(f"微信消息 {conversation_id!r}：只有定位消息可以填写地图地点 ID。")
     connected_raw = row.get("connected", "")
     duration_raw = row.get("duration", "")
     is_call_record = message_type in {"voice-call", "video-call"}
@@ -908,6 +919,8 @@ for row in rows("微信消息"):
         message["connected"] = connected
         if connected:
             message["duration"] = int(duration)
+    if message_type == "location":
+        message["mapLocationId"] = map_location_id
     wechat["messages"].append(message)
 unique_ids(wechat["messages"], "id", "微信消息")
 
@@ -1134,15 +1147,26 @@ for row in rows("微信剧情"):
     if conversation["type"] == "group" and sender_id not in wechat_group_map[conversation["targetId"]]["memberIds"]:
         raise ValueError(f"微信剧情 {script_id!r}：发送人 {sender_id!r} 不是群成员。")
     message_type = WECHAT_MESSAGE_TYPE_ALIASES.get(as_text(row.get("type", "")), as_text(row.get("type", "")))
-    if message_type not in {"text", "image", "sticker"}:
+    if message_type not in {"text", "image", "sticker", "location"}:
         raise ValueError(f"微信剧情 {script_id!r}：消息类型无效。")
     text = as_text(row.get("text", ""))
     media_src = as_text(row.get("mediaSrc", ""))
+    map_location_id = as_text(row.get("mapLocationId", ""))
     if message_type == "text" and not text:
         raise ValueError(f"微信剧情 {script_id!r}：文字消息不能为空。")
-    if message_type in {"image", "sticker"} and not media_src:
-        raise ValueError(f"微信剧情 {script_id!r}：图片或表情消息必须填写素材路径。")
+    if message_type in {"image", "sticker", "location"} and not media_src:
+        raise ValueError(f"微信剧情 {script_id!r}：图片、表情或定位消息必须填写素材路径。")
+    if message_type == "location" and sender_id == WECHAT_SELF_ID:
+        raise ValueError(f"微信剧情 {script_id!r}：定位消息只支持由对方发送。")
+    if message_type == "location" and not map_location_id:
+        raise ValueError(f"微信剧情 {script_id!r}：定位消息必须填写地图地点 ID。")
+    if message_type == "location" and map_location_id not in map_location_ids:
+        raise ValueError(f"微信剧情 {script_id!r}：地图地点 ID {map_location_id!r} 在“地图地点”中不存在。")
+    if message_type != "location" and map_location_id:
+        raise ValueError(f"微信剧情 {script_id!r}：只有定位消息可以填写地图地点 ID。")
     message = {"order": sequence, "senderId": sender_id, "type": message_type, "text": text, "mediaSrc": media_src}
+    if message_type == "location":
+        message["mapLocationId"] = map_location_id
     if sender_id == WECHAT_SELF_ID:
         message["keystrokes"] = as_text(row.get("keystrokes", ""))
     else:

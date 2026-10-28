@@ -207,6 +207,19 @@ export const usePhoneStore = defineStore('phone', () => {
     pushNavigationHistory()
     triggerOperation('content-open', { appId, targetId })
   }
+  function openAppContent(appId, targetId) {
+    if (locked.value) return false
+    const app = phoneConfig.apps.find((item) => item.id === appId)
+    if (!app || app.enabled === false) return false
+    if (appId === 'mail') markMailRead(targetId)
+    activeAppId.value = appId
+    activeContactId.value = null
+    activeContent.value = { appId, targetId }
+    pushNavigationHistory()
+    triggerOperation('app-open', { appId, targetId: appId })
+    triggerOperation('content-open', { appId, targetId })
+    return true
+  }
   function replaceContent(appId, targetId) {
     activeContent.value = { appId, targetId }
     replaceNavigationHistory()
@@ -664,7 +677,7 @@ export const usePhoneStore = defineStore('phone', () => {
     locked, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact, activeContent,
     notification, contacts, unreadTotal, mail, unreadMailTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
     callElapsed, callStatus, alarmRinging, canNavigateBack, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
-    closeContact, openContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
+    closeContact, openContent, openAppContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
     toggleAlarm, stopAlarm, triggerOperation, startOutgoingCall, acceptCall, rejectCall,
     activeStoryEvents, completedEvents, eventOutcomes, activeSmsScripts, getActiveSmsScript, advanceSmsScript, completeSmsScript,
     resolveStoryOutcome, resetStory, startTimeline, startRuntime,

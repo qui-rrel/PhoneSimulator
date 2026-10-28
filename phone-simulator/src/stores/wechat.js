@@ -83,6 +83,7 @@ export const useWechatStore = defineStore('wechat', () => {
     if (!message) return ''
     if (message.type === 'image') return '[图片]'
     if (message.type === 'sticker') return '[表情]'
+    if (message.type === 'location') return '[位置]'
     if (message.type === 'voice-call' || message.type === 'video-call') {
       return message.connected ? `通话时长 ${formatCallDuration(message.duration)}` : '已取消'
     }
