@@ -129,6 +129,13 @@
       "enabled": true,
       "component": "MapsApp",
       "iconSrc": "/media/UI/AppIcon/gps-app-icon.png"
+    },
+    {
+      "id": "xiaohongshu",
+      "label": "小红书",
+      "enabled": true,
+      "component": "XiaohongshuApp",
+      "iconSrc": "/media/UI/AppIcon/redbook-app-icon.png"
     }
   ],
   "lockNotifications": [
@@ -716,5 +723,65 @@
       "recent": false,
       "savedDate": ""
     }
-  ]
+  ],
+  "xiaohongshu": {
+    "homeImageSrc": "/media/xiaohongshu-home-feed.jpg",
+    "searchHistory": [
+      {
+        "id": "xhs-search-1",
+        "text": "瑶台月下",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-2",
+        "text": "OPPO手机推荐性价比",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-3",
+        "text": "vivo手机推荐性价比",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-4",
+        "text": "iQOO系列手机推荐",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-5",
+        "text": "双十一安卓机推荐",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-6",
+        "text": "weplay2026",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-7",
+        "text": "苹果手机UI素材库",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-8",
+        "text": "苹果手机UI素材",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-9",
+        "text": "汉堡节推荐哪家",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-10",
+        "text": "剑之大陆相框",
+        "url": ""
+      },
+      {
+        "id": "xhs-search-11",
+        "text": "泸州左岸银河音乐",
+        "url": ""
+      }
+    ]
+  }
 }

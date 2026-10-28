@@ -14,10 +14,11 @@ import PhoneApp from '../apps/PhoneApp.vue'
 import SettingsApp from '../apps/SettingsApp.vue'
 import WeatherApp from '../apps/WeatherApp.vue'
 import WeChatApp from '../apps/WeChatApp.vue'
+import XiaohongshuApp from '../apps/XiaohongshuApp.vue'
 import { usePhoneStore } from '../stores/phone'
 
 const phone = usePhoneStore()
-const registry = { BrowserApp, CalculatorApp, CalendarApp, MessagesApp, ClockApp, GalleryApp, MailApp, MapsApp, MusicApp, NotesApp, PhoneApp, SettingsApp, WeatherApp, WeChatApp }
+const registry = { BrowserApp, CalculatorApp, CalendarApp, MessagesApp, ClockApp, GalleryApp, MailApp, MapsApp, MusicApp, NotesApp, PhoneApp, SettingsApp, WeatherApp, WeChatApp, XiaohongshuApp }
 const activeComponent = computed(() => registry[phone.activeApp?.component])
 const immersive = computed(() => (
   phone.activeApp?.id === 'wechat' &&

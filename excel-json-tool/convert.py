@@ -79,6 +79,9 @@ HEADER_ALIASES = {
     "时长（秒）": "duration",
     "网页标题": "title",
     "网址": "url",
+    "搜索记录 ID": "id",
+    "搜索内容": "text",
+    "跳转链接（可空）": "url",
     "通知 ID": "id",
     "关联应用 ID": "appId",
     "通知标题": "title",
@@ -204,6 +207,7 @@ EXPECTED_HEADERS = {
     "通话记录": {"id", "contactId"},
     "音乐": {"id", "title"},
     "浏览记录": {"id", "title", "url"},
+    "小红书搜索记录": {"id", "text", "url"},
     "锁屏通知": {"id", "appId", "body"},
     "邮件": {"id", "from", "subject"},
     "日历": {"id", "date", "title"},
@@ -630,6 +634,21 @@ content["notes"] = [{
 content["alarms"] = [{"id": as_text(row["id"]), "time": as_time_text(row["time"], "闹钟"), "label": as_text(row.get("label", "")), "enabled": as_bool(row["enabled"]), "sound": as_text(row.get("sound", ""))} for row in rows("闹钟")]
 content["playlist"] = [{"id": as_text(row["id"]), "title": as_text(row["title"]), "artist": as_text(row.get("artist", "")), "src": as_text(row.get("src", "")), "cover": as_text(row.get("cover", "")), "color": as_text(row.get("color", "")), "duration": as_number(row.get("duration", ""), 0)} for row in rows("音乐")]
 content["browserHistory"] = [{"id": as_text(row.get("id", "")), "title": as_text(row.get("title", "")), "url": as_text(row.get("url", "")), "time": as_display_time(row.get("time", ""))} for row in rows("浏览记录")]
+if "小红书搜索记录" in workbook.sheetnames:
+    search_history = []
+    for row in sorted(rows("小红书搜索记录"), key=lambda item: as_number(item.get("order", 0))):
+        item_id = as_text(row.get("id", ""))
+        text = as_text(row.get("text", ""))
+        url = as_text(row.get("url", ""))
+        if not item_id or not text:
+            raise ValueError("小红书搜索记录：搜索记录 ID 和搜索内容均为必填项。")
+        if url and not re.match(r"^https?://\S+$", url, re.IGNORECASE):
+            raise ValueError(f"小红书搜索记录 {item_id!r}：跳转链接必须留空或填写 http://、https:// 开头的外链。")
+        search_history.append({"id": item_id, "text": text, "url": url})
+    content.setdefault("xiaohongshu", {})["searchHistory"] = search_history
+else:
+    content.setdefault("xiaohongshu", {}).setdefault("searchHistory", [])
+unique_ids(content["xiaohongshu"]["searchHistory"], "id", "小红书搜索记录")
 content["lockNotifications"] = [{"id": as_text(row.get("id", "")), "appId": as_text(row.get("appId", "")), "contactId": as_text(row.get("contactId", "")), "title": as_text(row.get("title", "")), "time": as_display_time(row.get("time", "")), "body": as_text(row.get("body", ""))} for row in rows("锁屏通知")]
 content["callHistory"] = [{
     "id": as_text(row["id"]),
