@@ -1193,11 +1193,19 @@ button {
   display: grid;
   place-items: center;
   flex: none;
+  overflow: hidden;
   border-radius: 17px;
   color: #fff;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.2);
   font-size: 18px;
   font-weight: 600;
+}
+
+.avatar > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .conversation-copy {
@@ -1265,6 +1273,11 @@ button {
   background: rgba(250, 250, 252, 0.96);
 }
 
+.chat-header {
+  height: 110px;
+  padding-top: 55px;
+}
+
 .chat-header > button {
   width: 35px;
   height: 35px;
@@ -1292,7 +1305,7 @@ button {
 }
 
 .message-pane {
-  height: calc(100% - 160px);
+  height: calc(100% - 174px);
   padding: 13px 11px 22px;
   overflow-y: auto;
   background:
@@ -2294,7 +2307,7 @@ button {
 .clock-tabs > div.active { color: #ff9f0a; }
 
 /* On-screen keyboard */
-.messages-app--keyboard .message-pane { height: calc(100% - 414px); }
+.messages-app--keyboard .message-pane { height: calc(100% - 428px); }
 .messages-app--keyboard .chat-composer { bottom: 254px; }
 
 /* WeChat */
@@ -2413,7 +2426,8 @@ button {
 .wechat-conversation__copy em { overflow: hidden; color: #9a9a9a; font-size: 12px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
 
 .wechat-unread,
-.wechat-tabs button > b {
+.wechat-tabs button > b,
+.wechat-activity-badge {
   min-width: 18px;
   height: 18px;
   display: grid;
@@ -2472,9 +2486,13 @@ button {
 }
 
 .wechat-list-row:disabled { color: inherit; opacity: 1; }
+.wechat-list-row--with-badge { grid-template-columns: 30px 1fr auto; }
 .wechat-list-row > svg:first-child { width: 22px; height: 22px; }
 .wechat-list-row > svg:last-child { width: 18px; color: #b8b8b8; }
 .wechat-list-row span { font-size: 16px; }
+.wechat-list-row__tail { display: flex; align-items: center; gap: 8px; }
+.wechat-list-row__tail > svg { width: 18px; color: #b8b8b8; }
+.wechat-list-row__tail > .wechat-activity-badge { min-width: 20px; height: 20px; border-radius: 11px; font-size: 11px; }
 .wechat-list-gap { height: 10px; background: #ededed; }
 
 .wechat-profile-card {
@@ -2557,6 +2575,7 @@ button {
 .wechat-call-record { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
 .wechat-call-record svg { flex: none; stroke-width: 1.8; }
 .wechat-message-media { max-width: 150px; max-height: 185px; display: block; border-radius: 5px; object-fit: contain; }
+.wechat-message-image { display: block; overflow: hidden; padding: 0; border-radius: 5px; background: transparent; }
 .wechat-location-card { max-width: 190px; overflow: hidden; padding: 0; border-radius: 5px; background: transparent; }
 .wechat-location-card .wechat-message-media { max-width: 100%; max-height: 215px; }
 .wechat-composer {

@@ -23,7 +23,8 @@ const activeComponent = computed(() => registry[phone.activeApp?.component])
 const immersive = computed(() => (
   phone.activeApp?.id === 'wechat' &&
   (phone.activeContent?.targetId?.startsWith('moment-viewer:')
-    || phone.activeContent?.targetId?.startsWith('comment-viewer:'))
+    || phone.activeContent?.targetId?.startsWith('comment-viewer:')
+    || phone.activeContent?.targetId?.startsWith('chat-image-viewer:'))
 ))
 </script>
 

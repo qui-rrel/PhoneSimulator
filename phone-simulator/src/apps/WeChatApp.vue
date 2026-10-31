@@ -32,20 +32,23 @@ const typedSteps = ref(0)
 const keyboardLayoutTimer = ref(null)
 const viewerSwipeStart = ref(null)
 const viewerSwipeOffset = ref(0)
+const chatViewerScrollTop = ref(0)
 
 const contentTarget = computed(() => phone.activeContent?.appId === 'wechat' ? phone.activeContent.targetId : '')
+const chatViewerTarget = computed(() => {
+  if (!contentTarget.value.startsWith('chat-image-viewer:')) return null
+  const [, conversationId, messageId] = contentTarget.value.split(':')
+  return conversationId && messageId ? { conversationId, messageId } : null
+})
 const showingMoments = computed(() => contentTarget.value === 'moments')
 const showingMomentContent = computed(() => contentTarget.value === 'moments'
   || contentTarget.value === 'moments-compose'
   || contentTarget.value === 'moments-activity'
   || contentTarget.value.startsWith('moment-viewer:')
   || contentTarget.value.startsWith('comment-viewer:'))
-const viewerTarget = computed(() => {
-  if (!contentTarget.value.startsWith('moment-viewer:')) return null
-  const [, momentId, rawIndex] = contentTarget.value.split(':')
-  return { momentId, index: Math.max(0, Number.parseInt(rawIndex, 10) || 0) }
-})
-const conversation = computed(() => showingMomentContent.value ? null : wechat.findConversation(contentTarget.value))
+const conversation = computed(() => showingMomentContent.value
+  ? null
+  : wechat.findConversation(chatViewerTarget.value?.conversationId || contentTarget.value))
 const group = computed(() => conversation.value?.type === 'group' ? wechat.findGroup(conversation.value.targetId) : null)
 const directContact = computed(() => conversation.value?.type === 'direct' ? wechat.findContact(conversation.value.targetId) : null)
 const messages = computed(() => conversation.value ? wechat.conversationMessages(conversation.value.id) : [])
@@ -78,10 +81,13 @@ const momentImages = (moment) => {
   const configured = Array.isArray(moment?.imageSrc) ? moment.imageSrc : moment?.imageSrc ? [moment.imageSrc] : []
   return configured.filter(Boolean).slice(0, 9)
 }
-const viewerMoment = computed(() => wechat.moments.find((moment) => moment.id === viewerTarget.value?.momentId))
-const viewerImages = computed(() => momentImages(viewerMoment.value))
-const viewerIndex = computed(() => Math.min(viewerTarget.value?.index || 0, Math.max(0, viewerImages.value.length - 1)))
-const viewerImage = computed(() => viewerImages.value[viewerIndex.value] || '')
+const chatViewerMessages = computed(() => chatViewerTarget.value
+  ? wechat.conversationMessages(chatViewerTarget.value.conversationId)
+    .filter((message) => message.type === 'image' && message.mediaSrc)
+  : [])
+const chatViewerIndex = computed(() => chatViewerMessages.value
+  .findIndex((message) => message.id === chatViewerTarget.value?.messageId))
+const chatViewerImage = computed(() => chatViewerMessages.value[chatViewerIndex.value]?.mediaSrc || '')
 
 const contactName = (contact) => contact?.remark || contact?.nickname || contact?.name || '微信联系人'
 const sender = (message) => wechat.findContact(message.senderId)
@@ -118,10 +124,17 @@ function openMomentImage(moment, index) {
   phone.openContent('wechat', `moment-viewer:${moment.id}:${index}`)
 }
 
+function openChatImage(message) {
+  if (!conversation.value || message?.type !== 'image' || !message.mediaSrc) return
+  chatViewerScrollTop.value = messagePane.value?.scrollTop || 0
+  phone.openContent('wechat', `chat-image-viewer:${conversation.value.id}:${message.id}`)
+}
+
 function openMapLocation(message) {
   const locationId = String(message?.mapLocationId || '').trim()
   if (!locationId || !maps.addRecentAndSelect(locationId)) return
-  phone.openAppContent('maps', locationId)
+  phone.openApp('maps')
+  if (phone.activeAppId === 'maps') phone.openContent('maps', locationId)
 }
 
 function mapLocationLabel(message) {
@@ -129,9 +142,10 @@ function mapLocationLabel(message) {
   return location ? `打开${location.name}的地图定位` : '打开地图定位'
 }
 
-function replaceViewerIndex(index) {
-  if (!viewerMoment.value || index < 0 || index >= viewerImages.value.length) return false
-  phone.replaceContent('wechat', `moment-viewer:${viewerMoment.value.id}:${index}`)
+function replaceChatViewerIndex(index) {
+  const message = chatViewerMessages.value[index]
+  if (!chatViewerTarget.value || !message) return false
+  phone.replaceContent('wechat', `chat-image-viewer:${chatViewerTarget.value.conversationId}:${message.id}`)
   return true
 }
 
@@ -149,7 +163,7 @@ function moveViewerSwipe(event) {
   viewerSwipeOffset.value = Math.abs(offsetX) > Math.abs(offsetY) ? offsetX : 0
 }
 
-function endViewerSwipe() {
+function endChatViewerSwipe() {
   if (!viewerSwipeStart.value) return
   const wasTap = !viewerSwipeStart.value.moved
   const offset = viewerSwipeOffset.value
@@ -159,9 +173,10 @@ function endViewerSwipe() {
     phone.navigateBack()
     return
   }
-  if (Math.abs(offset) < 46) return
-  if (offset < 0) replaceViewerIndex(viewerIndex.value + 1)
-  else if (!replaceViewerIndex(viewerIndex.value - 1) && viewerIndex.value === 0) phone.navigateBack()
+  if (Math.abs(offset) < 46 || chatViewerMessages.value.length < 2 || chatViewerIndex.value < 0) return
+  const direction = offset < 0 ? 1 : -1
+  const nextIndex = chatViewerIndex.value + direction
+  replaceChatViewerIndex(nextIndex)
 }
 
 function cancelViewerSwipe() {
@@ -215,6 +230,7 @@ function prepareMediaReply(type) {
 }
 
 function closeKeyboard() {
+  if (!keyboardVisible.value) return
   typingToken.value += 1
   typingDraft.value = false
   keyboardVisible.value = false
@@ -248,25 +264,53 @@ async function sendPresetReply() {
 }
 
 watch(contentTarget, async (target, previous) => {
-  if (previous && wechat.findConversation(previous)) {
+  const previousConversation = wechat.findConversation(previous)
+  const nextConversation = wechat.findConversation(target)
+  if (previousConversation) {
     conversationDrafts.value[previous] = { text: draft.value, type: draftType.value, mediaSrc: draftMediaSrc.value, typedSteps: typedSteps.value }
   }
-  if (target && target !== 'moments') wechat.markConversationRead(target)
+  closeKeyboard()
+  activeKey.value = ''
+  if (!nextConversation) return
+  wechat.markConversationRead(target)
   const saved = conversationDrafts.value[target] || {}
   draft.value = saved.text || ''
   draftMediaSrc.value = saved.mediaSrc || ''
   draftType.value = saved.type || 'text'
   typedSteps.value = saved.typedSteps || 0
-  closeKeyboard()
-  activeKey.value = ''
-  await scrollToBottom()
+  await nextTick()
+  const returningFromViewer = previous?.startsWith('chat-image-viewer:')
+    && previous.split(':')[1] === nextConversation.id
+  if (returningFromViewer && messagePane.value) {
+    messagePane.value.scrollTop = chatViewerScrollTop.value
+  } else {
+    await scrollToBottom()
+  }
 }, { immediate: true })
 watch(() => messages.value.length, scrollToBottom)
 </script>
 
 <template>
   <div class="wechat-app" :class="{ 'wechat-app--keyboard': keyboardVisible && conversation }">
-    <WeChatMoments v-if="showingMomentContent" />
+    <main
+      v-if="chatViewerTarget"
+      class="wechat-moment-viewer"
+      aria-label="聊天图片查看器"
+      @pointerdown="beginViewerSwipe"
+      @pointermove="moveViewerSwipe"
+      @pointerup="endChatViewerSwipe"
+      @pointercancel="cancelViewerSwipe"
+    >
+      <img
+        v-if="chatViewerImage"
+        :src="chatViewerImage"
+        :style="{ transform: `translateX(${viewerSwipeOffset * 0.18}px)` }"
+        alt=""
+        draggable="false"
+      />
+    </main>
+
+    <WeChatMoments v-else-if="showingMomentContent" />
 
     <template v-else-if="conversation">
       <header class="wechat-chat-header">
@@ -312,7 +356,17 @@ watch(() => messages.value.length, scrollToBottom)
                   draggable="false"
                 />
               </button>
-              <img v-else class="wechat-message-media" :src="row.message.mediaSrc" :alt="row.message.type === 'image' ? '图片消息' : '表情消息'" />
+              <button
+                v-else-if="row.message.type === 'image'"
+                class="wechat-message-image"
+                type="button"
+                aria-label="查看大图"
+                @pointerdown.stop
+                @click.stop="openChatImage(row.message)"
+              >
+                <img class="wechat-message-media" :src="row.message.mediaSrc" alt="图片消息" draggable="false" />
+              </button>
+              <img v-else class="wechat-message-media" :src="row.message.mediaSrc" alt="表情消息" draggable="false" />
             </div>
             <WechatAvatar v-if="row.message.senderId === 'SELF'" :person="{ ...wechat.profile, nickname: wechat.profile.nickname }" :size="38" />
           </article>
@@ -410,7 +464,14 @@ watch(() => messages.value.length, scrollToBottom)
       </main>
 
       <main v-else-if="tab === 'discover'" class="wechat-list-page">
-        <button class="wechat-list-row" type="button" @click="openMoments"><ImageIcon color="#f0a23b" /><span>朋友圈</span><ChevronRight /></button>
+        <button class="wechat-list-row wechat-list-row--with-badge" type="button" @click="openMoments">
+          <ImageIcon color="#f0a23b" />
+          <span>朋友圈</span>
+          <span class="wechat-list-row__tail">
+            <b v-if="wechat.unreadMomentActivityCount" class="wechat-activity-badge">{{ wechat.unreadMomentActivityCount }}</b>
+            <ChevronRight />
+          </span>
+        </button>
         <div class="wechat-list-gap"></div>
         <button class="wechat-list-row" type="button" disabled><ScanLine color="#2c98d4" /><span>扫一扫</span><ChevronRight /></button>
         <button class="wechat-list-row" type="button" disabled><Music2 color="#ef5d6a" /><span>听一听</span><ChevronRight /></button>
@@ -439,7 +500,7 @@ watch(() => messages.value.length, scrollToBottom)
       <nav class="wechat-tabs" aria-label="微信导航">
         <button type="button" :class="{ active: tab === 'chats' }" @click="tab = 'chats'"><MessageCircle /><span>微信</span><b v-if="wechat.unreadTotal">{{ wechat.unreadTotal }}</b></button>
         <button type="button" disabled><ContactRound /><span>通讯录</span></button>
-        <button type="button" :class="{ active: tab === 'discover' }" @click="tab = 'discover'"><Compass /><span>发现</span></button>
+        <button type="button" :class="{ active: tab === 'discover' }" @click="tab = 'discover'"><Compass /><span>发现</span><b v-if="wechat.unreadMomentActivityCount" class="wechat-activity-badge">{{ wechat.unreadMomentActivityCount }}</b></button>
         <button type="button" :class="{ active: tab === 'me' }" @click="tab = 'me'"><UserRound /><span>我</span></button>
       </nav>
     </template>

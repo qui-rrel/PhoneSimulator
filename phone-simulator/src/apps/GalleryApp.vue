@@ -33,8 +33,9 @@ function endSwipe() {
   if (swipeStart.value === null) return
   if (Math.abs(swipeOffset.value) > 45) {
     const direction = swipeOffset.value < 0 ? 1 : -1
-    const nextIndex = (selectedIndex.value + direction + contentConfig.gallery.length) % contentConfig.gallery.length
-    phone.replaceContent('photos', contentConfig.gallery[nextIndex].id)
+    const nextIndex = selectedIndex.value + direction
+    const nextPhoto = contentConfig.gallery[nextIndex]
+    if (nextPhoto) phone.replaceContent('photos', nextPhoto.id)
   }
   swipeStart.value = null
   swipeOffset.value = 0

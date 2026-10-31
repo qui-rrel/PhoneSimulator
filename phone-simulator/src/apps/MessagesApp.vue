@@ -17,6 +17,7 @@ const typingToken = ref(0)
 const typedSteps = ref(0)
 const contactDrafts = ref({})
 const keyboardLayoutTimer = ref(null)
+const failedAvatarSources = ref(new Set())
 
 const contact = computed(() => phone.activeContact)
 const currentStage = computed(() => {
@@ -32,6 +33,12 @@ const currentPlayerLine = computed(() => currentPlayerEntry.value?.text || '')
 const contactTyping = computed(() => Boolean(currentStage.value?.isTyping))
 const keyboardRows = [['Q','W','E','R','T','Y','U','I','O','P'], ['A','S','D','F','G','H','J','K','L'], ['Z','X','C','V','B','N','M']]
 const conversationPreview = (item) => item.messages?.at(-1)?.text || ''
+const avatarFallback = (item) => item.initials || item.name?.slice(0, 1) || '?'
+const hasAvatar = (item) => Boolean(item.avatar && !failedAvatarSources.value.has(item.avatar))
+
+function markAvatarFailed(src) {
+  failedAvatarSources.value.add(src)
+}
 
 async function scrollToBottom(smooth = false) {
   await nextTick()
@@ -147,7 +154,10 @@ watch(() => contact.value?.id, (id, previous) => {
           type="button"
           @click="openContact(item.id)"
         >
-          <span class="avatar" :style="{ background: item.color }">{{ item.initials }}</span>
+          <span class="avatar" :style="{ background: item.color || '#8b95a5' }">
+            <img v-if="hasAvatar(item)" :src="item.avatar" alt="" @error="markAvatarFailed(item.avatar)" />
+            <span v-else>{{ avatarFallback(item) }}</span>
+          </span>
           <span class="conversation-copy">
             <span class="conversation-title">
               <strong>{{ item.name }}</strong>
@@ -166,22 +176,26 @@ watch(() => contact.value?.id, (id, previous) => {
           <ChevronLeft :size="26" />
         </button>
         <div>
-          <span class="avatar avatar--small" :style="{ background: contact.color }">{{ contact.initials }}</span>
+          <span class="avatar avatar--small" :style="{ background: contact.color || '#8b95a5' }">
+            <img v-if="hasAvatar(contact)" :src="contact.avatar" alt="" @error="markAvatarFailed(contact.avatar)" />
+            <span v-else>{{ avatarFallback(contact) }}</span>
+          </span>
           <strong>{{ contact.name }}</strong>
         </div>
         <button type="button" aria-label="视频通话"><Video :size="21" /></button>
       </header>
 
       <div ref="messagePane" class="message-pane" @pointerdown="closeKeyboard">
-        <div class="date-pill">今天</div>
+        <div v-if="contact.messages.length" class="date-pill">今天</div>
         <div
           v-for="message in contact.messages"
           :key="message.id"
           class="message-line"
           :class="message.side === 'me' ? 'message-line--me' : 'message-line--them'"
         >
-          <span v-if="message.side !== 'me'" class="avatar avatar--message" :style="{ background: contact.color }">
-            {{ contact.initials }}
+          <span v-if="message.side !== 'me'" class="avatar avatar--message" :style="{ background: contact.color || '#8b95a5' }">
+            <img v-if="hasAvatar(contact)" :src="contact.avatar" alt="" @error="markAvatarFailed(contact.avatar)" />
+            <span v-else>{{ avatarFallback(contact) }}</span>
           </span>
           <div>
             <p>{{ message.text }}</p>
@@ -192,7 +206,10 @@ watch(() => contact.value?.id, (id, previous) => {
         </div>
 
         <div v-if="contactTyping" class="message-line message-line--them">
-          <span class="avatar avatar--message" :style="{ background: contact.color }">{{ contact.initials }}</span>
+          <span class="avatar avatar--message" :style="{ background: contact.color || '#8b95a5' }">
+            <img v-if="hasAvatar(contact)" :src="contact.avatar" alt="" @error="markAvatarFailed(contact.avatar)" />
+            <span v-else>{{ avatarFallback(contact) }}</span>
+          </span>
           <div class="typing-bubble"><i></i><i></i><i></i></div>
         </div>
       </div>

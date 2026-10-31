@@ -98,7 +98,7 @@ function endViewerSwipe() {
   if (tap) return phone.navigateBack()
   if (Math.abs(offset) < 46 || viewerTarget.value?.kind === 'comment') return
   if (offset < 0) replaceViewerIndex(viewerIndex.value + 1)
-  else if (!replaceViewerIndex(viewerIndex.value - 1) && viewerIndex.value === 0) phone.navigateBack()
+  else replaceViewerIndex(viewerIndex.value - 1)
 }
 function cancelViewerSwipe() { viewerSwipeStart.value = null; viewerSwipeOffset.value = 0 }
 
