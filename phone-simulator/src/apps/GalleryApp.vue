@@ -47,11 +47,11 @@ function endSwipe() {
 
 <template>
   <div class="gallery-app">
-    <template v-if="selectedIndex < 0">
+    <div v-if="selectedIndex < 0" class="gallery-library">
       <header class="photos-header"><div><span>图库</span><h2>所有照片</h2></div><button type="button">选择</button></header>
       <div class="photos-count">{{ contentConfig.gallery.length }} 张照片</div>
       <div class="photo-grid"><button v-for="(photo, index) in contentConfig.gallery" :key="photo.id" type="button" :aria-label="`查看第 ${index + 1} 张照片`" @click="openPhoto(photo)"><span :style="thumbnailStyle(photo)"><i v-if="!photo.src"></i></span></button></div>
-    </template>
+    </div>
     <template v-else>
       <header class="simple-app-header photo-detail-header"><button type="button" aria-label="返回所有照片" @click="phone.navigateBack"><ChevronLeft :size="24" /></button><strong>{{ selectedIndex + 1 }} / {{ contentConfig.gallery.length }}</strong><button type="button" aria-label="更多"><MoreHorizontal :size="21" /></button></header>
       <div class="photo-viewer" :style="{ ...selectedPhotoStyle, transform: `translateX(${swipeOffset * 0.18}px)` }" @pointerdown="beginSwipe" @pointermove="moveSwipe" @pointerup="endSwipe" @pointercancel="endSwipe"><span v-if="!selected.src" class="abstract-photo-mark"></span></div>

@@ -33,6 +33,12 @@ function resolveLocalTime(value) {
   return value === LOCAL_TIME_TOKEN ? pageOpenedTime : value
 }
 
+function resolveWallpaperBackground(value) {
+  const background = String(value || '').trim()
+  if (!background.startsWith('/media/')) return background
+  return `url(${JSON.stringify(background)}) center / cover no-repeat`
+}
+
 export const contentConfig = resolveLocalTime(content)
 
 export function createDeviceDate(source = new Date()) {
@@ -50,7 +56,13 @@ export function createDeviceDate(source = new Date()) {
 
 export const phoneConfig = {
   ...contentConfig,
-  theme: { ...contentConfig.theme, wallpaper: contentConfig.theme.homeWallpaper },
+  theme: {
+    ...contentConfig.theme,
+    lockWallpaper: resolveWallpaperBackground(contentConfig.theme.lockWallpaper),
+    homeWallpaper: resolveWallpaperBackground(contentConfig.theme.homeWallpaper),
+    wallpaper: resolveWallpaperBackground(contentConfig.theme.homeWallpaper),
+    wallpaperOverlay: contentConfig.theme.wallpaperOverlay || 'transparent',
+  },
   apps: contentConfig.apps.map((app) => {
     const fallback = appFallbacks[app.id] || { icon: Compass, color: '#667085' }
     return { ...fallback, ...app, icon: fallback.icon }

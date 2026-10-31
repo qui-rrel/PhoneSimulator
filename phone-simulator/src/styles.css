@@ -2145,12 +2145,14 @@ button {
 .clock-empty { height: 70%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 17px; color: #8d8d92; }
 
 /* Photos */
+.gallery-library { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 .photos-header { height: 106px; display: flex; align-items: flex-end; justify-content: space-between; padding: 55px 15px 7px; background: #fff; }
 .photos-header span { color: #8d8e95; font-size: 10px; }
 .photos-header h2 { margin: 0; font-size: 27px; }
 .photos-header button { color: #147ce5; font-size: 12px; }
 .photos-count { padding: 5px 15px 8px; border-bottom: 1px solid #e5e5e8; color: #888a91; background: #fff; font-size: 10px; }
-.photo-grid { grid-template-columns: repeat(3, 1fr); gap: 1px; padding: 0; }
+.photo-grid { min-height: 0; align-content: start; flex: 1; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow-y: auto; overscroll-behavior: contain; padding: 0; scrollbar-width: none; }
+.photo-grid::-webkit-scrollbar { display: none; }
 .photo-grid button > span { aspect-ratio: 1; }
 .photo-grid small { display: none; }
 .photo-detail-header { height: 92px; display: grid; grid-template-columns: 40px 1fr 40px; padding-top: 46px; background: #fff; }
@@ -2543,8 +2545,6 @@ button {
 .wechat-message-media { max-width: 150px; max-height: 185px; display: block; border-radius: 5px; object-fit: contain; }
 .wechat-location-card { max-width: 190px; overflow: hidden; padding: 0; border-radius: 5px; background: transparent; }
 .wechat-location-card .wechat-message-media { max-width: 100%; max-height: 215px; }
-.wechat-typing { margin: 8px 0 8px 47px; color: #9a9a9a; font-size: 11px; }
-
 .wechat-composer {
   position: absolute;
   right: 0;

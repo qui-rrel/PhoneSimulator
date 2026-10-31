@@ -62,6 +62,11 @@ const momentsCoverStyle = computed(() => wechat.profile.momentsCover
   ? { backgroundImage: `url("${wechat.profile.momentsCover}")` }
   : undefined)
 const activeScript = computed(() => conversation.value ? wechat.getActiveScript(conversation.value.id) : null)
+const conversationHeaderTitle = computed(() => {
+  if (activeScript.value?.isTyping) return '对方正在输入中'
+  const title = wechat.conversationTitle(conversation.value)
+  return group.value ? `${title}（${group.value.memberIds.length}）` : title
+})
 const pendingPlayerEntry = computed(() => {
   const script = activeScript.value
   const entry = script?.messages?.[script.currentIndex]
@@ -266,7 +271,7 @@ watch(() => messages.value.length, scrollToBottom)
     <template v-else-if="conversation">
       <header class="wechat-chat-header">
         <button type="button" aria-label="返回" @click="phone.navigateBack"><ChevronLeft :size="27" /></button>
-        <strong>{{ wechat.conversationTitle(conversation) }}<span v-if="group">（{{ group.memberIds.length }}）</span></strong>
+        <strong>{{ conversationHeaderTitle }}</strong>
         <button type="button" aria-label="更多"><MoreHorizontal :size="24" /></button>
       </header>
 
@@ -312,7 +317,6 @@ watch(() => messages.value.length, scrollToBottom)
             <WechatAvatar v-if="row.message.senderId === 'SELF'" :person="{ ...wechat.profile, nickname: wechat.profile.nickname }" :size="38" />
           </article>
         </template>
-        <div v-if="activeScript?.isTyping" class="wechat-typing">对方正在输入…</div>
       </main>
 
       <footer class="wechat-composer">

@@ -5,7 +5,7 @@
       "initialActive": true,
       "trigger": {
         "type": "operation",
-        "action": "content-open",
+        "action": "message-input",
         "appId": "wechat",
         "targetId": "wx-chat-1"
       },
@@ -1096,20 +1096,6 @@
       "conversationId": "wx-chat-1",
       "messages": [
         {
-          "senderId": "wx-chen",
-          "type": "text",
-          "text": "月月，有个坏消息",
-          "mediaSrc": "",
-          "afterMs": 1200
-        },
-        {
-          "senderId": "wx-chen",
-          "type": "text",
-          "text": "难过😭",
-          "mediaSrc": "",
-          "afterMs": 600
-        },
-        {
           "senderId": "SELF",
           "type": "text",
           "text": "怎么了？",
@@ -1162,7 +1148,7 @@
           "senderId": "wx-chen",
           "type": "location",
           "text": "",
-          "mediaSrc": "定位图",
+          "mediaSrc": "/media/Chat/pengya-conference-venue-map.png",
           "mapLocationId": "stage",
           "afterMs": 1200
         },
@@ -1508,7 +1494,7 @@
           "senderId": "wx-chen",
           "type": "image",
           "text": "",
-          "mediaSrc": "茶点图片",
+          "mediaSrc": "/media/Chat/茶点 微信剧情.jpg",
           "afterMs": 1000
         },
         {
@@ -1757,7 +1743,15 @@
       "text": "出门日记📷许久不见",
       "keystrokes": "chumenrijixujiubujian",
       "imageSrc": [
-        "月朋友圈123456789"
+        "/media/Moment/月朋友圈1.jpg",
+        "/media/Moment/月朋友圈2.jpg",
+        "/media/Moment/月朋友圈3.jpg",
+        "/media/Moment/月朋友圈4.jpg",
+        "/media/Moment/月朋友圈5.jpg",
+        "/media/Moment/月朋友圈6.jpg",
+        "/media/Moment/月朋友圈7.jpg",
+        "/media/Moment/月朋友圈8.jpg",
+        "/media/Moment/月朋友圈9.jpg"
       ],
       "time": "刚刚"
     }
