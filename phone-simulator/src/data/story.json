@@ -293,7 +293,7 @@
         "type": "none"
       },
       "nextByOutcome": {
-        "completed": "",
+        "completed": "evt-phone-power-off",
         "accepted": "",
         "rejected": "",
         "missed": ""
@@ -466,6 +466,30 @@
       "action": {
         "type": "moment-comment",
         "commentScriptId": "commentScriptId-4"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "evt-phone-power-off",
+      "initialActive": false,
+      "trigger": {
+        "type": "operation",
+        "action": "call-ended",
+        "appId": "phone",
+        "targetId": "yao"
+      },
+      "action": {
+        "type": "power-off"
       },
       "nextByOutcome": {
         "completed": "",
@@ -1865,7 +1889,7 @@
           "commentId": "wx-moment-interactions-6",
           "replyToCommentId": "",
           "text": "化妆技术有进步哈",
-          "imageSrc": "呆没心情玩梗",
+          "imageSrc": "/media/Chat/没心情玩梗.jpg",
           "afterMs": 60000,
           "notify": true,
           "notificationText": "代斯评论了这条朋友圈"

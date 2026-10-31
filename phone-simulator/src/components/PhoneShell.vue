@@ -10,6 +10,7 @@ import DynamicIsland from './DynamicIsland.vue'
 import HomeScreen from './HomeScreen.vue'
 import LockScreen from './LockScreen.vue'
 import NotificationBanner from './NotificationBanner.vue'
+import PowerOffOverlay from './PowerOffOverlay.vue'
 import StatusBar from './StatusBar.vue'
 
 const phone = usePhoneStore()
@@ -161,6 +162,7 @@ function cancelEdgeBack() {
       <NotificationBanner />
       <CallOverlay />
       <AlarmOverlay />
+      <PowerOffOverlay />
 
       <div
         v-if="phone.canNavigateBack"

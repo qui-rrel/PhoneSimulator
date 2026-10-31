@@ -125,8 +125,14 @@ export const useMusicStore = defineStore('music', () => {
     mode.value = PLAY_MODES[(index + 1) % PLAY_MODES.length]
   }
 
+  function stopPlayback() {
+    playing.value = false
+    clearFallbackTimer()
+    audio?.pause()
+  }
+
   return {
     playlist, currentIndex, track, playing, elapsed, duration, progress, hasSelection, mode,
-    selectTrack, togglePlay, nextTrack, cycleMode,
+    selectTrack, togglePlay, nextTrack, cycleMode, stopPlayback,
   }
 })

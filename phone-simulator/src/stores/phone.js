@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { contentConfig, phoneConfig } from '../config/phone.config'
 import { storyConfig } from '../config/story.config'
 import { useMapsStore } from './maps'
+import { useMusicStore } from './music'
 import { useWechatStore } from './wechat'
 import { playMessageReceiveSound, playPasscodeDeleteSound, playPasscodeDigitSound } from '../utils/sounds'
 
@@ -12,6 +13,10 @@ const formatDateKey = (date = new Date()) => `${date.getFullYear()}-${date.getMo
 const hydrateContacts = (contacts = []) => clone(contacts)
 const CALL_END_DISPLAY_MS = 1400
 const PHONE_HISTORY_KEY = '__phoneSimulatorNavigation'
+const normalizeBatteryLevel = (value, fallback = 100) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? Math.min(100, Math.max(0, Math.round(number))) : fallback
+}
 
 let timelineTimers = []
 let callTimeout = null
@@ -26,9 +31,13 @@ let alarmPulse = null
 let navigationReady = false
 let navigationDepth = 0
 let navigationPopstateHandler = null
+let powerWarningTimer = null
+let powerShutdownTimer = null
 
 export const usePhoneStore = defineStore('phone', () => {
   const locked = ref(true)
+  const batteryLevel = ref(normalizeBatteryLevel(contentConfig.device?.initialBatteryLevel))
+  const powerState = ref('on')
   const passcodeVisible = ref(false)
   const pin = ref('')
   const pinError = ref(false)
@@ -61,6 +70,7 @@ export const usePhoneStore = defineStore('phone', () => {
   const unreadTotal = computed(() => contacts.value.reduce((total, contact) => total + (contact.unread || 0), 0))
   const unreadMailTotal = computed(() => mail.value.reduce((total, item) => total + (item.unread ? 1 : 0), 0))
   const canNavigateBack = computed(() => Boolean(
+    powerState.value === 'on' &&
     !locked.value &&
     activeAppId.value &&
     !incomingCall.value &&
@@ -306,6 +316,7 @@ export const usePhoneStore = defineStore('phone', () => {
     showNotification({ appId: 'messages', contactId, title: contact.name, body: text, initials: contact.initials, color: contact.color })
   }
   function showNotification(payload) {
+    if (powerState.value !== 'on') return
     notification.value = { ...payload, id: Date.now() }
     window.clearTimeout(showNotification.timer)
     showNotification.timer = window.setTimeout(() => { notification.value = null }, 5200)
@@ -515,6 +526,7 @@ export const usePhoneStore = defineStore('phone', () => {
     activeStoryEvents.value = activeStoryEvents.value.filter((id) => id !== eventId)
   }
   function activateStoryEvent(eventId, delayOverride = null) {
+    if (powerState.value !== 'on') return
     const event = findStoryEvent(eventId)
     if (!event || completedEvents.value.includes(eventId) || activeStoryEvents.value.includes(eventId)) return
     activeStoryEvents.value.push(eventId)
@@ -529,10 +541,18 @@ export const usePhoneStore = defineStore('phone', () => {
     timelineTimers.push(window.setTimeout(() => runEvent(event), delay))
   }
   function runEvent(event) {
-    if (!event || completedEvents.value.includes(event.id)) return
+    if (!event || powerState.value !== 'on' || completedEvents.value.includes(event.id)) return
     removeActiveStoryEvent(event.id)
     if (!triggeredEvents.value.includes(event.id)) triggeredEvents.value.push(event.id)
+    if (event.batteryLevel !== undefined && event.batteryLevel !== null && event.batteryLevel !== '') {
+      batteryLevel.value = Math.min(batteryLevel.value, normalizeBatteryLevel(event.batteryLevel, batteryLevel.value))
+    }
     const action = event.action || {}
+    if (action.type === 'power-off') {
+      resolveStoryOutcome(event.id, 'completed')
+      window.setTimeout(beginPowerOff, 0)
+      return
+    }
     if (action.type === 'call') {
       startIncomingCall(action.dialogueId, event.id, action.timeoutMs)
       return
@@ -574,6 +594,7 @@ export const usePhoneStore = defineStore('phone', () => {
     if (nextId) activateStoryEvent(nextId)
   }
   function triggerOperation(action, payload = {}) {
+    if (powerState.value !== 'on') return
     const details = typeof payload === 'string' ? { targetId: payload } : payload
     const matchedEvents = (storyConfig.events || []).filter((item) =>
       activeStoryEvents.value.includes(item.id) &&
@@ -594,6 +615,36 @@ export const usePhoneStore = defineStore('phone', () => {
       initialEvents = events.filter((event) => !referenced.has(event.id))
     }
     initialEvents.forEach((event) => activateStoryEvent(event.id))
+  }
+
+  function clearPowerTimers() {
+    window.clearTimeout(powerWarningTimer)
+    window.clearTimeout(powerShutdownTimer)
+    powerWarningTimer = null
+    powerShutdownTimer = null
+  }
+  function beginPowerOff() {
+    if (powerState.value !== 'on') return
+    batteryLevel.value = 0
+    powerState.value = 'warning'
+    notification.value = null
+    window.clearTimeout(showNotification.timer)
+    timelineTimers.forEach((timer) => window.clearTimeout(timer))
+    timelineTimers = []
+    window.clearTimeout(callTimeout)
+    window.clearTimeout(outgoingCallTimer)
+    window.clearTimeout(outgoingCloseTimer)
+    window.clearInterval(callElapsedTimer)
+    callScriptTimers.forEach((timer) => window.clearTimeout(timer))
+    callScriptTimers = []
+    stopAlarmSound()
+    alarmRinging.value = null
+    useMusicStore().stopPlayback()
+    clearPowerTimers()
+    powerWarningTimer = window.setTimeout(() => {
+      powerState.value = 'shutting-down'
+      powerShutdownTimer = window.setTimeout(() => { powerState.value = 'off' }, 620)
+    }, 1700)
   }
 
   function stopAlarmSound() {
@@ -657,6 +708,9 @@ export const usePhoneStore = defineStore('phone', () => {
   }
   function startRuntime() { startNavigation(); startTimeline(); startAlarmClock() }
   function resetStory() {
+    clearPowerTimers()
+    batteryLevel.value = normalizeBatteryLevel(contentConfig.device?.initialBatteryLevel)
+    powerState.value = 'on'
     contacts.value = hydrateContacts(contentConfig.contacts)
     mail.value = clone(contentConfig.mail || [])
     callHistory.value = (contentConfig.callHistory || []).map(hydrateCallRecord)
@@ -674,7 +728,7 @@ export const usePhoneStore = defineStore('phone', () => {
   }
 
   return {
-    locked, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact, activeContent,
+    locked, batteryLevel, powerState, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact, activeContent,
     notification, contacts, unreadTotal, mail, unreadMailTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
     callElapsed, callStatus, alarmRinging, canNavigateBack, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
     closeContact, openContent, openAppContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,

@@ -3,7 +3,8 @@
     "width": 393,
     "height": 852,
     "radius": 58,
-    "fixedDate": ""
+    "fixedDate": "",
+    "initialBatteryLevel": 20
   },
   "owner": {
     "name": "张月",
@@ -534,9 +535,9 @@
     {
       "id": "yao",
       "name": "瑶瑶",
-      "avatar": "",
-      "initials": "瑶",
-      "color": "#7d8ef2",
+      "avatar": "/media/Icon/丫头像.jpg",
+      "initials": "",
+      "color": "",
       "time": "$localTime",
       "unread": 0,
       "messages": [
@@ -826,7 +827,7 @@
       "title": "想见你想见你想见你",
       "artist": "张月、陈瑶",
       "src": "/media/Music/想见你想见你想见你.mp3",
-      "cover": "/media/结婚照1 5.23.jpg",
+      "cover": "/media/Icon/想见你封面.jpg",
       "color": "#BE9CF6",
       "duration": 0
     },
@@ -835,7 +836,7 @@
       "title": "interstellar",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -844,7 +845,7 @@
       "title": "恋爱告急",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -853,7 +854,7 @@
       "title": "霍元甲",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -862,8 +863,8 @@
       "title": "孤单北半球",
       "artist": "",
       "src": "",
-      "cover": "",
-      "color": "",
+      "cover": "/media/Icon/孤北封面.jpg",
+      "color": "#BE9CF6",
       "duration": 0
     },
     {
@@ -871,7 +872,7 @@
       "title": "言不由衷",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -880,7 +881,7 @@
       "title": "凑热闹",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -889,7 +890,7 @@
       "title": "惊鸿一面",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -898,7 +899,7 @@
       "title": "另一个天堂",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -907,7 +908,7 @@
       "title": "缘分一道桥",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -916,7 +917,7 @@
       "title": "怪我更爱我自己",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -925,7 +926,7 @@
       "title": "锁",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -934,7 +935,7 @@
       "title": "susan说",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -943,7 +944,7 @@
       "title": "泪桥",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -952,7 +953,7 @@
       "title": "camera ready",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -961,7 +962,7 @@
       "title": "1987我不知会遇见你",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -970,7 +971,7 @@
       "title": "猜不透",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -979,7 +980,7 @@
       "title": "一直很安静",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -988,7 +989,7 @@
       "title": "hey girl",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -997,7 +998,7 @@
       "title": "天生刺猬",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1006,7 +1007,7 @@
       "title": "Nonchalant",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1015,7 +1016,7 @@
       "title": "她",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1024,7 +1025,7 @@
       "title": "信",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1033,7 +1034,7 @@
       "title": "爱什么稀罕",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1042,7 +1043,7 @@
       "title": "没那么简单",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1051,7 +1052,7 @@
       "title": "辛德瑞拉",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1060,7 +1061,7 @@
       "title": "无名之辈",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1069,7 +1070,7 @@
       "title": "遗憾",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1078,7 +1079,7 @@
       "title": "奇妙能力歌",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1087,7 +1088,7 @@
       "title": "爱你",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1096,7 +1097,7 @@
       "title": "这条小鱼在乎",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1105,7 +1106,7 @@
       "title": "不想懂得",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1114,7 +1115,7 @@
       "title": "worth it",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1123,7 +1124,7 @@
       "title": "自乘风浪",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     },
@@ -1132,7 +1133,7 @@
       "title": "孤单芭蕾",
       "artist": "",
       "src": "",
-      "cover": "",
+      "cover": "/media/AppIcon/apple-music-app-icon.png",
       "color": "",
       "duration": 0
     }
@@ -1324,9 +1325,9 @@
     "profile": {
       "nickname": "月努力月幸运",
       "wechatId": "wx_yue",
-      "avatar": "",
-      "initials": "月",
-      "color": "#596579",
+      "avatar": "/media/Icon/朋头像.jpg",
+      "initials": "",
+      "color": "",
       "momentsCover": ""
     },
     "contacts": [
@@ -1335,8 +1336,8 @@
         "nickname": "瑶瑶",
         "remark": "",
         "wechatId": "",
-        "avatar": "",
-        "initials": "瑶",
+        "avatar": "/media/Icon/丫头像.jpg",
+        "initials": "",
         "color": ""
       },
       {
@@ -1452,8 +1453,8 @@
         "nickname": "张铃",
         "remark": "",
         "wechatId": "",
-        "avatar": "",
-        "initials": "铃",
+        "avatar": "/media/Icon/ling头像.jpg",
+        "initials": "",
         "color": ""
       },
       {
@@ -1497,8 +1498,8 @@
         "nickname": "宝宝妹妹",
         "remark": "",
         "wechatId": "",
-        "avatar": "",
-        "initials": "妹",
+        "avatar": "/media/Icon/张日头像.jpg",
+        "initials": "",
         "color": ""
       },
       {
@@ -1515,8 +1516,8 @@
         "nickname": "哲文",
         "remark": "",
         "wechatId": "",
-        "avatar": "",
-        "initials": "哲",
+        "avatar": "/media/Icon/哲文头像.jpg",
+        "initials": "",
         "color": ""
       },
       {

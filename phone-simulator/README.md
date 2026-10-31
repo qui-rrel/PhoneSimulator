@@ -45,7 +45,7 @@ npm run build
 
 ## 已实现内容
 
-- 锁屏、四位密码、桌面、状态栏、灵动岛和 App 打开/关闭动画。
+- 锁屏、四位密码、桌面、动态电量状态栏、灵动岛和 App 打开/关闭动画。
 - 首次进入时先高优先级加载锁屏壁纸和锁屏通知所需图片，完成后才显示手机；随后按桌面壁纸、App 图标、其他 UI 图片、相册图片、音视频的顺序后台预加载。
 - App、聊天和内容详情使用统一返回层级；可从手机屏幕左边缘右滑逐层返回，浏览器原生返回或边缘手势也会优先返回模拟器内的上一层。
 - 在桌面浏览器中，可按住鼠标上下拖动聊天、朋友圈、设置、天气等可滚动区域；移动端仍使用原生触摸滚动。
@@ -100,7 +100,7 @@ Excel 是便于创作者编辑的内容源，JSON 是网页实际读取的运行
 | 字段 | 用途 |
 | --- | --- |
 | `site` | 浏览器标签页名称等网页自身设置，不显示在手机界面中 |
-| `device` | 手机画布尺寸、外壳圆角和可选固定日期等参数 |
+| `device` | 手机画布尺寸、外壳圆角、初始电量和可选固定日期等参数 |
 | `owner` | 用户名、签名和 Wi-Fi 名称 |
 | `security` | 四位数字锁屏密码 |
 | `theme` | 锁屏壁纸、桌面壁纸、遮罩和强调色 |
@@ -126,6 +126,8 @@ Excel 是便于创作者编辑的内容源，JSON 是网页实际读取的运行
 `apps` 不保存未读角标。信息角标从 `contacts[].unread` 汇总，邮件角标从 `mail[].unread` 汇总，微信角标从 `wechat.conversations[].unread` 汇总；运行时收到或读完内容后直接跟随各自状态更新。
 
 `device.fixedDate` 可填写 `YYYY-MM-DD`，让锁屏、桌面日期、日历图标、日历 App 和天气生成始终使用该日期；留空时使用玩家本地日期。固定日期只覆盖年月日，状态栏、锁屏时钟、天气小时预报、闹钟、消息和剧情计时仍使用玩家本地时间。
+
+`device.initialBatteryLevel` 是 0～100 的初始电量。剧情事件可使用可选的 `batteryLevel` 将电量降至指定值；`power-off` 动作会显示电量耗尽提示、播放关机动画并保持黑屏，同时停止音乐、闹钟和后续剧情计时。
 
 ### 动态本地时间
 
@@ -172,7 +174,7 @@ Excel 的显示时间字段填写 `LOCAL_TIME`，转换后会保存为 `$localTi
 - `call-ended`。
 - `moment-liked`、`moment-unliked`、`moment-comment-sent`、`moment-published`。
 
-`appId` 限定应用，`targetId` 是触发对象 ID，可对应联系人、照片、邮件、备忘录、微信会话或朋友圈等内容。事件动作支持 `call`、`sms-script`、`wechat-script`、`moment-publish`、`moment-comment`、`moment-interactions` 和 `none`。
+`appId` 限定应用，`targetId` 是触发对象 ID，可对应联系人、照片、邮件、备忘录、微信会话或朋友圈等内容。事件动作支持 `call`、`sms-script`、`wechat-script`、`moment-publish`、`moment-comment`、`moment-interactions`、`power-off` 和 `none`。
 
 来电可按 `accepted`、`rejected`、`missed` 分支；普通操作和短信完成通常使用 `completed`。`retry.enabled` 为 `false` 时忽略重试结果，为 `true` 时只重试 `retry.outcomes` 中列出的结果。
 

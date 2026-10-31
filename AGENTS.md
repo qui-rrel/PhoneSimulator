@@ -136,7 +136,7 @@ Excel 工作簿
 `content.json` 当前主要分区：
 
 - `site`：浏览器标签页名称等网页设置，不显示在手机界面中。
-- `device`：手机壳画布参数，以及可空的 `fixedDate` 固定显示日期。
+- `device`：手机壳画布参数、`initialBatteryLevel` 初始电量，以及可空的 `fixedDate` 固定显示日期。
 - `owner`：用户名、签名、Wi-Fi。
 - `security`：四位数字密码；始终按字符串理解以保留前导零。
 - `theme`：强调色、锁屏和桌面壁纸。
@@ -185,7 +185,9 @@ Excel 工作簿
    - `moment-publish`：激活一段玩家发布朋友圈剧情。
    - `moment-comment`：激活一段玩家评论或回复朋友圈剧情。
    - `moment-interactions`：执行一段联系人朋友圈互动剧情。
+   - `power-off`：将电量归零，显示电量耗尽提示后播放关机动画并保持黑屏。
    - `none`：不展示新内容，直接完成并衔接。
+5. 事件可选的 `batteryLevel` 表示执行时把当前电量降低至该百分比；留空不变，且不会把已经更低的电量升高。
 5. `resolveStoryOutcome()` 根据 `nextByOutcome` 激活下一个节点；若 `retry.enabled` 且当前结果在 `retry.outcomes` 中，则等待后重试本节点。
 
 不要增加全局“线性/分支模式”。线性与分支都由事件连接表达，以便未来 App 操作继续复用。

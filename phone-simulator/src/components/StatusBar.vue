@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { BatteryFull, Signal, Wifi } from 'lucide-vue-next'
+import { Signal, Wifi } from 'lucide-vue-next'
 import { usePhoneStore } from '../stores/phone'
 
 const phone = usePhoneStore()
@@ -27,7 +27,11 @@ onBeforeUnmount(() => window.clearInterval(timer))
     <div class="status-icons" aria-hidden="true">
       <Signal :size="16" :stroke-width="2.4" />
       <Wifi :size="16" :stroke-width="2.4" />
-      <BatteryFull :size="21" :stroke-width="2.1" />
+      <span class="status-battery" :class="{ 'status-battery--low': phone.batteryLevel <= 20 }">
+        <small>{{ phone.batteryLevel }}%</small>
+        <span class="status-battery__body"><i :style="{ width: `${phone.batteryLevel}%` }"></i></span>
+        <span class="status-battery__tip"></span>
+      </span>
     </div>
   </div>
 </template>
