@@ -125,7 +125,6 @@ HEADER_ALIASES = {
     "操作目标 ID": "targetId",
     "触发对象 ID": "targetId",
     "发生内容": "actionType",
-    "电量降至（%）": "batteryLevel",
     "无人接听超时（秒）": "timeoutMs",
     "无人接听超时（毫秒）": "timeoutMs",
     "接听后事件 ID": "acceptedNext",
@@ -241,7 +240,16 @@ SHEET_ALIASES = {
     "短信剧情": ["短信剧情", "聊天剧情"],
 }
 
-NUMBER_FIELDS = {"device.width", "device.height", "device.radius", "security.digits", "weather.seed", "device.initialBatteryLevel"}
+NUMBER_FIELDS = {
+    "device.width",
+    "device.height",
+    "device.radius",
+    "security.digits",
+    "weather.seed",
+    "device.initialBatteryLevel",
+    "device.batteryDrainIntervalSeconds",
+    "device.powerOffDelaySeconds",
+}
 BOOLEAN_FIELDS = {"home.showGreetingWidget"}
 
 MAP_TYPE_ALIASES = {
@@ -316,7 +324,6 @@ ACTION_ALIASES = {
     "执行朋友圈发布剧情": "moment-publish",
     "执行朋友圈玩家评论剧情": "moment-comment",
     "执行朋友圈互动剧情": "moment-interactions",
-    "手机没电关机": "power-off",
     "仅衔接下一节点": "none",
     "call": "call",
     "sms-script": "sms-script",
@@ -324,7 +331,6 @@ ACTION_ALIASES = {
     "moment-publish": "moment-publish",
     "moment-comment": "moment-comment",
     "moment-interactions": "moment-interactions",
-    "power-off": "power-off",
     "none": "none",
 }
 WECHAT_CONVERSATION_TYPE_ALIASES = {"单聊": "direct", "群聊": "group", "direct": "direct", "group": "group"}
@@ -580,8 +586,16 @@ for row in rows("基础设置"):
         value = "" if value in (None, "") else as_date_text(value, "基础设置中的固定日期")
     elif field == "device.initialBatteryLevel":
         value = as_number(value)
-        if not isinstance(value, int) or not 0 <= value <= 100:
-            raise ValueError("基础设置中的初始手机电量必须填写 0 到 100 的整数。")
+        if not isinstance(value, int) or not 1 <= value <= 100:
+            raise ValueError("基础设置中的初始手机电量必须填写 1 到 100 的整数。")
+    elif field == "device.batteryDrainIntervalSeconds":
+        value = as_number(value)
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError("基础设置中的每格电量耗时必须填写大于 0 的整数秒数。")
+    elif field == "device.powerOffDelaySeconds":
+        value = as_number(value)
+        if not isinstance(value, int) or value < 0:
+            raise ValueError("基础设置中的剧情完成后关机等待必须填写大于或等于 0 的整数秒数。")
     elif field == "security.digits":
         value = as_number(value)
         if value != 4:
@@ -1315,8 +1329,10 @@ for row in rows("剧情事件"):
 
     action_type = ACTION_ALIASES.get(str(row["actionType"]).strip(), str(row["actionType"]).strip())
     action = {"type": action_type}
-    if action_type not in {"call", "sms-script", "wechat-script", "moment-publish", "moment-comment", "moment-interactions", "power-off", "none"}:
-        raise ValueError(f"剧情事件 {event_id!r}：发生内容必须选择有效的短信、微信、朋友圈、电话、关机或衔接动作。")
+    if action_type == "power-off" or str(row["actionType"]).strip() == "手机没电关机":
+        raise ValueError(f"剧情事件 {event_id!r}：关机已改为所有主线和支线完成后自动触发，请删除关机事件。")
+    if action_type not in {"call", "sms-script", "wechat-script", "moment-publish", "moment-comment", "moment-interactions", "none"}:
+        raise ValueError(f"剧情事件 {event_id!r}：发生内容必须选择有效的短信、微信、朋友圈、电话或衔接动作。")
     for key in ["smsScriptId", "wechatScriptId", "publishScriptId", "commentScriptId", "interactionScriptId", "dialogueId"]:
         if row.get(key):
             action[key] = as_text(row[key])
@@ -1325,12 +1341,6 @@ for row in rows("剧情事件"):
 
     retry_enabled = as_bool(branch.get("retryEnabled", False))
     retry_outcomes = as_retry_outcomes(branch.get("retryOutcomes", ""), event_id) if retry_enabled else []
-    battery_level = row.get("batteryLevel", "")
-    if battery_level != "":
-        battery_level = as_number(battery_level)
-        if not isinstance(battery_level, int) or not 0 <= battery_level <= 100:
-            raise ValueError(f"剧情事件 {event_id!r}：电量降至必须填写 0 到 100 的整数或留空。")
-
     event = {
         "id": event_id,
         "initialActive": as_bool(row.get("initialActive", False)),
@@ -1348,8 +1358,6 @@ for row in rows("剧情事件"):
             "outcomes": retry_outcomes,
         },
     }
-    if battery_level != "":
-        event["batteryLevel"] = battery_level
     story["events"].append(event)
 
 event_ids = unique_ids(story["events"], "id", "剧情事件")

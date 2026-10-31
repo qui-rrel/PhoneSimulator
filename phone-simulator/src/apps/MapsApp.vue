@@ -37,7 +37,8 @@ const mapViewport = ref(null)
 const mapImage = ref(null)
 const imageFailed = ref(false)
 const isDragging = ref(false)
-const pan = ref({ x: 0, y: 0 })
+const initialPan = Object.freeze({ x: 0, y: 18 })
+const pan = ref({ ...initialPan })
 let drag = null
 
 const typeStyles = Object.freeze({
@@ -76,7 +77,7 @@ function formattedDate(value) {
 }
 
 function resetPan() {
-  pan.value = { x: 0, y: 18 }
+  pan.value = { ...initialPan }
 }
 
 function clampPan(x, y) {
@@ -144,24 +145,28 @@ onBeforeUnmount(() => { drag = null; isDragging.value = false })
       @pointerup="endMapDrag"
       @pointercancel="endMapDrag"
     >
-      <img
+      <div
         v-if="activeLocation && !imageFailed"
-        ref="mapImage"
-        class="maps-image"
-        :src="activeLocation.mapSrc"
-        :alt="`${activeLocation.name}地图`"
-        draggable="false"
+        class="maps-image-layer"
         :style="{ transform: `translate(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px))` }"
-        @load="resetPan"
-        @error="imageFailed = true"
-      />
+      >
+        <img
+          ref="mapImage"
+          class="maps-image"
+          :src="activeLocation.mapSrc"
+          :alt="`${activeLocation.name}地图`"
+          draggable="false"
+          @load="resetPan"
+          @error="imageFailed = true"
+        />
+        <div class="maps-focus" aria-hidden="true">
+          <i></i>
+          <strong>{{ activeLocation.name }}</strong>
+        </div>
+      </div>
       <div v-else class="maps-image-error">
         <MapPin :size="34" />
         <span>地图素材未找到</span>
-      </div>
-      <div v-if="activeLocation" class="maps-focus" aria-hidden="true">
-        <i></i>
-        <strong>{{ activeLocation.name }}</strong>
       </div>
       <div class="maps-float-controls" aria-hidden="true">
         <span><Layers3 :size="20" /></span>

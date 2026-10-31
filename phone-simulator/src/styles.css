@@ -2598,6 +2598,7 @@ button {
 .wechat-composer__media { display: flex; align-items: center; gap: 6px; }
 .wechat-composer__media img { width: 26px; height: 26px; object-fit: contain; }
 .wechat-send { height: 30px; flex: none; padding: 0 10px; border-radius: 4px; color: #fff; background: #07c160; font-size: 12px; }
+.wechat-send:disabled { color: #8f9b94; background: #d8ddd9; }
 
 .wechat-moments {
   height: calc(100% - 114px);
@@ -2937,9 +2938,10 @@ button {
 }
 .maps-canvas { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; background: #e9ece6; }
 .maps-canvas:active,.maps-canvas--dragging { cursor: grabbing; }
-.maps-image { position: absolute; top: 50%; left: 50%; width: 620px; max-width: none; display: block; user-select: none; pointer-events: none; filter: saturate(.94) contrast(.98); will-change: transform; }
+.maps-image-layer { position: absolute; top: 50%; left: 50%; width: 620px; aspect-ratio: 5 / 7; will-change: transform; }
+.maps-image { width: 100%; height: 100%; max-width: none; display: block; user-select: none; pointer-events: none; filter: saturate(.94) contrast(.98); }
 .maps-image-error { position: absolute; inset: 0 0 330px; display: grid; place-content: center; justify-items: center; gap: 8px; color: #8d9299; background: linear-gradient(145deg,#edf0eb,#dfe5de); font-size: 12px; }
-.maps-focus { position: absolute; z-index: 3; top: 39%; left: 50%; display: flex; flex-direction: column; align-items: center; transform: translate(-50%,-50%); pointer-events: none; }
+.maps-focus { position: absolute; z-index: 3; top: 46.43%; left: 50%; display: flex; flex-direction: column; align-items: center; transform: translate(-50%,-50%); pointer-events: none; }
 .maps-focus i { position: relative; width: 17px; height: 17px; border: 4px solid #fff; border-radius: 50%; background: #0a84ff; box-shadow: 0 2px 7px rgba(0,78,174,.45); }
 .maps-focus i::before { position: absolute; width: 31px; height: 31px; margin: -11px; border: 4px solid rgba(10,132,255,.22); border-radius: 50%; content: ''; }
 .maps-focus strong { max-width: 190px; overflow: hidden; margin-top: 7px; padding: 5px 9px; border-radius: 7px; color: #15599a; background: rgba(255,255,255,.95); box-shadow: 0 3px 10px rgba(32,53,76,.18); font-size: 12px; line-height: 1; white-space: nowrap; text-overflow: ellipsis; }
@@ -2992,7 +2994,8 @@ button {
 .incoming-call-actions, .active-call-actions { width: 100%; display: flex; justify-content: space-around; margin-top: auto; }
 .incoming-call-actions button, .active-call-actions button { width: 58px; height: 58px; display: block; overflow: hidden; border-radius: 50%; }
 .incoming-call-actions button img, .active-call-actions button img { width: 100%; height: 100%; display: block; object-fit: contain; clip-path: circle(50%); }
-.call-transcript { width: 100%; max-height: 260px; margin-top: 45px; overflow-y: auto; }
+.call-transcript { width: 100%; max-height: 260px; margin-top: 45px; overflow-y: auto; scrollbar-width: none; }
+.call-transcript::-webkit-scrollbar { display: none; }
 .call-transcript p { width: fit-content; max-width: 78%; margin: 8px 0; padding: 8px 11px; border-radius: 14px; background: rgba(255,255,255,.14); font-size: 11px; }
 .call-transcript .call-line--me { margin-left: auto; background: #4779df; }
 .call-screen-enter-active, .call-screen-leave-active { transition: opacity .3s, transform .35s ease; }

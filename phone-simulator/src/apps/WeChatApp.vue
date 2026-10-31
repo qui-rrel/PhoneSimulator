@@ -76,6 +76,12 @@ const pendingPlayerEntry = computed(() => {
   return entry?.senderId === 'SELF' ? entry : null
 })
 const pendingType = computed(() => pendingPlayerEntry.value?.type || 'text')
+const canSendReply = computed(() => {
+  const entry = pendingPlayerEntry.value
+  if (!entry || typingDraft.value) return false
+  if (entry.type === 'text') return Boolean(draft.value && draft.value === (entry.text || ''))
+  return draftType.value === entry.type && Boolean(draftMediaSrc.value)
+})
 const keyboardRows = [['Q','W','E','R','T','Y','U','I','O','P'], ['A','S','D','F','G','H','J','K','L'], ['Z','X','C','V','B','N','M']]
 const momentImages = (moment) => {
   const configured = Array.isArray(moment?.imageSrc) ? moment.imageSrc : moment?.imageSrc ? [moment.imageSrc] : []
@@ -246,7 +252,7 @@ function tapKey(key) {
 
 async function sendPresetReply() {
   const entry = pendingPlayerEntry.value
-  if (!entry || (!draft.value && !draftMediaSrc.value) || typingDraft.value || !conversation.value) return
+  if (!entry || !canSendReply.value || !conversation.value) return
   playMessageSendSound()
   wechat.addMessage(conversation.value.id, {
     senderId: 'SELF',
@@ -314,7 +320,7 @@ watch(() => messages.value.length, scrollToBottom)
 
     <template v-else-if="conversation">
       <header class="wechat-chat-header">
-        <button type="button" aria-label="返回" @click="phone.navigateBack"><ChevronLeft :size="27" /></button>
+        <button type="button" aria-label="返回" @click.stop="phone.navigateBack"><ChevronLeft :size="27" /></button>
         <strong>{{ conversationHeaderTitle }}</strong>
         <button type="button" aria-label="更多"><MoreHorizontal :size="24" /></button>
       </header>
@@ -382,7 +388,7 @@ watch(() => messages.value.length, scrollToBottom)
         </button>
         <button type="button" aria-label="表情" @click="prepareMediaReply('sticker')"><Smile :size="25" /></button>
         <button v-if="!draft && !draftMediaSrc" type="button" aria-label="更多" @click="prepareMediaReply('image')"><CirclePlus :size="25" /></button>
-        <button v-else class="wechat-send" type="button" @click="sendPresetReply">发送</button>
+        <button v-else class="wechat-send" type="button" :disabled="!canSendReply" @click="sendPresetReply">发送</button>
       </footer>
       <Transition name="keyboard-rise">
         <section v-if="keyboardVisible" class="phone-keyboard">

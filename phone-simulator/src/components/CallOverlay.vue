@@ -1,7 +1,8 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { usePhoneStore } from '../stores/phone'
 const phone = usePhoneStore()
+const transcriptPane = ref(null)
 const displayCall = computed(() => phone.incomingCall || phone.activeCall)
 const formatDuration = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
 const callStatusText = computed(() => {
@@ -9,6 +10,15 @@ const callStatusText = computed(() => {
   if (phone.callStatus === 'connecting') return '正在呼叫…'
   if (phone.callStatus === 'ended') return '通话结束'
   return formatDuration(phone.callElapsed)
+})
+
+watch(() => phone.callTranscript.length, async (length) => {
+  if (!length) return
+  await nextTick()
+  transcriptPane.value?.scrollTo({
+    top: transcriptPane.value.scrollHeight,
+    behavior: 'smooth',
+  })
 })
 </script>
 
@@ -19,7 +29,7 @@ const callStatusText = computed(() => {
       <h2>{{ displayCall.title }}</h2>
       <p>{{ callStatusText }}</p>
 
-      <div v-if="phone.activeCall && phone.callStatus === 'connected'" class="call-transcript">
+      <div v-if="phone.activeCall && phone.callStatus === 'connected'" ref="transcriptPane" class="call-transcript">
         <p v-for="(line, index) in phone.callTranscript" :key="index" :class="`call-line--${line.side}`">{{ line.text }}</p>
       </div>
 

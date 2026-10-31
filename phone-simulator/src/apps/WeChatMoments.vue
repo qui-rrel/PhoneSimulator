@@ -17,6 +17,7 @@ const publishDraft = ref({ text: '', images: [], typedSteps: 0 })
 const keyboardOwner = ref('')
 const activeKey = ref('')
 const typingToken = ref(0)
+const typingOwner = ref('')
 const addingImages = ref(false)
 const viewerSwipeStart = ref(null)
 const viewerSwipeOffset = ref(0)
@@ -55,13 +56,13 @@ const currentCommentDraft = computed(() => {
 })
 const publishComplete = computed(() => {
   const script = activePublish.value
-  if (!script) return false
+  if (!script || typingOwner.value === 'publish') return false
   return (!script.text || publishDraft.value.text === script.text)
     && (!(script.imageSrc || []).length || publishDraft.value.images.length === script.imageSrc.length)
 })
 const commentComplete = computed(() => {
   const script = currentCommentScript.value
-  if (!script) return false
+  if (!script || typingOwner.value === `comment:${currentCommentDraftKey.value}`) return false
   return (!script.text || currentCommentDraft.value.text === script.text)
     && (!script.imageSrc || currentCommentDraft.value.imageSrc === script.imageSrc)
 })
@@ -106,6 +107,7 @@ function closeKeyboard() {
   const closingComment = keyboardOwner.value.startsWith('comment:')
   window.clearTimeout(commentLayoutTimer.value)
   typingToken.value += 1
+  typingOwner.value = ''
   keyboardOwner.value = ''
   activeKey.value = ''
   if (closingComment) commentTarget.value = null
@@ -113,22 +115,28 @@ function closeKeyboard() {
 function tapKey(key) { playKeyboardTapSound(); activeKey.value = key; window.setTimeout(() => { if (activeKey.value === key) activeKey.value = '' }, 110) }
 async function typeConfigured(owner, line, keystrokes, draft) {
   keyboardOwner.value = owner
+  if (typingOwner.value === owner) return
   typingToken.value += 1
   const token = typingToken.value
   if (!line || draft.text === line) return
   const plan = createTypingPlan(line, keystrokes)
   if (!plan.keystrokes.length) { draft.text = line; return }
-  for (let index = draft.typedSteps || 0; index < plan.keystrokes.length; index += 1) {
-    if (token !== typingToken.value || keyboardOwner.value !== owner) return
-    activeKey.value = plan.keystrokes[index].toUpperCase()
-    playKeyboardTapSound()
-    draft.typedSteps = index + 1
-    const length = Math.max(1, Math.floor((draft.typedSteps / plan.keystrokes.length) * plan.typeableCount))
-    draft.text = plan.render(length)
-    await new Promise((resolve) => window.setTimeout(resolve, 56 + Math.random() * 30))
+  typingOwner.value = owner
+  try {
+    for (let index = draft.typedSteps || 0; index < plan.keystrokes.length; index += 1) {
+      if (token !== typingToken.value || keyboardOwner.value !== owner) return
+      activeKey.value = plan.keystrokes[index].toUpperCase()
+      playKeyboardTapSound()
+      draft.typedSteps = index + 1
+      const length = Math.max(1, Math.floor((draft.typedSteps / plan.keystrokes.length) * plan.typeableCount))
+      draft.text = plan.render(length)
+      await new Promise((resolve) => window.setTimeout(resolve, 56 + Math.random() * 30))
+    }
+    draft.text = line
+    activeKey.value = ''
+  } finally {
+    if (typingOwner.value === owner && token === typingToken.value) typingOwner.value = ''
   }
-  draft.text = line
-  activeKey.value = ''
 }
 function openPublishKeyboard() { void typeConfigured('publish', activePublish.value?.text || '', activePublish.value?.keystrokes, publishDraft.value) }
 function openCommentKeyboard() { void typeConfigured(`comment:${currentCommentDraftKey.value}`, currentCommentScript.value?.text || '', currentCommentScript.value?.keystrokes, currentCommentDraft.value) }

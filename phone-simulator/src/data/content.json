@@ -4,7 +4,9 @@
     "height": 852,
     "radius": 58,
     "fixedDate": "",
-    "initialBatteryLevel": 20
+    "initialBatteryLevel": 20,
+    "batteryDrainIntervalSeconds": 30,
+    "powerOffDelaySeconds": 30
   },
   "owner": {
     "name": "张月",

@@ -31,6 +31,11 @@ const currentPlayerEntry = computed(() => {
 })
 const currentPlayerLine = computed(() => currentPlayerEntry.value?.text || '')
 const contactTyping = computed(() => Boolean(currentStage.value?.isTyping))
+const canSendReply = computed(() => Boolean(
+  draft.value
+  && draft.value === currentPlayerLine.value
+  && !typingDraft.value,
+))
 const keyboardRows = [['Q','W','E','R','T','Y','U','I','O','P'], ['A','S','D','F','G','H','J','K','L'], ['Z','X','C','V','B','N','M']]
 const conversationPreview = (item) => item.messages?.at(-1)?.text || ''
 const avatarFallback = (item) => item.initials || item.name?.slice(0, 1) || '?'
@@ -109,7 +114,7 @@ function tapKey(key) {
 }
 
 async function sendPresetReply() {
-  if (!draft.value || !contact.value || typingDraft.value) return
+  if (!canSendReply.value || !contact.value) return
   const id = contact.value.id
   const stage = currentStage.value
   if (!stage) return
@@ -226,7 +231,7 @@ watch(() => contact.value?.id, (id, previous) => {
           <i v-if="typingDraft"></i>
         </button>
         <Smile :size="22" />
-        <button class="send-button" :class="{ 'send-button--ready': draft }" type="button" aria-label="发送" @click="sendPresetReply">
+        <button class="send-button" :class="{ 'send-button--ready': canSendReply }" type="button" aria-label="发送" :disabled="!canSendReply" @click="sendPresetReply">
           <Send :size="18" />
         </button>
       </div>

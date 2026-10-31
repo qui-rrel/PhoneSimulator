@@ -293,7 +293,7 @@
         "type": "none"
       },
       "nextByOutcome": {
-        "completed": "evt-phone-power-off",
+        "completed": "",
         "accepted": "",
         "rejected": "",
         "missed": ""
@@ -466,30 +466,6 @@
       "action": {
         "type": "moment-comment",
         "commentScriptId": "commentScriptId-4"
-      },
-      "nextByOutcome": {
-        "completed": "",
-        "accepted": "",
-        "rejected": "",
-        "missed": ""
-      },
-      "retry": {
-        "enabled": false,
-        "afterMs": 30000,
-        "outcomes": []
-      }
-    },
-    {
-      "id": "evt-phone-power-off",
-      "initialActive": false,
-      "trigger": {
-        "type": "operation",
-        "action": "call-ended",
-        "appId": "phone",
-        "targetId": "yao"
-      },
-      "action": {
-        "type": "power-off"
       },
       "nextByOutcome": {
         "completed": "",
