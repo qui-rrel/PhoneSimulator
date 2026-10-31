@@ -6616,7 +6616,7 @@
       "name": "家",
       "type": "home",
       "address": "北京市朝阳区朝霞路9号",
-      "mapSrc": "/media/Maps/home.svg",
+      "mapSrc": "/media/Maps/map-家-20261028-5.svg",
       "favorite": true,
       "recent": false,
       "savedDate": "2026-10-12"
@@ -6627,7 +6627,7 @@
       "name": "瑶瑶家",
       "type": "home",
       "address": "北京市朝阳区栖霞路18号",
-      "mapSrc": "/media/Maps/yaoyao-home.svg",
+      "mapSrc": "/media/Maps/map-瑶瑶家-2ahg5f3bgz2a-3-4.svg",
       "favorite": true,
       "recent": true,
       "savedDate": "2026-10-20"
@@ -6638,7 +6638,7 @@
       "name": "海底捞火锅",
       "type": "dining",
       "address": "北京市朝阳区青梧路88号",
-      "mapSrc": "/media/Maps/hotpot.svg",
+      "mapSrc": "/media/Maps/map-海底捞火锅-yir7q1h4csln-5.svg",
       "favorite": true,
       "recent": true,
       "savedDate": "2026-10-06"
@@ -6649,7 +6649,7 @@
       "name": "月光舞蹈室",
       "type": "dance-studio",
       "address": "北京市朝阳区星汉路21号",
-      "mapSrc": "/media/Maps/moon-dance-studio.svg",
+      "mapSrc": "/media/Maps/map-月光舞蹈室-yir7q1h4csln-7.svg",
       "favorite": false,
       "recent": true,
       "savedDate": ""
@@ -6660,7 +6660,7 @@
       "name": "星轨录音室",
       "type": "recording-studio",
       "address": "北京市朝阳区云港路16号",
-      "mapSrc": "/media/Maps/star-recording-studio.svg",
+      "mapSrc": "/media/Maps/map-星轨录音室-cpyma3yqcwmk-6.svg",
       "favorite": false,
       "recent": false,
       "savedDate": ""
@@ -6671,7 +6671,7 @@
       "name": "澎雅大舞台",
       "type": "other",
       "address": "北京市朝阳区宛平南路2799号",
-      "mapSrc": "/media/Maps/stage.svg",
+      "mapSrc": "/media/Maps/map-澎雅大舞台-16u97f1x3sas.svg",
       "favorite": false,
       "recent": false,
       "savedDate": ""
