@@ -44,20 +44,23 @@ function waitForLoadingSlice() {
   })
 }
 
-function preloadImage(src) {
+function preloadImage(src, { fetchPriority = 'low', timeoutMs = 12000 } = {}) {
   return new Promise((resolve) => {
     const image = new Image()
     let settled = false
+    let timeout
     const finish = async () => {
       if (settled) return
       settled = true
+      window.clearTimeout(timeout)
       image.onload = null
       image.onerror = null
       if (image.decode) await image.decode().catch(() => {})
       resolve()
     }
+    timeout = window.setTimeout(finish, timeoutMs)
     image.decoding = 'async'
-    image.fetchPriority = 'low'
+    image.fetchPriority = fetchPriority
     image.onload = finish
     image.onerror = finish
     image.src = src
@@ -88,23 +91,48 @@ function preloadPlayableMedia(src) {
 }
 
 async function preloadStage(sources, loader, state) {
-  const pending = []
-  for (const src of uniqueSources(sources)) {
-    if (state.cancelled || warmedSources.has(src)) continue
-    await waitForLoadingSlice()
-    if (state.cancelled) break
-    warmedSources.add(src)
-    pending.push(loader(src))
+  const queue = uniqueSources(sources).filter((src) => !warmedSources.has(src))
+  let cursor = 0
+  async function worker() {
+    while (!state.cancelled && cursor < queue.length) {
+      const src = queue[cursor]
+      cursor += 1
+      await waitForLoadingSlice()
+      if (state.cancelled) return
+      warmedSources.add(src)
+      await loader(src)
+    }
   }
-  await Promise.allSettled(pending)
+  const workerCount = Math.min(3, queue.length)
+  await Promise.allSettled(Array.from({ length: workerCount }, worker))
+}
+
+export async function preloadLockScreenMedia(config) {
+  const apps = new Map((config.apps || []).map((app) => [app.id, app]))
+  const contacts = new Map((config.contacts || []).map((contact) => [contact.id, contact]))
+  const notificationImages = (config.lockNotifications || []).flatMap((item) => {
+    const contact = contacts.get(item.contactId)
+    if (['messages', 'phone'].includes(item.appId) && contact?.avatar) return [contact.avatar]
+    return [apps.get(item.appId)?.iconSrc]
+  })
+  const sources = uniqueSources([
+    ...collectMediaPaths(config.theme?.lockWallpaper || config.theme?.homeWallpaper),
+    ...notificationImages,
+  ]).filter((src) => IMAGE_EXTENSION.test(src))
+
+  await Promise.allSettled(sources.map((src) => {
+    warmedSources.add(src)
+    return preloadImage(src, { fetchPriority: 'high' })
+  }))
 }
 
 export function startProgressiveMediaPreload(config) {
   const state = { cancelled: false }
+  const homeWallpaperImages = uniqueSources(collectMediaPaths(config.theme?.homeWallpaper))
   const appIcons = uniqueSources(config.apps?.filter((app) => app.enabled !== false).map((app) => app.iconSrc) || [])
   const galleryImages = uniqueSources(config.gallery?.map((photo) => photo.src) || [])
   const configuredSources = uniqueSources(collectMediaPaths(config))
-  const reservedImages = new Set([...appIcons, ...galleryImages])
+  const reservedImages = new Set([...homeWallpaperImages, ...appIcons, ...galleryImages])
   const otherUiImages = uniqueSources([
     ...CALL_UI_ASSETS,
     ...configuredSources.filter((src) => IMAGE_EXTENSION.test(src) && !reservedImages.has(src)),
@@ -112,6 +140,8 @@ export function startProgressiveMediaPreload(config) {
   const playableMedia = configuredSources.filter((src) => MEDIA_EXTENSION.test(src))
 
   void (async () => {
+    await preloadStage(homeWallpaperImages, (src) => preloadImage(src, { fetchPriority: 'auto' }), state)
+    if (state.cancelled) return
     await preloadStage(appIcons, preloadImage, state)
     if (state.cancelled) return
     await preloadStage(otherUiImages, preloadImage, state)

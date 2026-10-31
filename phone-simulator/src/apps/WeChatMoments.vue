@@ -249,7 +249,7 @@ watch(target, (value, previous) => {
         <WechatAvatar :person="wechat.findContact(moment.authorId)" :size="42" />
         <div class="wechat-moment__body"><strong>{{ contactName(wechat.findContact(moment.authorId)) }}</strong><p v-if="moment.text">{{ moment.text }}</p>
           <div v-if="momentImages(moment).length" class="wechat-moment-gallery" :class="{ 'wechat-moment-gallery--single': momentImages(moment).length === 1, 'wechat-moment-gallery--two': momentImages(moment).length === 2, 'wechat-moment-gallery--four': momentImages(moment).length === 4 }">
-            <button v-for="(src, imageIndex) in momentImages(moment)" :key="`${moment.id}-${imageIndex}`" type="button" @click="openMomentImage(moment, imageIndex)"><img :src="src" alt="" loading="lazy" /></button>
+            <button v-for="(src, imageIndex) in momentImages(moment)" :key="`${moment.id}-${imageIndex}`" type="button" @click="openMomentImage(moment, imageIndex)"><img :src="src" alt="" loading="lazy" decoding="async" /></button>
           </div>
           <div class="wechat-moment__meta"><small>{{ moment.time }}</small><button type="button" aria-label="朋友圈操作" @click.stop="toggleMenu(moment.id)"><MoreHorizontal :size="17" /></button>
             <Transition name="wechat-pop"><div v-if="menuMomentId === moment.id" class="wechat-moment-menu"><button type="button" @click="toggleLike(moment.id)"><Heart :class="{ active: wechat.isMomentLiked(moment.id) }" />{{ wechat.isMomentLiked(moment.id) ? '取消' : '赞' }}</button><button type="button" @click="openComment(moment)"><MessageCircle />评论</button></div></Transition>

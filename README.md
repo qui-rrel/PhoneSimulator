@@ -128,7 +128,7 @@ Private 仓库可以连接 Cloudflare Pages，但必须在 GitHub 授权页面�
 
 如环境要求指定 Node.js，可增加环境变量 `NODE_VERSION=22`。部署成功后会得到 `https://项目名.pages.dev/`。
 
-`public/media/` 中的素材会随构建产物发布。网页显示锁屏后会在后台按 App 图标、其他 UI 图片、相册图片、音视频的顺序分阶段预加载，避免大量素材在首帧同时请求；这不会替代图片分辨率和文件体积优化。
+`public/media/` 中的素材会随构建产物发布。网页会先加载锁屏壁纸和锁屏通知所需图片，完成后才显示手机；随后在后台按桌面壁纸、App 图标、其他 UI 图片、相册图片、音视频的顺序分阶段预加载，并限制低优先级图片并发，避免大量素材争抢首屏资源。这不会替代图片分辨率和文件体积优化。
 
 最容易出现的配置错误是把 Root directory 留空：外层仓库根目录没有 `package.json`，Cloudflare 将无法执行 Vue 构建。Root directory 必须填写 `phone-simulator`。
 

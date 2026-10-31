@@ -152,7 +152,7 @@ function cancelEdgeBack() {
       @pointercancel.capture="(event) => finishMouseScroll(event, true)"
       @click.capture="blockMouseScrollClick"
     >
-      <div class="wallpaper"></div>
+      <div v-if="!phone.locked" class="wallpaper"></div>
       <HomeScreen v-if="!phone.locked" :class="{ 'home-screen--app-open': phone.activeApp }" />
       <LockScreen v-else />
       <AppWindow v-if="!phone.locked" />
