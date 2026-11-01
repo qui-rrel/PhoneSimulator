@@ -1152,6 +1152,11 @@
           "type": "event-state",
           "targetId": "evt-final-call-enabled",
           "value": "completed"
+        },
+        {
+          "type": "event-state",
+          "targetId": "evt-wait-final-call",
+          "value": "in-progress"
         }
       ]
     },
@@ -1170,6 +1175,11 @@
           "type": "event-outcome",
           "targetId": "evt-call-2",
           "value": "rejected"
+        },
+        {
+          "type": "event-state",
+          "targetId": "evt-final-call-enabled",
+          "value": "not-triggered"
         }
       ]
     },
@@ -1188,6 +1198,11 @@
           "type": "event-outcome",
           "targetId": "evt-call-2",
           "value": "missed"
+        },
+        {
+          "type": "event-state",
+          "targetId": "evt-final-call-enabled",
+          "value": "not-triggered"
         }
       ]
     },
@@ -1206,6 +1221,11 @@
           "type": "event-outcome",
           "targetId": "evt-call-1",
           "value": "rejected"
+        },
+        {
+          "type": "event-state",
+          "targetId": "evt-final-call-enabled",
+          "value": "not-triggered"
         }
       ]
     },
@@ -1224,6 +1244,11 @@
           "type": "event-outcome",
           "targetId": "evt-call-1",
           "value": "missed"
+        },
+        {
+          "type": "event-state",
+          "targetId": "evt-final-call-enabled",
+          "value": "not-triggered"
         }
       ]
     }
