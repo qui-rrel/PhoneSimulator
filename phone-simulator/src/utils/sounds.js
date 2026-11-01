@@ -1,4 +1,5 @@
 let audioContext = null
+let incomingRingtone = null
 
 function getAudioContext() {
   if (typeof window === 'undefined') return null
@@ -49,7 +50,7 @@ function playNoiseClick(context, frequency) {
   filter.type = 'bandpass'
   filter.frequency.setValueAtTime(frequency, start)
   filter.Q.setValueAtTime(0.8, start)
-  gain.gain.setValueAtTime(0.025, start)
+  gain.gain.setValueAtTime(0.065, start)
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration)
   source.connect(filter).connect(gain).connect(context.destination)
   source.start(start)
@@ -76,13 +77,13 @@ export function playPasscodeDigitSound() {
   const context = getAudioContext()
   if (!context) return
   const pitch = 510 + Math.random() * 24
-  playTone(context, { frequency: pitch, endFrequency: pitch * 0.92, duration: 0.048, volume: 0.032 })
+  playTone(context, { frequency: pitch, endFrequency: pitch * 0.92, duration: 0.048, volume: 0.075 })
 }
 
 export function playPasscodeDeleteSound() {
   const context = getAudioContext()
   if (!context) return
-  playTone(context, { frequency: 330, endFrequency: 230, duration: 0.07, volume: 0.035, type: 'triangle' })
+  playTone(context, { frequency: 330, endFrequency: 230, duration: 0.07, volume: 0.085, type: 'triangle' })
 }
 
 export function playKeyboardTapSound() {
@@ -94,13 +95,64 @@ export function playKeyboardTapSound() {
 export function playMessageSendSound() {
   const context = getAudioContext()
   if (!context) return
-  playTone(context, { frequency: 620, endFrequency: 710, duration: 0.075, volume: 0.025, type: 'triangle' })
-  playTone(context, { frequency: 880, endFrequency: 1040, duration: 0.12, volume: 0.032, type: 'sine', delay: 0.045 })
+  playTone(context, { frequency: 620, endFrequency: 710, duration: 0.075, volume: 0.055, type: 'triangle' })
+  playTone(context, { frequency: 880, endFrequency: 1040, duration: 0.12, volume: 0.07, type: 'sine', delay: 0.045 })
 }
 
 export function playMessageReceiveSound() {
   const context = getAudioContext()
   if (!context) return
-  playTone(context, { frequency: 880, duration: 0.1, volume: 0.032, type: 'sine' })
-  playTone(context, { frequency: 1320, endFrequency: 1240, duration: 0.18, volume: 0.04, type: 'sine', delay: 0.085 })
+  playTone(context, { frequency: 880, duration: 0.1, volume: 0.075, type: 'sine' })
+  playTone(context, { frequency: 1320, endFrequency: 1240, duration: 0.18, volume: 0.095, type: 'sine', delay: 0.085 })
+}
+
+function scheduleRingtoneTone(context, output, frequency, delay) {
+  const start = context.currentTime + delay
+  const oscillator = context.createOscillator()
+  const gain = context.createGain()
+  oscillator.type = 'sine'
+  oscillator.frequency.setValueAtTime(frequency, start)
+  oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.035, start + 0.14)
+  gain.gain.setValueAtTime(0.0001, start)
+  gain.gain.exponentialRampToValueAtTime(0.72, start + 0.012)
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.14)
+  oscillator.connect(gain).connect(output)
+  oscillator.start(start)
+  oscillator.stop(start + 0.17)
+}
+
+export function stopIncomingCallRingtone() {
+  const ringtone = incomingRingtone
+  if (!ringtone) return
+  incomingRingtone = null
+  window.clearInterval(ringtone.timer)
+  try {
+    const now = ringtone.context.currentTime
+    ringtone.output.gain.cancelScheduledValues(now)
+    ringtone.output.gain.setValueAtTime(Math.max(0.0001, ringtone.output.gain.value), now)
+    ringtone.output.gain.exponentialRampToValueAtTime(0.0001, now + 0.045)
+    window.setTimeout(() => ringtone.output.disconnect(), 70)
+  } catch { /* 音频上下文已关闭时无需额外处理。 */ }
+}
+
+export function startIncomingCallRingtone() {
+  stopIncomingCallRingtone()
+  const context = getAudioContext()
+  if (!context) return
+
+  const output = context.createGain()
+  output.gain.setValueAtTime(0.16, context.currentTime)
+  output.connect(context.destination)
+  const ringtone = { context, output, timer: null }
+  incomingRingtone = ringtone
+
+  const playPattern = () => {
+    if (incomingRingtone !== ringtone) return
+    scheduleRingtoneTone(context, output, 740, 0)
+    scheduleRingtoneTone(context, output, 988, 0.18)
+    scheduleRingtoneTone(context, output, 740, 0.48)
+    scheduleRingtoneTone(context, output, 988, 0.66)
+  }
+  playPattern()
+  ringtone.timer = window.setInterval(playPattern, 1500)
 }

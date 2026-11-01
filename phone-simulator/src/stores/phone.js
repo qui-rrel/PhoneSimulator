@@ -5,7 +5,13 @@ import { storyConfig } from '../config/story.config'
 import { useMapsStore } from './maps'
 import { useMusicStore } from './music'
 import { useWechatStore } from './wechat'
-import { playMessageReceiveSound, playPasscodeDeleteSound, playPasscodeDigitSound } from '../utils/sounds'
+import {
+  playMessageReceiveSound,
+  playPasscodeDeleteSound,
+  playPasscodeDigitSound,
+  startIncomingCallRingtone,
+  stopIncomingCallRingtone,
+} from '../utils/sounds'
 
 const clone = (value) => JSON.parse(JSON.stringify(value))
 const formatTime = (date = new Date()) => new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date)
@@ -398,6 +404,7 @@ export const usePhoneStore = defineStore('phone', () => {
     }, CALL_END_DISPLAY_MS)
   }
   function beginCall(call, direction, eventId = '') {
+    stopIncomingCallRingtone()
     window.clearTimeout(callTimeout)
     window.clearTimeout(outgoingCallTimer)
     window.clearTimeout(outgoingCloseTimer)
@@ -429,6 +436,7 @@ export const usePhoneStore = defineStore('phone', () => {
     if (!dialogue || incomingCall.value || activeCall.value) return
     const call = hydrateCall(dialogue)
     incomingCall.value = { ...call, eventId }
+    startIncomingCallRingtone()
     showNotification({ appId: 'phone', contactId: call.contactId, title: call.title, body: '来电' })
     window.clearTimeout(callTimeout)
     callTimeout = window.setTimeout(() => resolveIncomingCall('missed'), timeoutMs)
@@ -436,6 +444,7 @@ export const usePhoneStore = defineStore('phone', () => {
   function resolveIncomingCall(outcome) {
     const ringing = incomingCall.value
     if (!ringing) return
+    stopIncomingCallRingtone()
     window.clearTimeout(callTimeout)
     incomingCall.value = null
     if (notification.value?.appId === 'phone' && notification.value?.contactId === ringing.contactId) dismissNotification()
@@ -663,6 +672,7 @@ export const usePhoneStore = defineStore('phone', () => {
   }
   function beginPowerOff() {
     if (powerState.value !== 'on') return
+    stopIncomingCallRingtone()
     storyTimelineStarted = false
     clearStoryPowerOffTimer()
     clearBatteryDrainTimer()
@@ -749,6 +759,7 @@ export const usePhoneStore = defineStore('phone', () => {
   }
   function startRuntime() { startNavigation(); startBatteryDrain(); startTimeline(); startAlarmClock() }
   function resetStory() {
+    stopIncomingCallRingtone()
     clearPowerTimers()
     clearStoryPowerOffTimer()
     clearBatteryDrainTimer()

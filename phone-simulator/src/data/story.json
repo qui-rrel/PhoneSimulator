@@ -565,123 +565,57 @@
           "side": "me",
           "text": "瑶瑶不在身边的第我也记不清多久，想她😭",
           "keystrokes": "yaoyaobuzaishengbiandediwoyejibuqingduojiuxiangta"
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-2",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "them",
           "text": "怎么突然发短信呀？",
           "afterMs": 60000
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-3",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "them",
           "text": "摸摸月月",
           "afterMs": 1000
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-4",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "me",
           "text": "你之前不也突然发了短信",
           "keystrokes": "nizhiqianbuyeturanfaleduanxin"
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-5",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "me",
           "text": "不觉得很正式吗，和微信不同",
           "keystrokes": "bujuedehenzhengshimaheweixinbutong"
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-6",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "them",
           "text": "这么有仪式感呀",
           "afterMs": 1000
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-7",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "me",
           "text": "我很正式地在想瑶瑶",
           "keystrokes": "wohenzhengshidezaixiangyaoyao"
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-8",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "me",
           "text": "刚刚小呼说今天的妈妈很漂亮",
           "keystrokes": "ganggangxiaohushuojintiandemamahenpiaoliang"
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-9",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "them",
           "text": "亲亲小呼，也亲亲大呼",
           "afterMs": 1000
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-10",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "me",
           "text": "😘亲亲瑶瑶",
           "keystrokes": "qinqinyaoyao"
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-11",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "them",
           "text": "好啦，一会儿就能见到啦",
           "afterMs": 1000
-        }
-      ]
-    },
-    {
-      "id": "sms-yao-side-12",
-      "contactId": "yao",
-      "messages": [
+        },
         {
           "side": "me",
           "text": "嗯，不打扰瑶瑶工作了",
