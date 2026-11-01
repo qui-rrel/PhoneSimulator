@@ -38,6 +38,7 @@ let alarmPulse = null
 let navigationReady = false
 let navigationDepth = 0
 let navigationPopstateHandler = null
+let explicitHistoryNavigation = false
 let powerWarningTimer = null
 let powerShutdownTimer = null
 let batteryDrainTimer = null
@@ -137,8 +138,14 @@ export const usePhoneStore = defineStore('phone', () => {
     navigationDepth = 0
     window.history.replaceState(historyPayload(0), '')
     navigationPopstateHandler = (event) => {
+      const isExplicitNavigation = explicitHistoryNavigation
+      explicitHistoryNavigation = false
       const navigation = event.state?.[PHONE_HISTORY_KEY]
       if (!navigation) return
+      if (!isExplicitNavigation && runEdgeBackHandlers()) {
+        window.history.pushState(historyPayload(navigationDepth), '')
+        return
+      }
       navigationDepth = Math.max(0, Number(navigation.depth) || 0)
       applyNavigationView(navigation.view)
     }
@@ -151,11 +158,13 @@ export const usePhoneStore = defineStore('phone', () => {
     }
     navigationPopstateHandler = null
     navigationReady = false
+    explicitHistoryNavigation = false
   }
 
   function navigateBack() {
     if (!canNavigateBack.value) return false
     if (navigationReady && navigationDepth > 0) {
+      explicitHistoryNavigation = true
       window.history.back()
       return true
     }
@@ -174,16 +183,22 @@ export const usePhoneStore = defineStore('phone', () => {
     }
   }
 
-  function handleEdgeBack() {
+  function runEdgeBackHandlers() {
     for (let index = edgeBackHandlers.length - 1; index >= 0; index -= 1) {
       if (edgeBackHandlers[index]()) return true
     }
+    return false
+  }
+
+  function handleEdgeBack() {
+    if (runEdgeBackHandlers()) return true
     return navigateBack()
   }
 
   function navigateHome() {
     if (locked.value) return false
     if (navigationReady && navigationDepth > 0) {
+      explicitHistoryNavigation = true
       window.history.go(-navigationDepth)
       return true
     }
