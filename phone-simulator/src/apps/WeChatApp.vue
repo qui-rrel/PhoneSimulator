@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   Blocks, ChevronLeft, ChevronRight, CirclePlus, Compass, ContactRound, Gamepad2, Heart,
   Image as ImageIcon, MessageCircle, MessageSquare, Mic, MoreHorizontal, Music2, Plus,
@@ -35,6 +35,7 @@ const keyboardLayoutTimer = ref(null)
 const viewerSwipeStart = ref(null)
 const viewerSwipeOffset = ref(0)
 const chatViewerScrollTop = ref(0)
+let removeEdgeBackHandler = () => {}
 
 const contentTarget = computed(() => phone.activeContent?.appId === 'wechat' ? phone.activeContent.targetId : '')
 const chatViewerTarget = computed(() => {
@@ -262,6 +263,15 @@ function closeKeyboard() {
   activeKey.value = ''
   nextTick(alignLatestAfterKeyboardLayout)
 }
+
+function handleKeyboardEdgeBack() {
+  if (!keyboardVisible.value) return false
+  closeKeyboard()
+  return true
+}
+
+onMounted(() => { removeEdgeBackHandler = phone.registerEdgeBackHandler(handleKeyboardEdgeBack) })
+onBeforeUnmount(() => removeEdgeBackHandler())
 
 function tapKey(key) {
   playKeyboardTapSound()

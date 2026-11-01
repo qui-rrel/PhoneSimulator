@@ -129,7 +129,7 @@ function endEdgeBack() {
   const shouldNavigate = edgeReady.value
   edgeStart.value = null
   edgeOffset.value = 0
-  if (shouldNavigate) phone.navigateBack()
+  if (shouldNavigate) phone.handleEdgeBack()
 }
 
 function cancelEdgeBack() {

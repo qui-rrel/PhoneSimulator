@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { AtSign, Camera, ChevronLeft, Heart, Image as ImageIcon, MapPin, MessageCircle, MoreHorizontal, Smile, Users } from 'lucide-vue-next'
 import WechatAvatar from '../components/WechatAvatar.vue'
 import { usePhoneStore } from '../stores/phone'
@@ -24,6 +24,7 @@ const viewerSwipeStart = ref(null)
 const viewerSwipeOffset = ref(0)
 const momentPane = ref(null)
 const commentLayoutTimer = ref(null)
+let removeEdgeBackHandler = () => {}
 
 const target = computed(() => phone.activeContent?.appId === 'wechat' ? phone.activeContent.targetId : '')
 const showingFeed = computed(() => target.value === 'moments')
@@ -113,6 +114,13 @@ function closeKeyboard() {
   activeKey.value = ''
   if (closingComment) commentTarget.value = null
 }
+function handleKeyboardEdgeBack() {
+  if (!keyboardOwner.value) return false
+  closeKeyboard()
+  return true
+}
+onMounted(() => { removeEdgeBackHandler = phone.registerEdgeBackHandler(handleKeyboardEdgeBack) })
+onBeforeUnmount(() => removeEdgeBackHandler())
 function tapKey(key) { playKeyboardTapSound(); activeKey.value = key; window.setTimeout(() => { if (activeKey.value === key) activeKey.value = '' }, 110) }
 async function typeConfigured(owner, line, keystrokes, draft) {
   keyboardOwner.value = owner

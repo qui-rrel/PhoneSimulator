@@ -76,7 +76,7 @@
       "initialActive": false,
       "trigger": {
         "type": "timer",
-        "afterMs": 240000
+        "afterMs": 90000
       },
       "action": {
         "type": "call",

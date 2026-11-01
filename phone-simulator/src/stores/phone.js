@@ -74,6 +74,7 @@ export const usePhoneStore = defineStore('phone', () => {
   const alarmRinging = ref(null)
   const alarmTriggerKeys = new Set()
   const processingSmsScripts = new Set()
+  const edgeBackHandlers = []
 
   const activeApp = computed(() => phoneConfig.apps.find((app) => app.id === activeAppId.value))
   const activeContact = computed(() => contacts.value.find((contact) => contact.id === activeContactId.value))
@@ -162,6 +163,22 @@ export const usePhoneStore = defineStore('phone', () => {
     else if (activeContactId.value) activeContactId.value = null
     else if (activeAppId.value) activeAppId.value = null
     return true
+  }
+
+  function registerEdgeBackHandler(handler) {
+    if (typeof handler !== 'function') return () => {}
+    edgeBackHandlers.push(handler)
+    return () => {
+      const index = edgeBackHandlers.lastIndexOf(handler)
+      if (index >= 0) edgeBackHandlers.splice(index, 1)
+    }
+  }
+
+  function handleEdgeBack() {
+    for (let index = edgeBackHandlers.length - 1; index >= 0; index -= 1) {
+      if (edgeBackHandlers[index]()) return true
+    }
+    return navigateBack()
   }
 
   function navigateHome() {
@@ -801,7 +818,7 @@ export const usePhoneStore = defineStore('phone', () => {
     locked, batteryLevel, powerState, passcodeVisible, pin, pinError, activeAppId, activeApp, activeContactId, activeContact, activeContent,
     notification, contacts, unreadTotal, mail, unreadMailTotal, alarms, callHistory, incomingCall, activeCall, callTranscript,
     callElapsed, callStatus, alarmRinging, canNavigateBack, showPasscode, pressPin, erasePin, lock, openApp, closeApp, openContact,
-    closeContact, openContent, openAppContent, replaceContent, navigateBack, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
+    closeContact, openContent, openAppContent, replaceContent, navigateBack, handleEdgeBack, registerEdgeBackHandler, navigateHome, stopNavigation, addMessage, receiveMessage, showNotification, dismissNotification, openNotification,
     toggleAlarm, stopAlarm, triggerOperation, startOutgoingCall, acceptCall, rejectCall,
     activeStoryEvents, completedEvents, eventOutcomes, activeSmsScripts, getActiveSmsScript, advanceSmsScript, completeSmsScript,
     resolveStoryOutcome, resetStory, startTimeline, startRuntime,

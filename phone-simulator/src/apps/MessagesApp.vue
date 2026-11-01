@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, MoreHorizontal, Plus, Search, Send, Smile, Video } from 'lucide-vue-next'
 import { usePhoneStore } from '../stores/phone'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
@@ -18,6 +18,7 @@ const typedSteps = ref(0)
 const contactDrafts = ref({})
 const keyboardLayoutTimer = ref(null)
 const failedAvatarSources = ref(new Set())
+let removeEdgeBackHandler = () => {}
 
 const contact = computed(() => phone.activeContact)
 const currentStage = computed(() => {
@@ -107,6 +108,15 @@ function closeKeyboard() {
   activeKey.value = ''
   nextTick(alignLatestAfterKeyboardLayout)
 }
+
+function handleKeyboardEdgeBack() {
+  if (!keyboardVisible.value) return false
+  closeKeyboard()
+  return true
+}
+
+onMounted(() => { removeEdgeBackHandler = phone.registerEdgeBackHandler(handleKeyboardEdgeBack) })
+onBeforeUnmount(() => removeEdgeBackHandler())
 
 function tapKey(key) {
   playKeyboardTapSound()
