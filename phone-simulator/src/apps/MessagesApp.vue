@@ -120,7 +120,7 @@ async function sendPresetReply() {
   const stage = currentStage.value
   if (!stage) return
   playMessageSendSound()
-  phone.addMessage(id, { side: 'me', text: draft.value, read: true })
+  phone.addMessage(id, { side: 'me', text: draft.value, read: false })
   draft.value = ''
   typedSteps.value = 0
   delete contactDrafts.value[id]

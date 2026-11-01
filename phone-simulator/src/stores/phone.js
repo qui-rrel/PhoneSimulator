@@ -18,6 +18,7 @@ const formatTime = (date = new Date()) => new Intl.DateTimeFormat('zh-CN', { hou
 const formatDateKey = (date = new Date()) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 const hydrateContacts = (contacts = []) => clone(contacts)
 const CALL_END_DISPLAY_MS = 2500
+const SMS_TYPING_LEAD_MS = 3000
 const PHONE_HISTORY_KEY = '__phoneSimulatorNavigation'
 const normalizeBatteryLevel = (value, fallback = 100) => {
   const number = Number(value)
@@ -278,6 +279,13 @@ export const usePhoneStore = defineStore('phone', () => {
     const [script] = activeSmsScripts.value.splice(index, 1)
     if (script.eventId) resolveStoryOutcome(script.eventId, 'completed')
   }
+  function markSentMessagesRead(contactId) {
+    const contact = contacts.value.find((item) => item.id === contactId)
+    if (!contact) return
+    contact.messages.forEach((message) => {
+      if (message.side === 'me' && message.read !== true) message.read = true
+    })
+  }
   async function playAutomaticSmsMessages(scriptId) {
     if (processingSmsScripts.has(scriptId)) return
     processingSmsScripts.add(scriptId)
@@ -287,10 +295,17 @@ export const usePhoneStore = defineStore('phone', () => {
         const entry = script.messages?.[script.currentIndex]
         if (!entry || entry.side !== 'them') break
         const expectedIndex = script.currentIndex
-        script.isTyping = true
         const configuredDelay = Number(entry.afterMs)
-        const delay = Number.isFinite(configuredDelay) ? configuredDelay : 900 + entry.text.length * 45
-        await new Promise((resolve) => window.setTimeout(resolve, Math.max(0, delay)))
+        const totalDelay = Math.max(0, Number.isFinite(configuredDelay) ? configuredDelay : 900 + entry.text.length * 45)
+        const typingDelay = Math.min(totalDelay, SMS_TYPING_LEAD_MS)
+        const offlineDelay = totalDelay - typingDelay
+        script.isTyping = false
+        if (offlineDelay > 0) await new Promise((resolve) => window.setTimeout(resolve, offlineDelay))
+        script = activeSmsScripts.value.find((item) => item.id === scriptId)
+        if (!script || script.currentIndex !== expectedIndex) break
+        markSentMessagesRead(script.contactId)
+        script.isTyping = true
+        if (typingDelay > 0) await new Promise((resolve) => window.setTimeout(resolve, typingDelay))
         script = activeSmsScripts.value.find((item) => item.id === scriptId)
         if (!script || script.currentIndex !== expectedIndex) break
         script.isTyping = false
