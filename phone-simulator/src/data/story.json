@@ -225,7 +225,7 @@
       },
       "nextByOutcome": {
         "completed": "",
-        "accepted": "evt-final-call-enabled",
+        "accepted": "evt-after-call2-wx",
         "rejected": "evt-call2-missed-wx",
         "missed": "evt-call2-missed-wx"
       },
@@ -271,7 +271,7 @@
         "type": "none"
       },
       "nextByOutcome": {
-        "completed": "evt-final-call-enabled",
+        "completed": "evt-after-call2-wx",
         "accepted": "",
         "rejected": "",
         "missed": ""
@@ -293,7 +293,7 @@
         "type": "none"
       },
       "nextByOutcome": {
-        "completed": "",
+        "completed": "evt-wait-final-call",
         "accepted": "",
         "rejected": "",
         "missed": ""
@@ -491,6 +491,53 @@
       "action": {
         "type": "sms-script",
         "smsScriptId": "sms-yao-side-1"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "evt-after-call2-wx",
+      "initialActive": false,
+      "trigger": {
+        "type": "timer",
+        "afterMs": 30000
+      },
+      "action": {
+        "type": "wechat-script",
+        "wechatScriptId": "wx-script-9"
+      },
+      "nextByOutcome": {
+        "completed": "evt-final-call-enabled",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
+    },
+    {
+      "id": "evt-wait-final-call",
+      "initialActive": false,
+      "trigger": {
+        "type": "operation",
+        "action": "call-ended",
+        "appId": "phone",
+        "targetId": "yao"
+      },
+      "action": {
+        "type": "none"
       },
       "nextByOutcome": {
         "completed": "",
@@ -1823,6 +1870,47 @@
           "text": "我错了瑶瑶马上打！",
           "mediaSrc": "",
           "keystrokes": "wocuoleyaoyaomashangda"
+        }
+      ]
+    },
+    {
+      "id": "wx-script-9",
+      "conversationId": "wx-chat-1",
+      "messages": [
+        {
+          "senderId": "wx-chen",
+          "type": "text",
+          "text": "月月到哪里了？",
+          "mediaSrc": "",
+          "afterMs": 800
+        },
+        {
+          "senderId": "wx-chen",
+          "type": "text",
+          "text": "开车注意安全哦。",
+          "mediaSrc": "",
+          "afterMs": 1000
+        },
+        {
+          "senderId": "wx-chen",
+          "type": "text",
+          "text": "要到了记得给我打电话",
+          "mediaSrc": "",
+          "afterMs": 1000
+        },
+        {
+          "senderId": "SELF",
+          "type": "text",
+          "text": "嗯，知道啦",
+          "mediaSrc": "",
+          "keystrokes": "enzhidaola"
+        },
+        {
+          "senderId": "SELF",
+          "type": "text",
+          "text": "要到了给你打过去哦",
+          "mediaSrc": "",
+          "keystrokes": "yaodaolegeinidaguoquo"
         }
       ]
     }
