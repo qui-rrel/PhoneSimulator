@@ -1,5 +1,5 @@
 import { BookOpenText, Calculator, CalendarDays, Clock3, CloudSun, Compass, Image, Mail, MapPinned, MessageCircle, Music2, NotebookPen, Phone, Settings } from 'lucide-vue-next'
-import content from '../data/content.json'
+import content from 'virtual:protected-content-config'
 
 const appFallbacks = {
   messages: { icon: MessageCircle, color: '#31c45d' },

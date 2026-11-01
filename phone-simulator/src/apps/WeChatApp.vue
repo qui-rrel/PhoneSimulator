@@ -7,6 +7,7 @@ import {
 } from 'lucide-vue-next'
 import WechatAvatar from '../components/WechatAvatar.vue'
 import WeChatMoments from './WeChatMoments.vue'
+import { MESSAGE_INPUT } from '../config/story.operations'
 import { usePhoneStore } from '../stores/phone'
 import { useMapsStore } from '../stores/maps'
 import { useWechatStore } from '../stores/wechat'
@@ -209,7 +210,7 @@ function cancelViewerSwipe() {
 
 async function prepareTextReply() {
   keyboardVisible.value = true
-  phone.triggerOperation('message-input', { appId: 'wechat', targetId: conversation.value.id })
+  phone.triggerOperation(MESSAGE_INPUT, { appId: 'wechat', targetId: conversation.value.id })
   await nextTick()
   alignLatestAfterKeyboardLayout()
   const entry = pendingPlayerEntry.value
@@ -245,7 +246,7 @@ function prepareMediaReply(type) {
   if (!entry || entry.type !== type) return
   keyboardVisible.value = false
   activeKey.value = ''
-  phone.triggerOperation('message-input', { appId: 'wechat', targetId: conversation.value.id })
+  phone.triggerOperation(MESSAGE_INPUT, { appId: 'wechat', targetId: conversation.value.id })
   playKeyboardTapSound()
   draftType.value = type
   draftMediaSrc.value = entry.mediaSrc || ''

@@ -2,6 +2,18 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { contentConfig, phoneConfig } from '../config/phone.config'
 import { storyConfig } from '../config/story.config'
+import {
+  APP_OPEN,
+  CALL_ENDED,
+  CONTENT_OPEN,
+  MOMENT_LIKED,
+  MOMENT_UNLIKED,
+  OUTGOING_CALL,
+  OUTGOING_CALL_ACCEPTED,
+  OUTGOING_CALL_MISSED,
+  getIncomingCallOperation,
+  matchesStoryOperation,
+} from '../config/story.operations'
 import { useMapsStore } from './maps'
 import { useMusicStore } from './music'
 import { useWechatStore } from './wechat'
@@ -254,7 +266,7 @@ export const usePhoneStore = defineStore('phone', () => {
     activeContactId.value = null
     activeAppId.value = id
     if (changed) pushNavigationHistory()
-    triggerOperation('app-open', { appId: id, targetId: id })
+    triggerOperation(APP_OPEN, { appId: id, targetId: id })
   }
   function closeApp() { navigateHome() }
   function openContact(id) {
@@ -264,7 +276,7 @@ export const usePhoneStore = defineStore('phone', () => {
     const contact = contacts.value.find((item) => item.id === id)
     if (contact) contact.unread = 0
     pushNavigationHistory()
-    triggerOperation('content-open', { appId: 'messages', targetId: id })
+    triggerOperation(CONTENT_OPEN, { appId: 'messages', targetId: id })
   }
   function closeContact() { navigateBack() }
   function openContent(appId, targetId) {
@@ -272,7 +284,7 @@ export const usePhoneStore = defineStore('phone', () => {
     replaceNavigationHistory()
     activeContent.value = { appId, targetId }
     pushNavigationHistory()
-    triggerOperation('content-open', { appId, targetId })
+    triggerOperation(CONTENT_OPEN, { appId, targetId })
   }
   function openAppContent(appId, targetId) {
     if (locked.value) return false
@@ -283,8 +295,8 @@ export const usePhoneStore = defineStore('phone', () => {
     activeContactId.value = null
     activeContent.value = { appId, targetId }
     pushNavigationHistory()
-    triggerOperation('app-open', { appId, targetId: appId })
-    triggerOperation('content-open', { appId, targetId })
+    triggerOperation(APP_OPEN, { appId, targetId: appId })
+    triggerOperation(CONTENT_OPEN, { appId, targetId })
     return true
   }
   function replaceContent(appId, targetId) {
@@ -475,7 +487,7 @@ export const usePhoneStore = defineStore('phone', () => {
     callElapsed.value = 0
     callStatus.value = 'connected'
     if (direction === 'outgoing') {
-      triggerOperation('outgoing-call-accepted', { appId: 'phone', targetId: call.contactId })
+      triggerOperation(OUTGOING_CALL_ACCEPTED, { appId: 'phone', targetId: call.contactId })
     }
     window.clearInterval(callElapsedTimer)
     callElapsedTimer = window.setInterval(() => { callElapsed.value += 1 }, 1000)
@@ -509,7 +521,7 @@ export const usePhoneStore = defineStore('phone', () => {
     window.clearTimeout(callTimeout)
     incomingCall.value = null
     if (notification.value?.appId === 'phone' && notification.value?.contactId === ringing.contactId) dismissNotification()
-    triggerOperation(`incoming-call-${outcome}`, { appId: 'phone', targetId: ringing.contactId })
+    triggerOperation(getIncomingCallOperation(outcome), { appId: 'phone', targetId: ringing.contactId })
     if (outcome === 'accepted') beginCall(ringing, 'incoming', ringing.eventId)
     else {
       addCallRecord(ringing, outcome, 'incoming')
@@ -547,14 +559,14 @@ export const usePhoneStore = defineStore('phone', () => {
   function finishUnansweredOutgoing(call) {
     if (!activeCall.value) return
     addCallRecord(call, 'missed', 'outgoing')
-    triggerOperation('outgoing-call-missed', { appId: 'phone', targetId: call.contactId })
-    triggerOperation('call-ended', { appId: 'phone', targetId: call.contactId, outcome: 'missed' })
+    triggerOperation(OUTGOING_CALL_MISSED, { appId: 'phone', targetId: call.contactId })
+    triggerOperation(CALL_ENDED, { appId: 'phone', targetId: call.contactId, outcome: 'missed' })
     showCallEnded(call)
   }
   function startOutgoingCall(contactId, record = {}) {
     if (incomingCall.value || activeCall.value) return
     const baseCall = hydrateCall(null, record, contactId)
-    triggerOperation('outgoing-call', { appId: 'phone', targetId: baseCall.contactId })
+    triggerOperation(OUTGOING_CALL, { appId: 'phone', targetId: baseCall.contactId })
     const dialCount = (outgoingDialCounts.value[baseCall.contactId] || 0) + 1
     outgoingDialCounts.value[baseCall.contactId] = dialCount
     const rule = [...(storyConfig.outgoingCallRules || [])]
@@ -587,7 +599,7 @@ export const usePhoneStore = defineStore('phone', () => {
     callScriptTimers.forEach((timer) => window.clearTimeout(timer))
     addCallRecord(call, endedStatus === 'connected' ? 'completed' : 'outgoing', call.direction, callElapsed.value)
     const eventId = call.eventId
-    triggerOperation('call-ended', { appId: 'phone', targetId: call.contactId, outcome: endedStatus })
+    triggerOperation(CALL_ENDED, { appId: 'phone', targetId: call.contactId, outcome: endedStatus })
     showCallEnded(call, () => {
       if (eventId) resolveStoryOutcome(eventId, 'accepted')
     })
@@ -625,8 +637,8 @@ export const usePhoneStore = defineStore('phone', () => {
     if (event.trigger?.type !== 'timer') {
       const action = event.trigger?.action
       const targetId = event.trigger?.targetId
-      if (action === 'moment-liked' && targetId && useWechatStore().isMomentLiked(targetId)) runEvent(event)
-      if (action === 'moment-unliked' && targetId && !useWechatStore().isMomentLiked(targetId)) runEvent(event)
+      if (action === MOMENT_LIKED && targetId && useWechatStore().isMomentLiked(targetId)) runEvent(event)
+      if (action === MOMENT_UNLIKED && targetId && !useWechatStore().isMomentLiked(targetId)) runEvent(event)
       return
     }
     const delay = delayOverride === null ? Number(event.trigger.afterMs || 0) : Number(delayOverride || 0)
@@ -681,11 +693,9 @@ export const usePhoneStore = defineStore('phone', () => {
   function triggerOperation(action, payload = {}) {
     if (powerState.value !== 'on') return
     const details = typeof payload === 'string' ? { targetId: payload } : payload
+    if (!action) return
     const matchedEvents = (storyConfig.events || []).filter((item) =>
-      activeStoryEvents.value.includes(item.id) &&
-      item.trigger?.type === 'operation' && item.trigger.action === action &&
-      (!item.trigger.appId || item.trigger.appId === details.appId) &&
-      (!item.trigger.targetId || item.trigger.targetId === details.targetId),
+      activeStoryEvents.value.includes(item.id) && matchesStoryOperation(item, action, details),
     )
     matchedEvents.forEach(runEvent)
   }

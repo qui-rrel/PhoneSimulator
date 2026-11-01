@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { AtSign, Camera, ChevronLeft, Heart, Image as ImageIcon, MapPin, MessageCircle, MoreHorizontal, Smile, Users } from 'lucide-vue-next'
 import WechatAvatar from '../components/WechatAvatar.vue'
+import { MESSAGE_INPUT } from '../config/story.operations'
 import { usePhoneStore } from '../stores/phone'
 import { useWechatStore } from '../stores/wechat'
 import { MOMENTS_FIRST_SCREEN_ITEM_COUNT } from '../utils/mediaPreloader'
@@ -199,7 +200,7 @@ function scrollMomentAboveComposer(momentId) {
 function openComment(moment, replyToCommentId = '') {
   menuMomentId.value = ''
   commentTarget.value = { momentId: moment.id, replyToCommentId }
-  phone.triggerOperation('message-input', { appId: 'wechat', targetId: moment.id })
+  phone.triggerOperation(MESSAGE_INPUT, { appId: 'wechat', targetId: moment.id })
   nextTick(() => {
     typingToken.value += 1
     keyboardOwner.value = `comment:${currentCommentDraftKey.value}`

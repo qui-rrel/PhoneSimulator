@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, MoreHorizontal, Plus, Search, Send, Smile, Video } from 'lucide-vue-next'
+import { MESSAGE_INPUT } from '../config/story.operations'
 import { usePhoneStore } from '../stores/phone'
 import { settleChatScrollAtBottom } from '../utils/chatScroll'
 import { formatChatTimestamp } from '../utils/dateTime'
@@ -80,7 +81,7 @@ function openContact(id) {
 async function typePresetReply() {
   if (!contact.value) return
   keyboardVisible.value = true
-  phone.triggerOperation('message-input', { appId: 'messages', targetId: contact.value.id })
+  phone.triggerOperation(MESSAGE_INPUT, { appId: 'messages', targetId: contact.value.id })
   await nextTick()
   alignLatestAfterKeyboardLayout()
   const stage = currentStage.value

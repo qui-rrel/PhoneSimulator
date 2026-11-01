@@ -1,3 +1,3 @@
-import story from '../data/story.json'
+import story from 'virtual:protected-story-config'
 
 export const storyConfig = story

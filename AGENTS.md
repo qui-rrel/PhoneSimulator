@@ -83,6 +83,7 @@ PhoneSimulator/
 - `phone-simulator/public/media/`：由 `/media/...` URL 直接访问的图片和音频。
 - `phone-simulator/src/config/phone.config.js`：加载内容 JSON、解析 `$localTime`、注册 App 图标。
 - `phone-simulator/src/config/story.config.js`：加载剧情 JSON。
+- `phone-simulator/src/config/story.operations.js`：集中维护 App 操作与剧情 action 的映射及操作事件匹配；生产构建时与配置加载器一起进入受保护 chunk。
 - `phone-simulator/src/stores/phone.js`：锁屏、App 状态、联系人消息、通知、电话、闹钟和剧情运行器。
 - `phone-simulator/src/stores/music.js`：独立于 App 页面生命周期的音乐播放状态；退出音乐 App 不能自动停止播放。
 - `phone-simulator/src/components/AppWindow.vue`：App 组件注册与窗口切换。
@@ -100,6 +101,8 @@ Excel 工作簿
   -> src/config/*.config.js
   -> Pinia store / Vue components
 ```
+
+源码中的两个 JSON、配置加载器和操作映射保持可读；Vite 生产构建通过虚拟模块把 `content.json` 与 `story.json` 编码为每次构建不同的载荷，并只轻度混淆配置加载器与 `story.operations.js`。浏览器运行时仍会解码出完整对象，因此该机制只提高直接复制门槛，不得用于隐藏密钥或隐私数据。`npm run build` 会在 Vite 编译后自动运行 `scripts/verify-protected-build.mjs`，检查原始 JSON、source map、剧情操作名和较长配置文案是否意外进入发布包。
 
 规则：
 

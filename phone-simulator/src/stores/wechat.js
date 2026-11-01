@@ -2,6 +2,12 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { contentConfig } from '../config/phone.config'
 import { storyConfig } from '../config/story.config'
+import {
+  MOMENT_COMMENT_SENT,
+  MOMENT_LIKED,
+  MOMENT_PUBLISHED,
+  MOMENT_UNLIKED,
+} from '../config/story.operations'
 import { playMessageReceiveSound } from '../utils/sounds'
 
 const clone = (value) => JSON.parse(JSON.stringify(value))
@@ -307,7 +313,7 @@ export const useWechatStore = defineStore('wechat', () => {
   function toggleMomentLike(momentId) {
     const liked = !isMomentLiked(momentId)
     setMomentLike(momentId, SELF_ID, liked)
-    phoneBridge?.triggerOperation(liked ? 'moment-liked' : 'moment-unliked', { appId: 'wechat', targetId: momentId })
+    phoneBridge?.triggerOperation(liked ? MOMENT_LIKED : MOMENT_UNLIKED, { appId: 'wechat', targetId: momentId })
     return liked
   }
 
@@ -365,7 +371,7 @@ export const useWechatStore = defineStore('wechat', () => {
       imageSrc: script.imageSrc || [],
       time: script.time || '刚刚',
     })
-    phoneBridge?.triggerOperation('moment-published', { appId: 'wechat', targetId: script.momentId })
+    phoneBridge?.triggerOperation(MOMENT_PUBLISHED, { appId: 'wechat', targetId: script.momentId })
     if (script.eventId) phoneBridge?.resolveStoryOutcome(script.eventId, 'completed')
     return true
   }
@@ -394,7 +400,7 @@ export const useWechatStore = defineStore('wechat', () => {
       text: script.text || '',
       imageSrc: script.imageSrc || '',
     })
-    phoneBridge?.triggerOperation('moment-comment-sent', { appId: 'wechat', targetId: script.momentId, commentId: script.commentId })
+    phoneBridge?.triggerOperation(MOMENT_COMMENT_SENT, { appId: 'wechat', targetId: script.momentId, commentId: script.commentId })
     if (script.eventId) phoneBridge?.resolveStoryOutcome(script.eventId, 'completed')
     return true
   }

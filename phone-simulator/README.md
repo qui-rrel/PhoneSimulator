@@ -43,6 +43,8 @@ npm run build
 
 编译结果位于 `dist/`，该目录由构建生成，不提交到 GitHub。`npm run preview` 可临时预览已经生成的生产构建。
 
+生产构建会把 `content.json` 和 `story.json` 编码为随机载荷，并只对配置加载器与剧情操作映射 chunk 做轻度混淆；源码、Excel 和转换流程仍保持正常可读。构建命令结束前还会运行 `scripts/verify-protected-build.mjs`，确认没有独立 JSON、source map、主要剧情操作名或较长配置文案意外进入发布包。该机制用于提高复制门槛，不能用于保存真正的密钥或隐私数据，因为浏览器运行时仍可取得解码后的配置对象。
+
 ## 已实现内容
 
 - 锁屏、四位密码、桌面、动态电量状态栏、灵动岛和 App 打开/关闭动画。
@@ -222,13 +224,14 @@ phone-simulator/
 ├─ public/media/           网页直接访问的图片和音频
 ├─ src/apps/               各个 App 页面组件
 ├─ src/components/         手机壳、锁屏、桌面和全局浮层
-├─ src/config/             JSON 装载、图标注册与时间标记解析
+├─ src/config/             配置加载、剧情操作映射、图标注册与时间标记解析
 ├─ src/data/content.json   初始内容
 ├─ src/data/story.json     剧情内容
 ├─ src/stores/phone.js     手机状态、电话、闹钟和剧情运行器
 ├─ src/stores/maps.js      地图收藏配置、最近地点和当前地点
 ├─ src/stores/wechat.js    微信会话、群聊、朋友圈和微信剧情状态
 ├─ src/stores/music.js     跨 App 保持的音乐播放状态
+├─ scripts/                生产构建保护检查
 ├─ src/App.vue             应用入口布局
 └─ src/styles.css          全局样式
 ```
