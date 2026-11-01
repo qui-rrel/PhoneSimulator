@@ -100,6 +100,7 @@ async function typePresetReply() {
 }
 
 function closeKeyboard() {
+  if (!keyboardVisible.value) return
   typingToken.value += 1
   typingDraft.value = false
   keyboardVisible.value = false
