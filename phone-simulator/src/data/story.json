@@ -478,6 +478,31 @@
         "afterMs": 30000,
         "outcomes": []
       }
+    },
+    {
+      "id": "evt-yao-sms-side",
+      "initialActive": true,
+      "trigger": {
+        "type": "operation",
+        "action": "message-input",
+        "appId": "messages",
+        "targetId": "yao"
+      },
+      "action": {
+        "type": "sms-script",
+        "smsScriptId": "sms-yao-side-1"
+      },
+      "nextByOutcome": {
+        "completed": "",
+        "accepted": "",
+        "rejected": "",
+        "missed": ""
+      },
+      "retry": {
+        "enabled": false,
+        "afterMs": 30000,
+        "outcomes": []
+      }
     }
   ],
   "smsScripts": [
@@ -529,6 +554,138 @@
           "side": "me",
           "text": "嗯，知道的，你也去好好休息吧",
           "keystrokes": "enzhidaodeniyequhaohaoxiuxiba"
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-1",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "me",
+          "text": "瑶瑶不在身边的第我也记不清多久，想她😭",
+          "keystrokes": "yaoyaobuzaishengbiandediwoyejibuqingduojiuxiangta"
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-2",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "them",
+          "text": "怎么突然发短信呀？",
+          "afterMs": 60000
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-3",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "them",
+          "text": "摸摸月月",
+          "afterMs": 1000
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-4",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "me",
+          "text": "你之前不也突然发了短信",
+          "keystrokes": "nizhiqianbuyeturanfaleduanxin"
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-5",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "me",
+          "text": "不觉得很正式吗，和微信不同",
+          "keystrokes": "bujuedehenzhengshimaheweixinbutong"
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-6",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "them",
+          "text": "这么有仪式感呀",
+          "afterMs": 1000
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-7",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "me",
+          "text": "我很正式地在想瑶瑶",
+          "keystrokes": "wohenzhengshidezaixiangyaoyao"
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-8",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "me",
+          "text": "刚刚小呼说今天的妈妈很漂亮",
+          "keystrokes": "ganggangxiaohushuojintiandemamahenpiaoliang"
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-9",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "them",
+          "text": "亲亲小呼，也亲亲大呼",
+          "afterMs": 1000
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-10",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "me",
+          "text": "😘亲亲瑶瑶",
+          "keystrokes": "qinqinyaoyao"
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-11",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "them",
+          "text": "好啦，一会儿就能见到啦",
+          "afterMs": 1000
+        }
+      ]
+    },
+    {
+      "id": "sms-yao-side-12",
+      "contactId": "yao",
+      "messages": [
+        {
+          "side": "me",
+          "text": "嗯，不打扰瑶瑶工作了",
+          "keystrokes": "enbudayaoyaoyaogongzuole"
         }
       ]
     }
@@ -1128,7 +1285,7 @@
           "type": "text",
           "text": "之后再找时间就好",
           "mediaSrc": "",
-          "keystrokes": ""
+          "keystrokes": "zhihouzaizhaoshijianjiuhao"
         },
         {
           "senderId": "wx-chen",
@@ -1356,7 +1513,7 @@
         {
           "senderId": "SELF",
           "type": "text",
-          "text": "给你姐客气",
+          "text": "跟你姐客气",
           "mediaSrc": "",
           "keystrokes": "geinijiekeqi"
         },
@@ -1763,7 +1920,7 @@
       "momentId": "wx-self-published-1",
       "replyToCommentId": "wx-moment-interactions-2",
       "text": "吭吭",
-      "keystrokes": "",
+      "keystrokes": "hengheng",
       "imageSrc": ""
     },
     {
@@ -1772,7 +1929,7 @@
       "momentId": "wx-self-published-1",
       "replyToCommentId": "wx-moment-interactions-6",
       "text": "瑶瑶教的",
-      "keystrokes": "",
+      "keystrokes": "yaoyaojiaode",
       "imageSrc": ""
     },
     {
@@ -1781,7 +1938,7 @@
       "momentId": "wx-self-published-1",
       "replyToCommentId": "wx-moment-interactions-9",
       "text": "等瑶瑶有空",
-      "keystrokes": "",
+      "keystrokes": "dengyaoyaoyoukong",
       "imageSrc": ""
     },
     {
@@ -1790,7 +1947,7 @@
       "momentId": "wx-self-published-1",
       "replyToCommentId": "wx-moment-interactions-12",
       "text": "瑶瑶可爱，正大光明拍",
-      "keystrokes": "",
+      "keystrokes": "yaoyaokeaizhengdaguangmingpai",
       "imageSrc": ""
     }
   ],

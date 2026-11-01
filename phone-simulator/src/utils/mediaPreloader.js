@@ -5,6 +5,9 @@ const CALL_UI_ASSETS = [
   '/media/UI/CallIcon/speaker-call-icon.png',
 ]
 
+export const GALLERY_FIRST_SCREEN_IMAGE_COUNT = 18
+export const MOMENTS_FIRST_SCREEN_ITEM_COUNT = 3
+
 const IMAGE_EXTENSION = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:[?#].*)?$/i
 const MEDIA_EXTENSION = /\.(?:aac|m4a|mp3|mp4|ogg|ogv|wav|webm)(?:[?#].*)?$/i
 const CSS_URL_PATTERN = /url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi
@@ -90,21 +93,32 @@ function preloadPlayableMedia(src) {
   })
 }
 
-async function preloadStage(sources, loader, state) {
+async function preloadStage(sources, loader, state, { workerLimit = 3, yieldBeforeLoad = true } = {}) {
   const queue = uniqueSources(sources).filter((src) => !warmedSources.has(src))
   let cursor = 0
   async function worker() {
     while (!state.cancelled && cursor < queue.length) {
       const src = queue[cursor]
       cursor += 1
-      await waitForLoadingSlice()
+      if (yieldBeforeLoad) await waitForLoadingSlice()
       if (state.cancelled) return
+      if (warmedSources.has(src)) continue
       warmedSources.add(src)
       await loader(src)
     }
   }
-  const workerCount = Math.min(3, queue.length)
+  const workerCount = Math.min(workerLimit, queue.length)
   await Promise.allSettled(Array.from({ length: workerCount }, worker))
+}
+
+export function warmImageSources(sources, { concurrency = 4 } = {}) {
+  const imageSources = uniqueSources(collectMediaPaths(sources)).filter((src) => IMAGE_EXTENSION.test(src))
+  return preloadStage(
+    imageSources,
+    (src) => preloadImage(src, { fetchPriority: 'high' }),
+    { cancelled: false },
+    { workerLimit: concurrency, yieldBeforeLoad: false },
+  )
 }
 
 export async function preloadLockScreenMedia(config) {
@@ -131,8 +145,17 @@ export function startProgressiveMediaPreload(config) {
   const homeWallpaperImages = uniqueSources(collectMediaPaths(config.theme?.homeWallpaper))
   const appIcons = uniqueSources(config.apps?.filter((app) => app.enabled !== false).map((app) => app.iconSrc) || [])
   const galleryImages = uniqueSources(config.gallery?.map((photo) => photo.src) || [])
+  const galleryFirstScreenImages = galleryImages.slice(0, GALLERY_FIRST_SCREEN_IMAGE_COUNT)
+  const remainingGalleryImages = galleryImages.slice(GALLERY_FIRST_SCREEN_IMAGE_COUNT)
+  const visibleMoments = [...(config.wechat?.moments || [])]
+    .filter((moment) => moment.initiallyVisible !== false)
+    .sort((left, right) => Number(right.order || 0) - Number(left.order || 0))
+  const momentImages = uniqueSources(collectMediaPaths(visibleMoments))
+  const momentFirstScreenImages = uniqueSources(collectMediaPaths(visibleMoments.slice(0, MOMENTS_FIRST_SCREEN_ITEM_COUNT)))
+  const firstMomentImageSet = new Set(momentFirstScreenImages)
+  const remainingMomentImages = momentImages.filter((src) => !firstMomentImageSet.has(src))
   const configuredSources = uniqueSources(collectMediaPaths(config))
-  const reservedImages = new Set([...homeWallpaperImages, ...appIcons, ...galleryImages])
+  const reservedImages = new Set([...homeWallpaperImages, ...appIcons, ...galleryImages, ...momentImages])
   const otherUiImages = uniqueSources([
     ...CALL_UI_ASSETS,
     ...configuredSources.filter((src) => IMAGE_EXTENSION.test(src) && !reservedImages.has(src)),
@@ -144,9 +167,15 @@ export function startProgressiveMediaPreload(config) {
     if (state.cancelled) return
     await preloadStage(appIcons, preloadImage, state)
     if (state.cancelled) return
+    await preloadStage(momentFirstScreenImages, (src) => preloadImage(src, { fetchPriority: 'high' }), state)
+    if (state.cancelled) return
+    await preloadStage(galleryFirstScreenImages, (src) => preloadImage(src, { fetchPriority: 'high' }), state)
+    if (state.cancelled) return
     await preloadStage(otherUiImages, preloadImage, state)
     if (state.cancelled) return
-    await preloadStage(galleryImages, preloadImage, state)
+    await preloadStage(remainingMomentImages, preloadImage, state)
+    if (state.cancelled) return
+    await preloadStage(remainingGalleryImages, preloadImage, state)
     if (state.cancelled) return
     await preloadStage(playableMedia, preloadPlayableMedia, state)
   })()

@@ -191,7 +191,6 @@ watch(() => contact.value?.id, (id, previous) => {
       </header>
 
       <div ref="messagePane" class="message-pane" @pointerdown="closeKeyboard">
-        <div v-if="contact.messages.length" class="date-pill">今天</div>
         <div
           v-for="message in contact.messages"
           :key="message.id"

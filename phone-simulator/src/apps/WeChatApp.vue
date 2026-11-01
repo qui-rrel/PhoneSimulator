@@ -7,10 +7,12 @@ import {
 } from 'lucide-vue-next'
 import WechatAvatar from '../components/WechatAvatar.vue'
 import WeChatMoments from './WeChatMoments.vue'
+import { createDeviceDate } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
 import { useMapsStore } from '../stores/maps'
 import { useWechatStore } from '../stores/wechat'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
+import { MOMENTS_FIRST_SCREEN_ITEM_COUNT, warmImageSources } from '../utils/mediaPreloader'
 import { createTypingPlan } from '../utils/typing'
 
 defineProps({ app: { type: Object, required: true } })
@@ -100,6 +102,22 @@ const sender = (message) => wechat.findContact(message.senderId)
 const conversationAvatar = (item) => item.type === 'group'
   ? { members: wechat.groupMembers(wechat.findGroup(item.targetId)) }
   : { person: wechat.findContact(item.targetId) }
+const conversationListTime = (message) => {
+  const value = String(message?.time || '').trim()
+  const clock = value.match(/^(\d{1,2}):(\d{2})$/)
+  if (clock) return `${clock[1].padStart(2, '0')}:${clock[2]}`
+
+  const fullDate = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s+|T)(\d{1,2}):(\d{2})(?::\d{2})?$/)
+  if (!fullDate) return value
+  const [, year, month, day, hour, minute] = fullDate
+  const deviceDate = createDeviceDate()
+  const isDeviceDate = Number(year) === deviceDate.getFullYear()
+    && Number(month) === deviceDate.getMonth() + 1
+    && Number(day) === deviceDate.getDate()
+  return isDeviceDate
+    ? `${hour.padStart(2, '0')}:${minute}`
+    : `${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+}
 
 async function scrollToBottom(smooth = false) {
   await nextTick()
@@ -122,6 +140,7 @@ function openConversation(id) {
 }
 
 function openMoments() {
+  void warmImageSources(wechat.moments.slice(0, MOMENTS_FIRST_SCREEN_ITEM_COUNT).flatMap(momentImages))
   tab.value = 'discover'
   phone.openContent('wechat', 'moments')
 }
@@ -458,13 +477,16 @@ watch(() => messages.value.length, scrollToBottom)
       </header>
 
       <main v-if="tab === 'chats'" class="wechat-conversations">
-        <button v-for="item in wechat.sortedConversations" :key="item.id" type="button" class="wechat-conversation" @click="openConversation(item.id)">
+        <button v-for="item in wechat.sortedConversations" :key="item.id" type="button" class="wechat-conversation" :class="{ 'wechat-conversation--pinned': item.pinned }" @click="openConversation(item.id)">
           <WechatAvatar v-bind="conversationAvatar(item)" :size="47" />
           <span class="wechat-conversation__copy">
-            <span><strong>{{ wechat.conversationTitle(item) }}</strong><small>{{ item.time }}</small></span>
+            <strong>{{ wechat.conversationTitle(item) }}</strong>
             <em>{{ wechat.messagePreview(wechat.lastMessage(item.id)) }}</em>
           </span>
-          <b v-if="item.unread" class="wechat-unread">{{ item.unread }}</b>
+          <span class="wechat-conversation__meta">
+            <small>{{ conversationListTime(wechat.lastMessage(item.id)) }}</small>
+            <b v-if="wechat.conversationUnreadCount(item.id)" class="wechat-unread">{{ wechat.conversationUnreadCount(item.id) }}</b>
+          </span>
         </button>
         <p v-if="!wechat.sortedConversations.length" class="wechat-empty">暂无聊天</p>
       </main>

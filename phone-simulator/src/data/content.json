@@ -1607,262 +1607,175 @@
         "id": "wx-chat-1",
         "type": "direct",
         "targetId": "wx-chen",
-        "order": 1,
-        "time": "$localTime",
-        "unread": 2,
-        "muted": false
+        "pinned": true
       },
       {
         "id": "wx-chat-2",
         "type": "direct",
         "targetId": "wx-dai",
-        "order": 5,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-3",
         "type": "direct",
         "targetId": "wx-can",
-        "order": 6,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-4",
         "type": "direct",
         "targetId": "wx-glm",
-        "order": 7,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-5",
         "type": "direct",
         "targetId": "wx-slm",
-        "order": 8,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-6",
         "type": "direct",
         "targetId": "wx-houyu",
-        "order": 9,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-7",
         "type": "direct",
         "targetId": "wx-nana",
-        "order": 10,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-8",
         "type": "direct",
         "targetId": "wx-zhelai",
-        "order": 11,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-9",
         "type": "direct",
         "targetId": "wx-hw",
-        "order": 12,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-10",
         "type": "direct",
         "targetId": "wx-qianhui",
-        "order": 13,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-11",
         "type": "direct",
         "targetId": "wx-fan",
-        "order": 14,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-12",
         "type": "direct",
         "targetId": "wx-tao",
-        "order": 15,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-13",
         "type": "direct",
         "targetId": "wx-shang",
-        "order": 16,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-14",
         "type": "direct",
         "targetId": "wx-ling",
-        "order": 17,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-15",
         "type": "direct",
         "targetId": "wx-dan",
-        "order": 18,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-16",
         "type": "direct",
         "targetId": "wx-zhuang",
-        "order": 19,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-17",
         "type": "direct",
         "targetId": "wx-wei",
-        "order": 20,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-18",
         "type": "direct",
         "targetId": "wx-qiu",
-        "order": 21,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-19",
         "type": "direct",
         "targetId": "wx-sister",
-        "order": 2,
-        "time": "2026-10-31 10:23",
-        "unread": 3,
-        "muted": true
+        "pinned": true
       },
       {
         "id": "wx-chat-20",
         "type": "direct",
         "targetId": "wx-xiaowan",
-        "order": 22,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-21",
         "type": "direct",
         "targetId": "wx-zhewen",
-        "order": 23,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-22",
         "type": "direct",
         "targetId": "wx-guo",
-        "order": 24,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-23",
         "type": "direct",
         "targetId": "wx-wan",
-        "order": 25,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-24",
         "type": "direct",
         "targetId": "wx-piao",
-        "order": 26,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-25",
         "type": "direct",
         "targetId": "wx-pen",
-        "order": 27,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-26",
         "type": "direct",
         "targetId": "wx-kai",
-        "order": 28,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-27",
         "type": "group",
         "targetId": "wx-group-studio",
-        "order": 3,
-        "time": "$localTime",
-        "unread": 0,
-        "muted": false
+        "pinned": false
       },
       {
         "id": "wx-chat-28",
         "type": "group",
         "targetId": "wx-group-sheep",
-        "order": 4,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       },
       {
         "id": "wx-chat-29",
         "type": "group",
         "targetId": "wx-group-by5",
-        "order": 29,
-        "time": "",
-        "unread": 0,
-        "muted": true
+        "pinned": false
       }
     ],
     "messages": [

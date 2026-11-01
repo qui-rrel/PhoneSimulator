@@ -224,7 +224,7 @@ EXPECTED_HEADERS = {
     "微信联系人": {"contactId", "nickname"},
     "微信群聊": {"groupId", "name"},
     "微信群成员": {"groupId", "contactId", "order"},
-    "微信会话": {"conversationId", "type", "targetId", "order", "unread"},
+    "微信会话": {"conversationId", "type", "targetId", "pinned"},
     "微信消息": {"conversationId", "id", "sequence", "senderId", "type"},
     "朋友圈": {"momentId", "authorId", "order"},
     "朋友圈点赞": {"momentId", "contactId", "order"},
@@ -861,10 +861,7 @@ for row in rows("微信会话"):
         "id": as_text(row.get("conversationId", "")),
         "type": conversation_type,
         "targetId": target_id,
-        "order": as_number(row.get("order", 0)),
-        "time": as_display_time(row.get("time", "")),
-        "unread": as_number(row.get("unread", 0)),
-        "muted": as_bool(row.get("muted", False)),
+        "pinned": as_bool(row.get("pinned", False)),
     })
 wechat_conversation_ids = unique_ids(wechat["conversations"], "id", "微信会话")
 wechat_conversation_map = {item["id"]: item for item in wechat["conversations"]}

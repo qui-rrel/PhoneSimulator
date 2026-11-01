@@ -4,6 +4,7 @@ import { AtSign, Camera, ChevronLeft, Heart, Image as ImageIcon, MapPin, Message
 import WechatAvatar from '../components/WechatAvatar.vue'
 import { usePhoneStore } from '../stores/phone'
 import { useWechatStore } from '../stores/wechat'
+import { MOMENTS_FIRST_SCREEN_ITEM_COUNT } from '../utils/mediaPreloader'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
 import { createTypingPlan } from '../utils/typing'
 
@@ -253,11 +254,11 @@ watch(target, (value, previous) => {
     <main ref="momentPane" class="wechat-moments" @pointerdown="handleFeedPointerDown">
       <section class="wechat-moments-cover" :style="coverStyle"><div class="wechat-moments-cover__profile"><strong>{{ wechat.profile.nickname }}</strong><WechatAvatar :person="wechat.profile" :size="60" /></div></section>
       <button v-if="wechat.unreadMomentActivityCount" class="wechat-moment-notice" type="button" @click="openActivity">{{ wechat.unreadMomentActivityCount }} 条新消息</button>
-      <article v-for="moment in wechat.moments" :key="moment.id" class="wechat-moment" :data-moment-id="moment.id">
+      <article v-for="(moment, momentIndex) in wechat.moments" :key="moment.id" class="wechat-moment" :data-moment-id="moment.id">
         <WechatAvatar :person="wechat.findContact(moment.authorId)" :size="42" />
         <div class="wechat-moment__body"><strong>{{ contactName(wechat.findContact(moment.authorId)) }}</strong><p v-if="moment.text">{{ moment.text }}</p>
           <div v-if="momentImages(moment).length" class="wechat-moment-gallery" :class="{ 'wechat-moment-gallery--single': momentImages(moment).length === 1, 'wechat-moment-gallery--two': momentImages(moment).length === 2, 'wechat-moment-gallery--four': momentImages(moment).length === 4 }">
-            <button v-for="(src, imageIndex) in momentImages(moment)" :key="`${moment.id}-${imageIndex}`" type="button" @click="openMomentImage(moment, imageIndex)"><img :src="src" alt="" loading="lazy" decoding="async" /></button>
+            <button v-for="(src, imageIndex) in momentImages(moment)" :key="`${moment.id}-${imageIndex}`" type="button" @click="openMomentImage(moment, imageIndex)"><img :src="src" alt="" :loading="momentIndex < MOMENTS_FIRST_SCREEN_ITEM_COUNT ? 'eager' : 'lazy'" :fetchpriority="momentIndex < MOMENTS_FIRST_SCREEN_ITEM_COUNT ? 'high' : 'low'" decoding="async" /></button>
           </div>
           <div class="wechat-moment__meta"><small>{{ moment.time }}</small><button type="button" aria-label="朋友圈操作" @click.stop="toggleMenu(moment.id)"><MoreHorizontal :size="17" /></button>
             <Transition name="wechat-pop"><div v-if="menuMomentId === moment.id" class="wechat-moment-menu"><button type="button" @click="toggleLike(moment.id)"><Heart :class="{ active: wechat.isMomentLiked(moment.id) }" />{{ wechat.isMomentLiked(moment.id) ? '取消' : '赞' }}</button><button type="button" @click="openComment(moment)"><MessageCircle />评论</button></div></Transition>

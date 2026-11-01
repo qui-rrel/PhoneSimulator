@@ -11,6 +11,27 @@ const formatTime = (date = new Date()) => new Intl.DateTimeFormat('zh-CN', {
   minute: '2-digit',
   hour12: false,
 }).format(date)
+const messageTimestamp = (message) => {
+  const runtimeTimestamp = Number(message?.sortAt)
+  if (Number.isFinite(runtimeTimestamp) && runtimeTimestamp > 0) return runtimeTimestamp
+  const value = String(message?.time || '').trim()
+  const fullDate = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s+|T)(\d{1,2}):(\d{2})(?::(\d{2}))?$/)
+  if (fullDate) {
+    const [, year, month, day, hour, minute, second = '0'] = fullDate
+    return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second)).getTime()
+  }
+  const clock = value.match(/^(\d{1,2}):(\d{2})$/)
+  if (clock) {
+    const current = new Date()
+    current.setHours(Number(clock[1]), Number(clock[2]), 0, 0)
+    return current.getTime()
+  }
+  return 0
+}
+const initialMoments = (definitions) => definitions
+  .filter((item) => item.initiallyVisible !== false)
+  .map(clone)
+  .sort((left, right) => Number(right.order || 0) - Number(left.order || 0))
 const formatCallDuration = (seconds) => {
   const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0))
   const hours = Math.floor(totalSeconds / 3600)
@@ -32,7 +53,7 @@ export const useWechatStore = defineStore('wechat', () => {
   const conversations = ref(clone(source.conversations || []))
   const messages = ref(clone(source.messages || []))
   const momentDefinitions = clone(source.moments || [])
-  const moments = ref(momentDefinitions.filter((item) => item.initiallyVisible !== false))
+  const moments = ref(initialMoments(momentDefinitions))
   const momentLikes = ref(clone(source.momentLikes || []))
   const momentComments = ref(clone(source.momentComments || []))
   const momentActivities = ref([])
@@ -41,9 +62,28 @@ export const useWechatStore = defineStore('wechat', () => {
   const activeCommentScripts = ref([])
   const activeInteractionScripts = ref([])
 
-  const unreadTotal = computed(() => conversations.value.reduce((total, item) => total + Number(item.unread || 0), 0))
+  const unreadTotal = computed(() => messages.value.reduce((total, message) =>
+    total + (message.senderId !== SELF_ID && message.read === false ? 1 : 0), 0))
   const unreadMomentActivityCount = computed(() => momentActivities.value.filter((item) => !item.read).length)
-  const sortedConversations = computed(() => [...conversations.value].sort((a, b) => Number(a.order || 0) - Number(b.order || 0)))
+  const sortedConversations = computed(() => conversations.value
+    .map((conversation, sourceIndex) => {
+      const latest = lastMessage(conversation.id)
+      return {
+        conversation,
+        sourceIndex,
+        hasMessages: Boolean(latest),
+        timestamp: messageTimestamp(latest),
+      }
+    })
+    .sort((left, right) => {
+      if (Boolean(left.conversation.pinned) !== Boolean(right.conversation.pinned)) {
+        return left.conversation.pinned ? -1 : 1
+      }
+      if (left.hasMessages !== right.hasMessages) return left.hasMessages ? -1 : 1
+      if (left.hasMessages && left.timestamp !== right.timestamp) return right.timestamp - left.timestamp
+      return left.sourceIndex - right.sourceIndex
+    })
+    .map(({ conversation }) => conversation))
 
   function attachPhone(phone) {
     phoneBridge = phone
@@ -94,10 +134,16 @@ export const useWechatStore = defineStore('wechat', () => {
     return conversationMessages(conversationId).at(-1) || null
   }
 
+  function conversationUnreadCount(conversationId) {
+    return messages.value.reduce((total, message) => total + (
+      message.conversationId === conversationId && message.senderId !== SELF_ID && message.read === false ? 1 : 0
+    ), 0)
+  }
+
   function markConversationRead(conversationId) {
-    const conversation = findConversation(conversationId)
-    if (!conversation) return
-    conversation.unread = 0
+    messages.value.forEach((message) => {
+      if (message.conversationId === conversationId && message.senderId !== SELF_ID) message.read = true
+    })
   }
 
   function addMessage(conversationId, message) {
@@ -109,6 +155,7 @@ export const useWechatStore = defineStore('wechat', () => {
       conversationId,
       order,
       time: formatTime(),
+      sortAt: Date.now(),
       read: true,
       type: 'text',
       text: '',
@@ -116,18 +163,16 @@ export const useWechatStore = defineStore('wechat', () => {
       ...clone(message),
     }
     messages.value.push(created)
-    conversation.time = created.time
     return created
   }
 
   function receiveMessage(conversationId, message) {
     const conversation = findConversation(conversationId)
-    const created = addMessage(conversationId, message)
+    const isOpen = phoneBridge?.activeAppId === 'wechat' && phoneBridge?.activeContent?.targetId === conversationId
+    const created = addMessage(conversationId, { ...message, read: isOpen })
     if (!conversation || !created) return
     playMessageReceiveSound()
-    const isOpen = phoneBridge?.activeAppId === 'wechat' && phoneBridge?.activeContent?.targetId === conversationId
     if (isOpen) return
-    conversation.unread = Number(conversation.unread || 0) + 1
     const sender = findContact(created.senderId)
     const title = conversationTitle(conversation)
     const senderName = sender?.remark || sender?.nickname || sender?.name || ''
@@ -397,7 +442,7 @@ export const useWechatStore = defineStore('wechat', () => {
     groups.value = clone(source.groups || [])
     conversations.value = clone(source.conversations || [])
     messages.value = clone(source.messages || [])
-    moments.value = momentDefinitions.filter((item) => item.initiallyVisible !== false).map(clone)
+    moments.value = initialMoments(momentDefinitions)
     momentLikes.value = clone(source.momentLikes || [])
     momentComments.value = clone(source.momentComments || [])
     momentActivities.value = []
@@ -414,7 +459,7 @@ export const useWechatStore = defineStore('wechat', () => {
     profile, contacts, groups, conversations, messages, moments, momentLikes, momentComments, momentActivities, activeScripts,
     activePublishScripts, activeCommentScripts, activeInteractionScripts, unreadTotal, unreadMomentActivityCount,
     sortedConversations, attachPhone, findContact, findGroup, findConversation, conversationMessages,
-    conversationTitle, groupMembers, messagePreview, lastMessage, markConversationRead, addMessage, receiveMessage,
+    conversationTitle, groupMembers, messagePreview, lastMessage, conversationUnreadCount, markConversationRead, addMessage, receiveMessage,
     getActiveScript, activateScript, advanceScript, completeScript, momentLikesFor, momentCommentsFor, findMoment,
     findMomentComment, isMomentLiked, toggleMomentLike, revealMoment, addMoment, addMomentComment, markMomentActivitiesRead,
     getActivePublishScript, activatePublishScript, submitPublishScript, getActiveCommentScript, activateCommentScript,
