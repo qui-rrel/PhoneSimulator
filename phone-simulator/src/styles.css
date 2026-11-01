@@ -2537,16 +2537,15 @@ button {
 }
 
 .wechat-avatar--group {
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 1fr;
+  grid-template-columns: repeat(var(--wechat-avatar-columns), var(--wechat-avatar-tile-size));
+  grid-auto-rows: var(--wechat-avatar-tile-size);
+  place-content: center;
   gap: 1px;
   padding: 2px;
   background: #dfdfdf;
 }
 
-.wechat-avatar--group:has(.wechat-avatar__tile:nth-child(2):last-child),
-.wechat-avatar--group:has(.wechat-avatar__tile:nth-child(4):last-child) { grid-template-columns: repeat(2, 1fr); }
-.wechat-avatar__tile { min-width: 0; min-height: 0; overflow: hidden; }
+.wechat-avatar__tile { min-width: 0; min-height: 0; overflow: hidden; aspect-ratio: 1; }
 .wechat-avatar__tile b { font-size: 9px; }
 
 .wechat-message-pane {

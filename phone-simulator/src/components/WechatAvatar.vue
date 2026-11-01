@@ -8,7 +8,21 @@ const props = defineProps({
 })
 
 const visibleMembers = computed(() => props.members.slice(0, 9))
-const style = computed(() => ({ width: `${props.size}px`, height: `${props.size}px` }))
+const style = computed(() => {
+  const baseStyle = { width: `${props.size}px`, height: `${props.size}px` }
+  const memberCount = visibleMembers.value.length
+  if (!memberCount) return baseStyle
+
+  const columns = memberCount === 1 ? 1 : memberCount === 2 || memberCount === 4 ? 2 : 3
+  const padding = 2
+  const gap = 1
+  const tileSize = (props.size - padding * 2 - gap * (columns - 1)) / columns
+  return {
+    ...baseStyle,
+    '--wechat-avatar-columns': columns,
+    '--wechat-avatar-tile-size': `${tileSize}px`,
+  }
+})
 </script>
 
 <template>
