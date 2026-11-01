@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, MoreHorizontal, Plus, Search, Send, Smile, Video } from 'lucide-vue-next'
 import { usePhoneStore } from '../stores/phone'
+import { formatChatTimestamp } from '../utils/dateTime'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
 import { createTypingPlan } from '../utils/typing'
 
@@ -177,7 +178,6 @@ watch(() => contact.value?.id, (id, previous) => {
           <span class="conversation-copy">
             <span class="conversation-title">
               <strong>{{ item.name }}</strong>
-              <small>{{ item.time }}</small>
             </span>
             <span class="conversation-preview">{{ conversationPreview(item) }}</span>
           </span>
@@ -215,7 +215,7 @@ watch(() => contact.value?.id, (id, previous) => {
           <div>
             <p>{{ message.text }}</p>
             <small v-if="message.stamp || (message.read && message.side === 'me')">
-              {{ message.stamp }}<em v-if="message.read && message.side === 'me'">已读</em>
+              {{ formatChatTimestamp(message.stamp) }}<em v-if="message.read && message.side === 'me'">已读</em>
             </small>
           </div>
         </div>

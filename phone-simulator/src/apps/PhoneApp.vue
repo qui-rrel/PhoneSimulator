@@ -1,6 +1,7 @@
 <script setup>
 import { Clock3, ContactRound, Grid3X3, Phone, Star } from 'lucide-vue-next'
 import { usePhoneStore } from '../stores/phone'
+import { formatListTimestamp } from '../utils/dateTime'
 
 defineProps({ app: { type: Object, required: true } })
 const phone = usePhoneStore()
@@ -37,7 +38,7 @@ const tabs = [
         >
           <span class="call-avatar-small" :style="{ background: record.color }"><img v-if="record.avatar" :src="record.avatar" alt="" />{{ record.avatar ? '' : record.initials }}</span>
           <span><strong>{{ record.name }}</strong><small>{{ record.direction === 'outgoing' ? (record.outcome === 'missed' ? '未接通' : '呼出电话') : record.outcome === 'missed' ? '未接电话' : '来电' }}</small></span>
-          <time>{{ record.time }}</time>
+          <time>{{ formatListTimestamp(record.time) }}</time>
         </button>
       </div>
     </section>

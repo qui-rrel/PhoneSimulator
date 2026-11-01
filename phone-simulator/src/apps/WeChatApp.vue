@@ -7,10 +7,10 @@ import {
 } from 'lucide-vue-next'
 import WechatAvatar from '../components/WechatAvatar.vue'
 import WeChatMoments from './WeChatMoments.vue'
-import { createDeviceDate } from '../config/phone.config'
 import { usePhoneStore } from '../stores/phone'
 import { useMapsStore } from '../stores/maps'
 import { useWechatStore } from '../stores/wechat'
+import { formatChatTimestamp, formatListTimestamp } from '../utils/dateTime'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
 import { MOMENTS_FIRST_SCREEN_ITEM_COUNT, warmImageSources } from '../utils/mediaPreloader'
 import { createTypingPlan } from '../utils/typing'
@@ -58,10 +58,10 @@ const messages = computed(() => conversation.value ? wechat.conversationMessages
 const messageRows = computed(() => {
   const displayedTimes = new Set()
   return messages.value.map((message) => {
-    const time = String(message.time || '').trim()
-    const showTime = Boolean(time && !displayedTimes.has(time))
-    if (time) displayedTimes.add(time)
-    return { message, time, showTime }
+    const sourceTime = String(message.time || '').trim()
+    const showTime = Boolean(sourceTime && !displayedTimes.has(sourceTime))
+    if (sourceTime) displayedTimes.add(sourceTime)
+    return { message, time: formatChatTimestamp(sourceTime), showTime }
   })
 })
 const momentsCoverStyle = computed(() => wechat.profile.momentsCover
@@ -103,22 +103,7 @@ const sender = (message) => wechat.findContact(message.senderId)
 const conversationAvatar = (item) => item.type === 'group'
   ? { members: wechat.groupMembers(wechat.findGroup(item.targetId)) }
   : { person: wechat.findContact(item.targetId) }
-const conversationListTime = (message) => {
-  const value = String(message?.time || '').trim()
-  const clock = value.match(/^(\d{1,2}):(\d{2})$/)
-  if (clock) return `${clock[1].padStart(2, '0')}:${clock[2]}`
-
-  const fullDate = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s+|T)(\d{1,2}):(\d{2})(?::\d{2})?$/)
-  if (!fullDate) return value
-  const [, year, month, day, hour, minute] = fullDate
-  const deviceDate = createDeviceDate()
-  const isDeviceDate = Number(year) === deviceDate.getFullYear()
-    && Number(month) === deviceDate.getMonth() + 1
-    && Number(day) === deviceDate.getDate()
-  return isDeviceDate
-    ? `${hour.padStart(2, '0')}:${minute}`
-    : `${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-}
+const conversationListTime = (message) => formatListTimestamp(message?.time)
 
 async function scrollToBottom(smooth = false) {
   await nextTick()
