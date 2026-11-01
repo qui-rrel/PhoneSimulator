@@ -2994,13 +2994,14 @@ button {
 /* Calls and alarms */
 .call-overlay, .alarm-overlay { position: absolute; z-index: 210; inset: 0; color: #fff; background: linear-gradient(180deg,#26313f,#10151c 58%,#050607); }
 .call-overlay { display: flex; flex-direction: column; align-items: center; padding: 105px 20px 35px; }
-.call-avatar { width: 82px; height: 82px; display: grid; place-items: center; overflow: hidden; border-radius: 50%; font-size: 32px; }
-.call-overlay h2 { margin: 18px 0 4px; font-size: 29px; }
-.call-overlay > p { margin: 0; color: rgba(255,255,255,.7); font-size: 13px; }
+.call-avatar { width: 82px; height: 82px; aspect-ratio: 1; display: grid; place-items: center; flex: 0 0 82px; overflow: hidden; border-radius: 50%; font-size: 32px; }
+.call-avatar img { display: block; border-radius: inherit; }
+.call-overlay h2 { flex: none; margin: 18px 0 4px; font-size: 29px; }
+.call-overlay > p { flex: none; margin: 0; color: rgba(255,255,255,.7); font-size: 13px; }
 .incoming-call-actions, .active-call-actions { width: 100%; display: flex; justify-content: space-around; margin-top: auto; }
 .incoming-call-actions button, .active-call-actions button { width: 58px; height: 58px; display: block; overflow: hidden; border-radius: 50%; }
 .incoming-call-actions button img, .active-call-actions button img { width: 100%; height: 100%; display: block; object-fit: contain; clip-path: circle(50%); }
-.call-transcript { width: 100%; max-height: 260px; margin-top: 45px; overflow-y: auto; scrollbar-width: none; }
+.call-transcript { width: 100%; min-height: 0; max-height: 260px; flex-shrink: 1; margin-top: 45px; overflow-y: auto; scrollbar-width: none; }
 .call-transcript::-webkit-scrollbar { display: none; }
 .call-transcript p { width: fit-content; max-width: 78%; margin: 8px 0; padding: 8px 11px; border-radius: 14px; background: rgba(255,255,255,.14); font-size: 11px; }
 .call-transcript .call-line--me { margin-left: auto; background: #4779df; }

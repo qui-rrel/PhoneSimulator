@@ -30,7 +30,7 @@
       "initialActive": false,
       "trigger": {
         "type": "timer",
-        "afterMs": 180000
+        "afterMs": 90000
       },
       "action": {
         "type": "wechat-script",

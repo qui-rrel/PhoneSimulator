@@ -39,6 +39,7 @@ let navigationReady = false
 let navigationDepth = 0
 let navigationPopstateHandler = null
 let explicitHistoryNavigation = false
+let restoringSuppressedForward = false
 let powerWarningTimer = null
 let powerShutdownTimer = null
 let batteryDrainTimer = null
@@ -142,11 +143,23 @@ export const usePhoneStore = defineStore('phone', () => {
       explicitHistoryNavigation = false
       const navigation = event.state?.[PHONE_HISTORY_KEY]
       if (!navigation) return
+      const targetDepth = Math.max(0, Number(navigation.depth) || 0)
+      if (restoringSuppressedForward) {
+        restoringSuppressedForward = false
+        navigationDepth = targetDepth
+        applyNavigationView(navigation.view)
+        return
+      }
+      if (!isExplicitNavigation && targetDepth > navigationDepth) {
+        restoringSuppressedForward = true
+        window.history.back()
+        return
+      }
       if (!isExplicitNavigation && runEdgeBackHandlers()) {
         window.history.pushState(historyPayload(navigationDepth), '')
         return
       }
-      navigationDepth = Math.max(0, Number(navigation.depth) || 0)
+      navigationDepth = targetDepth
       applyNavigationView(navigation.view)
     }
     window.addEventListener('popstate', navigationPopstateHandler)
@@ -159,6 +172,7 @@ export const usePhoneStore = defineStore('phone', () => {
     navigationPopstateHandler = null
     navigationReady = false
     explicitHistoryNavigation = false
+    restoringSuppressedForward = false
   }
 
   function navigateBack() {
