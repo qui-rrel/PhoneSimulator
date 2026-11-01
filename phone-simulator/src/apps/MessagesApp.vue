@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, MoreHorizontal, Plus, Search, Send, Smile, Video } from 'lucide-vue-next'
 import { usePhoneStore } from '../stores/phone'
+import { settleChatScrollAtBottom } from '../utils/chatScroll'
 import { formatChatTimestamp } from '../utils/dateTime'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
 import { createTypingPlan } from '../utils/typing'
@@ -20,6 +21,7 @@ const contactDrafts = ref({})
 const keyboardLayoutTimer = ref(null)
 const failedAvatarSources = ref(new Set())
 let removeEdgeBackHandler = () => {}
+let entryScrollToken = 0
 
 const contact = computed(() => phone.activeContact)
 const currentStage = computed(() => {
@@ -55,15 +57,24 @@ async function scrollToBottom(smooth = false) {
   })
 }
 
+function cancelEntryScroll() {
+  entryScrollToken += 1
+}
+
+async function scrollEntryToBottom() {
+  const token = ++entryScrollToken
+  await nextTick()
+  await settleChatScrollAtBottom(messagePane.value, () => token === entryScrollToken)
+}
+
 function alignLatestAfterKeyboardLayout() {
   window.clearTimeout(keyboardLayoutTimer.value)
   window.requestAnimationFrame(() => { void scrollToBottom(true) })
   keyboardLayoutTimer.value = window.setTimeout(() => { void scrollToBottom(true) }, 280)
 }
 
-async function openContact(id) {
+function openContact(id) {
   phone.openContact(id)
-  await scrollToBottom()
 }
 
 async function typePresetReply() {
@@ -116,8 +127,19 @@ function handleKeyboardEdgeBack() {
   return true
 }
 
-onMounted(() => { removeEdgeBackHandler = phone.registerEdgeBackHandler(handleKeyboardEdgeBack) })
-onBeforeUnmount(() => removeEdgeBackHandler())
+function handleMessagePanePointerDown() {
+  cancelEntryScroll()
+  closeKeyboard()
+}
+
+onMounted(() => {
+  removeEdgeBackHandler = phone.registerEdgeBackHandler(handleKeyboardEdgeBack)
+  if (contact.value) void scrollEntryToBottom()
+})
+onBeforeUnmount(() => {
+  cancelEntryScroll()
+  removeEdgeBackHandler()
+})
 
 function tapKey(key) {
   playKeyboardTapSound()
@@ -146,6 +168,8 @@ watch(() => contact.value?.id, (id, previous) => {
   draft.value = saved.text || ''
   typedSteps.value = saved.typedSteps || 0
   closeKeyboard()
+  if (id) void scrollEntryToBottom()
+  else cancelEntryScroll()
 })
 </script>
 
@@ -201,7 +225,7 @@ watch(() => contact.value?.id, (id, previous) => {
         <button type="button" aria-label="视频通话"><Video :size="21" /></button>
       </header>
 
-      <div ref="messagePane" class="message-pane" @pointerdown="closeKeyboard">
+      <div ref="messagePane" class="message-pane" @pointerdown="handleMessagePanePointerDown">
         <div
           v-for="message in contact.messages"
           :key="message.id"

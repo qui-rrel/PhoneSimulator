@@ -1178,8 +1178,8 @@
         },
         {
           "type": "event-state",
-          "targetId": "evt-final-call-enabled",
-          "value": "not-triggered"
+          "targetId": "evt-wait-call2-callback",
+          "value": "in-progress"
         }
       ]
     },
@@ -1201,8 +1201,8 @@
         },
         {
           "type": "event-state",
-          "targetId": "evt-final-call-enabled",
-          "value": "not-triggered"
+          "targetId": "evt-wait-call2-callback",
+          "value": "in-progress"
         }
       ]
     },
@@ -1224,8 +1224,8 @@
         },
         {
           "type": "event-state",
-          "targetId": "evt-final-call-enabled",
-          "value": "not-triggered"
+          "targetId": "evt-wait-call1-callback",
+          "value": "in-progress"
         }
       ]
     },
@@ -1247,8 +1247,8 @@
         },
         {
           "type": "event-state",
-          "targetId": "evt-final-call-enabled",
-          "value": "not-triggered"
+          "targetId": "evt-wait-call1-callback",
+          "value": "in-progress"
         }
       ]
     }

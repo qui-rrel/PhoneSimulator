@@ -10,6 +10,7 @@ import WeChatMoments from './WeChatMoments.vue'
 import { usePhoneStore } from '../stores/phone'
 import { useMapsStore } from '../stores/maps'
 import { useWechatStore } from '../stores/wechat'
+import { settleChatScrollAtBottom } from '../utils/chatScroll'
 import { formatChatTimestamp, formatListTimestamp } from '../utils/dateTime'
 import { playKeyboardTapSound, playMessageSendSound } from '../utils/sounds'
 import { MOMENTS_FIRST_SCREEN_ITEM_COUNT, warmImageSources } from '../utils/mediaPreloader'
@@ -36,6 +37,7 @@ const viewerSwipeStart = ref(null)
 const viewerSwipeOffset = ref(0)
 const chatViewerScrollTop = ref(0)
 let removeEdgeBackHandler = () => {}
+let entryScrollToken = 0
 
 const contentTarget = computed(() => phone.activeContent?.appId === 'wechat' ? phone.activeContent.targetId : '')
 const chatViewerTarget = computed(() => {
@@ -111,6 +113,16 @@ async function scrollToBottom(smooth = false) {
     top: messagePane.value.scrollHeight,
     behavior: smooth ? 'smooth' : 'auto',
   })
+}
+
+function cancelEntryScroll() {
+  entryScrollToken += 1
+}
+
+async function scrollEntryToBottom() {
+  const token = ++entryScrollToken
+  await nextTick()
+  await settleChatScrollAtBottom(messagePane.value, () => token === entryScrollToken)
 }
 
 function alignLatestAfterKeyboardLayout() {
@@ -255,8 +267,19 @@ function handleKeyboardEdgeBack() {
   return true
 }
 
-onMounted(() => { removeEdgeBackHandler = phone.registerEdgeBackHandler(handleKeyboardEdgeBack) })
-onBeforeUnmount(() => removeEdgeBackHandler())
+function handleMessagePanePointerDown() {
+  cancelEntryScroll()
+  closeKeyboard()
+}
+
+onMounted(() => {
+  removeEdgeBackHandler = phone.registerEdgeBackHandler(handleKeyboardEdgeBack)
+  if (conversation.value && !chatViewerTarget.value) void scrollEntryToBottom()
+})
+onBeforeUnmount(() => {
+  cancelEntryScroll()
+  removeEdgeBackHandler()
+})
 
 function tapKey(key) {
   playKeyboardTapSound()
@@ -284,6 +307,7 @@ async function sendPresetReply() {
 }
 
 watch(contentTarget, async (target, previous) => {
+  cancelEntryScroll()
   const previousConversation = wechat.findConversation(previous)
   const nextConversation = wechat.findConversation(target)
   if (previousConversation) {
@@ -304,7 +328,7 @@ watch(contentTarget, async (target, previous) => {
   if (returningFromViewer && messagePane.value) {
     messagePane.value.scrollTop = chatViewerScrollTop.value
   } else {
-    await scrollToBottom()
+    await scrollEntryToBottom()
   }
 }, { immediate: true })
 watch(() => messages.value.length, scrollToBottom)
@@ -339,7 +363,7 @@ watch(() => messages.value.length, scrollToBottom)
         <button type="button" aria-label="更多"><MoreHorizontal :size="24" /></button>
       </header>
 
-      <main ref="messagePane" class="wechat-message-pane" @pointerdown="closeKeyboard">
+      <main ref="messagePane" class="wechat-message-pane" @pointerdown="handleMessagePanePointerDown">
         <template v-for="row in messageRows" :key="row.message.id">
           <time v-if="row.showTime" class="wechat-chat-time">{{ row.time }}</time>
           <article
