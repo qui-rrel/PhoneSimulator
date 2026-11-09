@@ -2,6 +2,9 @@
 phone-simulator/node_modules/
 phone-simulator/dist/
 phone-simulator/.vite/
+config-editor/node_modules/
+config-editor/dist/
+config-editor/.vite/
 
 # Local and temporary files
 **/~$*.xlsx

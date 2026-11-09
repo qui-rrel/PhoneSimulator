@@ -2,7 +2,9 @@
 
 这是 PhoneSimulator 的 Vue 前端。它在浏览器中呈现一部可操作的手机，并由 JSON 驱动初始内容、短信/微信剧情、电话对白、朋友圈互动和事件分支。页面面向手机尺寸设计，也可以在桌面浏览器中以手机外壳形式预览。
 
-完整项目还包含 Excel 配置工具。第一次使用、GitHub Desktop 备份和 Cloudflare Pages 发布步骤见[仓库总说明](../README.md)。
+完整项目还包含推荐使用的可视化配置编辑器，以及继续兼容旧作品的 Excel 转换工具。第一次使用、GitHub Desktop 备份和 Cloudflare Pages 发布步骤见[仓库总说明](../README.md)。
+
+当前前端功能已进入稳定阶段。短期维护以作品内容、素材和明确缺陷为主；未在“已实现内容”中声明的入口不作为待补功能自动扩展。
 
 ## 技术栈
 
@@ -22,7 +24,9 @@ src/data/content.json + src/data/story.json
   -> src/apps/ 与 src/components/
 ```
 
-作品内容通常不直接编辑 JSON，而是修改 Excel 后通过转换器生成。涉及架构和协作约束时先阅读根目录 [AGENTS.md](../AGENTS.md)。
+开发时保留可读 JSON。生产构建会通过 Vite 虚拟模块编码两份配置，并把配置加载器和剧情操作映射放入受保护 chunk；该处理只增加直接复制成本，不改变可视化编辑器或旧 Excel 使用的运行时字段结构。
+
+作品内容通常不直接编辑 JSON，而是通过可视化编辑器导出；旧 Excel 作品也可以继续由转换器生成。涉及架构和协作约束时先阅读根目录 [AGENTS.md](../AGENTS.md)。
 
 ## 安装和运行
 
@@ -32,6 +36,8 @@ src/data/content.json + src/data/story.json
 npm install
 npm run dev
 ```
+
+需要 Node.js `20.19.0` 或更高的 20.x，或 `22.12.0` 及更高版本。
 
 终端会显示本地地址。停止预览时在运行 Vite 的终端按 `Ctrl + C`，否则端口会继续被占用。
 
@@ -43,7 +49,7 @@ npm run build
 
 编译结果位于 `dist/`，该目录由构建生成，不提交到 GitHub。`npm run preview` 可临时预览已经生成的生产构建。
 
-生产构建会把 `content.json` 和 `story.json` 编码为随机载荷，并只对配置加载器与剧情操作映射 chunk 做轻度混淆；源码、Excel 和转换流程仍保持正常可读。构建命令结束前还会运行 `scripts/verify-protected-build.mjs`，确认没有独立 JSON、source map、主要剧情操作名或较长配置文案意外进入发布包。该机制用于提高复制门槛，不能用于保存真正的密钥或隐私数据，因为浏览器运行时仍可取得解码后的配置对象。
+生产构建会把 `content.json` 和 `story.json` 编码为随机载荷，并只对配置加载器与剧情操作映射 chunk 做轻度混淆；源码、可视化项目和旧版 Excel 流程仍保持正常可读。构建命令结束前还会运行 `scripts/verify-protected-build.mjs`，确认没有独立 JSON、source map、主要剧情操作名或较长配置文案意外进入发布包。该机制用于提高复制门槛，不能用于保存真正的密钥或隐私数据，因为浏览器运行时仍可取得解码后的配置对象。
 
 ## 已实现内容
 
@@ -54,9 +60,9 @@ npm run build
 - 短信、电话、微信、地图、小红书、音乐、浏览器、相册、备忘录、邮件、日历、天气、时钟、计算器和设置。
 - 计算器支持四则运算、乘除优先级、百分比、小数、删除和连续计算；等号前显示表达式与实时预览，等号后突出最终结果。
 - 相册大图左右滑动。
-- 备忘录支持置顶；多个置顶项保持 Excel 行顺序，非置顶项按更新时间从晚到早排列。
-- 地图支持按地点切换并拖动 SVG；个人收藏、最近列表和保存日期均由“地图地点”表控制。
-- 小红书首页以可滚动长图呈现，顶部与底部使用独立固定界面；搜索页显示 Excel 配置的历史记录，可选记录可在新标签页打开外链。
+- 备忘录支持置顶；多个置顶项保持配置顺序，非置顶项按更新时间从晚到早排列。
+- 地图支持按地点切换并拖动 SVG；个人收藏、最近列表和保存日期均由地图地点配置控制。
+- 小红书首页以可滚动长图呈现，顶部与底部使用独立固定界面；搜索页显示配置的历史记录，可选记录可在新标签页打开外链。
 - 短信剧情逐键输入，玩家必须自行点击发送；输入框可随时打开或关闭键盘，未发送草稿会保留。
 - 微信支持单聊、群聊、群成员昵称、自动拼接群头像、文字/图片/表情图片/定位消息、置顶会话、由消息状态计算的未读数和顶部通知；定位卡片可打开对应地图地点、加入最近地点，并通过统一导航栈返回微信。顶部通知可点击进入内容，也可向上滑动提前关闭。初始聊天记录还可展示已接通或已取消的语音/视频通话记录，但不会真正发起通话。通讯录暂不可进入。
 - 从短信或微信列表、顶部消息通知进入会话时，聊天记录定位到最新一条；图片完成布局后会再次校准，玩家开始手动滑动后不再强制定位。
@@ -82,19 +88,17 @@ npm run build
 
 ## 推荐的内容编辑流程
 
-不要直接在 Vue 模板中写作品内容。推荐通过仓库中的 Excel 配置：
+不要直接在 Vue 模板中写作品内容。新作品推荐使用 [`config-editor/`](../config-editor/README.md)：
 
-1. 编辑 `../excel-json-tool/outputs/phone-config-template.xlsx`。
-2. 关闭正在编辑的工作簿。
-3. 在 `../excel-json-tool/` 运行 `python convert.py`。
-4. 转换器更新 `src/data/content.json` 和 `src/data/story.json`。
+1. 新建或打开 `.phone-project.json`；旧作品可以一次性导入 Excel。
+2. 在可视化编辑器中完成内容、消息序列和剧情蓝图配置。
+3. 保存可视化项目文件。
+4. 修正红色错误后，通过“导出 JSON”把 `content.json` 和 `story.json` 写入本目录的 `src/data/`。
 5. 回到本目录运行 `npm run build`。
 
-Excel 是便于创作者编辑的内容源，JSON 是网页实际读取的运行时数据。表格说明和字段格式见 [Excel 工具 README](../excel-json-tool/README.md)。
+`.phone-project.json` 是推荐工作流的内容源，JSON 是网页实际读取的运行时数据。已有作品也可以继续使用[旧版 Excel 工具](../excel-json-tool/README.md)，但不要让 Excel 与可视化项目同时维护同一个作品；二者都会覆盖相同的运行时 JSON。
 
-如果只是在排查程序，也可以阅读 JSON，但不要在不知情的情况下同时修改 Excel 和 JSON：下次转换会以 Excel 内容覆盖生成的 JSON。
-
-如果用户明确说正在编辑 Excel、只想暂存表格，或要求暂不更新 JSON，不要运行转换器。Excel 与 JSON 在这种中间状态下暂时不一致是允许的。
+如果只是在排查程序，可以阅读 JSON，但不要把直接修改 JSON 当作长期内容源。下一次从可视化项目导出或运行 Excel 转换器时，手工修改会被覆盖。
 
 ## 初始内容 `content.json`
 
@@ -124,7 +128,7 @@ Excel 是便于创作者编辑的内容源，JSON 是网页实际读取的运行
 | `xiaohongshu` | 小红书首页长图路径与搜索历史记录、可选外链 |
 | `wechat` | 微信账号、专属联系人、群聊、会话、消息、朋友圈点赞与评论 |
 
-`site.title` 控制浏览器标签页名称；修改 Excel 的“基础设置”后重新转换即可生效，不会显示在手机界面中。`security.passcode` 必须是恰好四位数字的字符串，例如 `"2799"` 或 `"0123"`。`apps[].enabled` 决定桌面是否显示入口。
+`site.title` 控制浏览器标签页名称；修改基础设置并重新导出即可生效，不会显示在手机界面中。`security.passcode` 必须是恰好四位数字的字符串，例如 `"2799"` 或 `"0123"`。`apps[].enabled` 决定桌面是否显示入口。
 
 `apps` 不保存未读角标。信息角标从 `contacts[].unread` 汇总，邮件角标从 `mail[].unread` 汇总，微信角标从 `wechat.messages[].read` 汇总；运行时收到或读完内容后直接跟随各自状态更新。微信会话只配置是否置顶，列表摘要、时间和未读数量均从最后一条消息及消息已读状态计算。短信列表不显示时间；微信会话和最近通话列表统一按设备设定日期格式化时间：当天显示 `HH:MM`，同年其他日期显示 `MM-DD`，跨年显示 `YYYY-MM-DD`。微信与短信聊天详情保留时分，同年消息显示 `MM-DD HH:MM`，跨年显示 `YYYY-MM-DD HH:MM`。
 
@@ -134,7 +138,7 @@ Excel 是便于创作者编辑的内容源，JSON 是网页实际读取的运行
 
 ### 动态本地时间
 
-Excel 的显示时间字段填写 `LOCAL_TIME`，转换后会保存为 `$localTime`。网页加载配置时会把它统一替换为玩家打开页面时的本地 `HH:MM`。
+旧版 Excel 的显示时间字段填写 `LOCAL_TIME`，转换后会保存为 `$localTime`；可视化项目直接保存运行时标记。网页加载配置时会把 `$localTime` 统一替换为玩家打开页面时的本地 `HH:MM`。
 
 普通文字，包括“刚刚”，都会原样显示；字段留空时对应位置不显示时间。不要在 JSON 里直接填写 `LOCAL_TIME`，JSON 使用的是 `$localTime`。
 
@@ -178,6 +182,8 @@ Excel 的显示时间字段填写 `LOCAL_TIME`，转换后会保存为 `$localTi
 - `moment-liked`、`moment-unliked`、`moment-comment-sent`、`moment-published`。
 
 `appId` 限定应用，`targetId` 是触发对象 ID，可对应联系人、照片、邮件、备忘录、微信会话或朋友圈等内容。事件动作支持 `call`、`sms-script`、`wechat-script`、`moment-publish`、`moment-comment`、`moment-interactions` 和 `none`。关机由剧情运行器在所有实际进入的主线和支线完成后统一触发，不再配置为普通事件。
+
+操作名称集中定义在 `src/config/story.operations.js`。新增或调整剧情操作时，应先更新该映射，再由 App 或 store 引用对应常量；不要在多个组件中重复写 action 字符串。生产构建只对这层映射和配置加载器做额外混淆。
 
 来电可按 `accepted`、`rejected`、`missed` 分支；普通操作和短信完成通常使用 `completed`。`retry.enabled` 为 `false` 时忽略重试结果，为 `true` 时只重试 `retry.outcomes` 中列出的结果。
 
@@ -241,7 +247,7 @@ phone-simulator/
 ### 运行时状态归属
 
 - `src/stores/phone.js`：锁屏、导航、短信、通知、电话、闹钟和通用剧情事件。
-- `src/stores/maps.js`：地图当前地点、Excel 收藏配置和最近列表。
+- `src/stores/maps.js`：地图当前地点、收藏配置和最近列表。
 - `src/stores/wechat.js`：微信会话、群聊、朋友圈、微信输入与朋友圈剧情状态。
 - `src/stores/music.js`：退出音乐 App 后仍需继续保留的播放状态。
 - 页面内部、退出后无需保留的选择状态放在对应 Vue 组件中，不复制第二套联系人或剧情状态。
@@ -253,9 +259,11 @@ phone-simulator/
 | 新增或调整 App 页面 | `src/apps/`、`src/components/AppWindow.vue`、`src/config/phone.config.js` |
 | 调整手机壳、状态栏、锁屏或桌面 | `src/components/`、`src/styles.css` |
 | 修改电话、短信、通知或事件推进 | `src/stores/phone.js` |
+| 修改 App 与剧情操作映射 | `src/config/story.operations.js`、相关 App 或 store |
 | 修改微信、群聊或朋友圈交互 | `src/apps/WeChatApp.vue`、`src/apps/WeChatMoments.vue`、`src/stores/wechat.js` |
 | 修改音乐跨页面播放 | `src/stores/music.js`、`src/apps/MusicApp.vue` |
-| 修改作品内容或新增配置字段 | `../excel-json-tool/outputs/phone-config-template.xlsx`、`../excel-json-tool/convert.py`、`src/data/*.json` |
+| 修改作品内容 | `../config-editor/`、作品 `.phone-project.json`、`src/data/*.json` |
+| 修改配置 schema 或旧 Excel 兼容 | `../config-editor/src/schema/`、`../excel-json-tool/outputs/phone-config-template.xlsx`、`../excel-json-tool/convert.py`、`src/data/*.json` |
 | 修改全局视觉或通用动画 | `src/styles.css` |
 
 更完整的代码约定和新聊天接手说明见仓库根目录的 [AGENTS.md](../AGENTS.md)。

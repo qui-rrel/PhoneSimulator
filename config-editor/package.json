@@ -1,0 +1,26 @@
+{
+  "name": "phone-config-editor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "test:excel-import": "node scripts/compare-excel-import.mjs",
+    "test:story-graph": "node scripts/test-story-graph.mjs",
+    "test:sequences": "node scripts/test-sequence-editor.mjs",
+    "test:validation": "node scripts/test-stage7-validation.mjs",
+    "test:content-navigation": "node scripts/test-content-navigation.mjs",
+    "test:runtime-export": "node scripts/test-runtime-export.mjs",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "lucide-vue-next": "^1.0.0",
+    "read-excel-file": "^9.3.14",
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.10",
+    "vite": "7.3.7"
+  }
+}
