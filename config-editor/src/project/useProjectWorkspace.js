@@ -120,12 +120,13 @@ export function useProjectWorkspace() {
   }
 
   async function newProject() {
-    if (!confirmDiscardChanges('新建项目并放弃这些修改')) return
+    if (!confirmDiscardChanges('新建项目并放弃这些修改')) return false
     const name = window.prompt('请输入作品名称', '未命名作品')
-    if (name === null) return
-    const document = createDefaultProjectDocument(name.trim() || '未命名作品', { empty: true })
+    if (name === null) return false
+    const document = createDefaultProjectDocument(name.trim() || '未命名作品')
     await applyDocument(document, { clean: false })
     showNotice('已新建项目，请保存项目文件。')
+    return true
   }
 
   function openWithFileInput() {

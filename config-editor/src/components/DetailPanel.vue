@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
-import { ChevronDown, Code2, Copy, ListOrdered, X } from 'lucide-vue-next'
+import { ChevronDown, Code2, Copy, FolderOpen, ListOrdered, X } from 'lucide-vue-next'
 import FieldControl from './FieldControl.vue'
 import { itemTitle } from '../utils/display'
 import { isFieldRequired, visibleFieldsForKeys } from '../schema/fields'
@@ -21,6 +21,9 @@ const isNode = computed(() => Boolean(props.node))
 const fields = computed(() => visibleFieldsForKeys(
   selectedItem.value?.fieldKeys || [], selectedItem.value?.data || {}, props.fieldDefinitions,
 ))
+const hasMediaPathField = computed(() => fields.value.some((field) => (
+  field.type === 'media path' || String(field.placeholder || '').includes('/media/')
+)))
 const title = computed(() => itemTitle(selectedItem.value, props.displayMode))
 const displayedId = computed(() => selectedItem.value?.runtimeId !== undefined
   ? selectedItem.value.runtimeId
@@ -114,8 +117,14 @@ watch([() => props.focusFieldKey, selectedItem], async ([fieldKey]) => {
         </div>
       </section>
 
+      <section v-if="hasMediaPathField" class="detail-section path-hint-section">
+        <div class="detail-hint-title"><FolderOpen :size="15" /><strong>素材路径说明</strong></div>
+        <p>填写项目素材目录中的相对路径，并保留真实文件格式后缀，例如 <code>/media/images/photo.jpg</code>。</p>
+        <p>素材文件夹位于 <code>phone-simulator/public/media/</code>。编辑器只保存路径，不会复制素材；配置完成后请手动把文件放入对应目录。</p>
+      </section>
+
       <section v-if="resource?.orderHint" class="detail-section order-hint-section">
-        <div class="order-hint-title"><ListOrdered :size="15" /><strong>顺序说明</strong></div>
+        <div class="detail-hint-title"><ListOrdered :size="15" /><strong>顺序说明</strong></div>
         <p>{{ resource.orderHint }}</p>
       </section>
 

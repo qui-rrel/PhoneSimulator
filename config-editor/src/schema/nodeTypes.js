@@ -54,6 +54,12 @@ export const nodeTypes = {
     flowInputs: [flowInput], flowOutputs: [], dataInputs: [], dataOutputs: [],
     paletteCategory: '剧情事件', defaults: { 'trigger.type': 'timer', 'action.type': 'none' },
   },
+  'power-off': {
+    type: 'power-off', kind: 'event', label: '关机事件', color: '#685f73',
+    fieldKeys: ['editor.nodeName', 'event.initialActive', 'trigger.afterSeconds'],
+    flowInputs: [flowInput], flowOutputs: [], dataInputs: [], dataOutputs: [],
+    paletteCategory: '剧情事件', defaults: { 'trigger.type': 'timer', 'trigger.afterSeconds': 0, 'action.type': 'power-off' },
+  },
   'contact-reference': referenceType('contact-reference', '联系人引用', '#4f8a8b', 'reference.contactId', 'content-reference', '联系人'),
   'content-reference': referenceType('content-reference', '内容引用', '#507899', 'reference.contentId', 'content-reference', '内容'),
   'wechat-conversation-reference': referenceType('wechat-conversation-reference', '微信会话引用', '#4f8a72', 'reference.conversationId', 'content-reference', '微信会话'),

@@ -46,6 +46,7 @@ export function synchronizeEventNodeType(node) {
   const actionType = node.data['action.type']
   let type
   if (actionType === 'call') type = 'call'
+  else if (actionType === 'power-off') type = 'power-off'
   else if (node.type === 'terminal' && actionType === 'none') type = 'terminal'
   else type = node.data['trigger.type'] === 'operation' ? 'operation' : 'timer'
   if (type === node.type) return

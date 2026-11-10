@@ -33,8 +33,8 @@ import { Code2 } from 'lucide-vue-next'
 
 const savedMode = window.localStorage.getItem('phone-config-editor:display-mode')
 const displayMode = ref(['zh', 'dual', 'json'].includes(savedMode) ? savedMode : 'zh')
-const selectedSectionId = ref('story')
-const selectedNodeId = ref('event-message')
+const selectedSectionId = ref('basics')
+const selectedNodeId = ref('')
 const selectedResourceId = ref('basic-device')
 let savedDirectorySelections = {}
 try { savedDirectorySelections = JSON.parse(window.localStorage.getItem('phone-config-editor:directories') || '{}') } catch { savedDirectorySelections = {} }
@@ -51,11 +51,20 @@ const runtimeExportDialogOpen = ref(false)
 const {
   projectName, projectFileLabel, baseStory, sections, nodes, edges, groups,
   isDirty, isBusy, notice, recoveryCandidate, importSummary, workspaceRevision,
-  newProject, openProject, importExcel, saveProject, saveProjectAs,
+  newProject: createNewProject, openProject, importExcel, saveProject, saveProjectAs,
   downloadRuntimeFile, writeRuntimeDirectory,
   closeImportSummary,
   restoreRecovery, discardRecovery, buildDocument,
 } = useProjectWorkspace()
+
+async function newProject() {
+  const created = await createNewProject()
+  if (!created) return
+  selectedSectionId.value = 'basics'
+  selectedNodeId.value = ''
+  selectedResourceId.value = 'basic-device'
+  detailOpen.value = true
+}
 
 const graphUndoStack = ref([])
 const graphRedoStack = ref([])

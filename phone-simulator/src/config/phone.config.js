@@ -19,6 +19,8 @@ const appFallbacks = {
   xiaohongshu: { icon: BookOpenText, color: '#ff2442' },
 }
 const LOCAL_TIME_TOKEN = '$localTime'
+const DEFAULT_LOCK_WALLPAPER = 'linear-gradient(160deg, #18243b 0%, #314a70 46%, #5f7693 100%)'
+const DEFAULT_HOME_WALLPAPER = 'linear-gradient(145deg, #17263b 0%, #294768 42%, #6d7f91 100%)'
 const pageOpenedTime = new Intl.DateTimeFormat('zh-CN', {
   hour: '2-digit',
   minute: '2-digit',
@@ -58,10 +60,10 @@ export const phoneConfig = {
   ...contentConfig,
   theme: {
     ...contentConfig.theme,
-    lockWallpaper: resolveWallpaperBackground(contentConfig.theme.lockWallpaper),
-    homeWallpaper: resolveWallpaperBackground(contentConfig.theme.homeWallpaper),
-    wallpaper: resolveWallpaperBackground(contentConfig.theme.homeWallpaper),
-    wallpaperOverlay: contentConfig.theme.wallpaperOverlay || 'transparent',
+    lockWallpaper: resolveWallpaperBackground(contentConfig.theme?.lockWallpaper) || DEFAULT_LOCK_WALLPAPER,
+    homeWallpaper: resolveWallpaperBackground(contentConfig.theme?.homeWallpaper) || DEFAULT_HOME_WALLPAPER,
+    wallpaper: resolveWallpaperBackground(contentConfig.theme?.homeWallpaper) || DEFAULT_HOME_WALLPAPER,
+    wallpaperOverlay: contentConfig.theme?.wallpaperOverlay || 'transparent',
   },
   apps: contentConfig.apps.map((app) => {
     const fallback = appFallbacks[app.id] || { icon: Compass, color: '#667085' }

@@ -15,10 +15,12 @@ const story = JSON.parse(await fs.readFile(path.join(repoRoot, 'phone-simulator/
 const state = projectToEditorState(createProjectFromRuntime({ name: '运行时导出测试', content, story }))
 const document = editorStateToProject(state)
 const bundle = createRuntimeExportBundle(document)
+const expectedContent = structuredClone(content)
+delete expectedContent.device?.powerOffDelaySeconds
 
 assert.equal(bundle.content.name, 'content.json')
 assert.equal(bundle.story.name, 'story.json')
-assert.deepEqual(JSON.parse(bundle.content.text), content)
+assert.deepEqual(JSON.parse(bundle.content.text), expectedContent)
 assert.deepEqual(JSON.parse(bundle.story.text), story)
 assert.equal(bundle.content.text.endsWith('\n'), true)
 assert.equal(bundle.story.text.endsWith('\n'), true)
@@ -38,7 +40,7 @@ const directory = {
   },
 }
 await writeRuntimeExport(directory, bundle)
-assert.deepEqual(JSON.parse(writes.get('content.json')), content)
+assert.deepEqual(JSON.parse(writes.get('content.json')), expectedContent)
 assert.deepEqual(JSON.parse(writes.get('story.json')), story)
 
 const issues = [{ level: 'warning' }, { level: 'error', id: 'broken-reference' }]

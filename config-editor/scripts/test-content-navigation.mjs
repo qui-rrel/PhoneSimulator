@@ -1,13 +1,11 @@
 import assert from 'node:assert/strict'
-import fs from 'node:fs/promises'
-import path from 'node:path'
 import { createOrdinaryResource, createProjectFromRuntime, editorStateToProject, projectToEditorState } from '../src/project/projectFile.js'
+import { defaultRuntimeContent, defaultRuntimeStory } from '../src/project/defaultTemplate.js'
 import { directoriesForSection } from '../src/schema/navigation.js'
 import { syncManagedOrder } from '../src/project/resourceOrdering.js'
 
-const repoRoot = path.resolve(import.meta.dirname, '../..')
-const content = JSON.parse(await fs.readFile(path.join(repoRoot, 'phone-simulator/src/data/content.json'), 'utf8'))
-const story = JSON.parse(await fs.readFile(path.join(repoRoot, 'phone-simulator/src/data/story.json'), 'utf8'))
+const content = structuredClone(defaultRuntimeContent)
+const story = structuredClone(defaultRuntimeStory)
 const state = projectToEditorState(createProjectFromRuntime({ name: '内容目录测试', content, story }))
 
 for (const section of state.sections.filter((item) => !['basics', 'story'].includes(item.id))) {
@@ -24,14 +22,21 @@ for (const section of state.sections) for (const directory of directoriesForSect
 }
 
 const communication = state.sections.find((item) => item.id === 'communication')
-const contact = communication.resources.find((item) => item.resourceType === 'contact')
+const contact = createOrdinaryResource('contact', communication.resources)
+contact.data['contact.name'] = '目录测试联系人'
+communication.resources.push(contact)
 const sms = createOrdinaryResource('sms-message', communication.resources)
 sms.data['sms.contactId'] = contact.runtimeId
 sms.data['sms.text'] = '目录测试消息'
 communication.resources.push(sms)
 
 const wechat = state.sections.find((item) => item.id === 'wechat')
-const conversation = wechat.resources.find((item) => item.resourceType === 'wechat-conversation')
+const wechatContact = createOrdinaryResource('wechat-contact', wechat.resources)
+wechatContact.data['wxContact.nickname'] = '目录测试微信联系人'
+wechat.resources.push(wechatContact)
+const conversation = createOrdinaryResource('wechat-conversation', wechat.resources)
+conversation.data['wxConversation.targetContactId'] = wechatContact.runtimeId
+wechat.resources.push(conversation)
 const message = createOrdinaryResource('wechat-message', wechat.resources)
 message.data['wxMessage.conversationId'] = conversation.runtimeId
 message.data['wxMessage.senderId'] = 'SELF'

@@ -27,8 +27,9 @@ const TRIGGER_ACTION = alias([
 ])
 const ACTION_TYPE = alias([
   ['收到电话', 'call'], ['执行短信剧情', 'sms-script'], ['执行微信剧情', 'wechat-script'], ['执行朋友圈发布剧情', 'moment-publish'],
-  ['执行朋友圈玩家评论剧情', 'moment-comment'], ['执行朋友圈互动剧情', 'moment-interactions'], ['仅衔接下一节点', 'none'],
-  ...['call', 'sms-script', 'wechat-script', 'moment-publish', 'moment-comment', 'moment-interactions', 'none'].map((item) => [item, item]),
+  ['执行朋友圈玩家评论剧情', 'moment-comment'], ['执行朋友圈互动剧情', 'moment-interactions'],
+  ['手机关机', 'power-off'], ['关机', 'power-off'], ['手机没电关机', 'power-off'], ['仅衔接下一节点', 'none'],
+  ...['call', 'sms-script', 'wechat-script', 'moment-publish', 'moment-comment', 'moment-interactions', 'power-off', 'none'].map((item) => [item, item]),
 ])
 const EVENT_STATE = alias([['任意', 'any'], ['已触发', 'completed'], ['未触发', 'not-triggered'], ['进行中', 'in-progress'], ['已完成', 'completed'], ['any', 'any'], ['triggered', 'completed'], ['not-triggered', 'not-triggered'], ['in-progress', 'in-progress'], ['completed', 'completed'], ['', 'any']])
 const CONDITION_TYPE = alias([['剧情事件状态', 'event-state'], ['剧情事件结果', 'event-outcome'], ['event-state', 'event-state'], ['event-outcome', 'event-outcome']])
@@ -36,7 +37,7 @@ const CONDITION_OUTCOME = alias([['接听', 'accepted'], ['拒接', 'rejected'],
 const RETRY_OUTCOME = alias([['接听', 'accepted'], ['拒接', 'rejected'], ['未接', 'missed']])
 const SELF = 'SELF'
 
-const NUMBER_FIELDS = new Set(['device.width', 'device.height', 'device.radius', 'security.digits', 'weather.seed', 'device.initialBatteryLevel', 'device.batteryDrainIntervalSeconds', 'device.powerOffDelaySeconds'])
+const NUMBER_FIELDS = new Set(['device.width', 'device.height', 'device.radius', 'security.digits', 'weather.seed', 'device.initialBatteryLevel', 'device.batteryDrainIntervalSeconds'])
 const BOOLEAN_FIELDS = new Set(['home.showGreetingWidget'])
 const byOrder = (a, b) => asNumber(a.order, 0) - asNumber(b.order, 0)
 const mapped = (map, value) => map[asText(value)] ?? asText(value)
@@ -65,6 +66,7 @@ function convertBasics(reader, content, story) {
   for (const row of reader.rows('基础设置')) {
     const field = asText(row.field)
     basicFields.add(field)
+    if (field === 'device.powerOffDelaySeconds') continue
     let value = row.value
     if (field === 'security.passcode') value = asPasscode(value)
     else if (field === 'device.fixedDate') value = value === '' ? '' : asDateText(value, '基础设置中的固定日期')
@@ -72,11 +74,11 @@ function convertBasics(reader, content, story) {
     else if (BOOLEAN_FIELDS.has(field)) value = asBool(value)
     else value = asText(value)
     if (field === 'device.initialBatteryLevel') required(Number.isInteger(value) && value >= 1 && value <= 100, '基础设置中的初始手机电量必须填写 1 到 100 的整数。')
-    if (field === 'device.batteryDrainIntervalSeconds') required(Number.isInteger(value) && value > 0, '基础设置中的每格电量耗时必须填写大于 0 的整数秒数。')
-    if (field === 'device.powerOffDelaySeconds') required(Number.isInteger(value) && value >= 0, '基础设置中的剧情完成后关机等待必须填写大于或等于 0 的整数秒数。')
+    if (field === 'device.batteryDrainIntervalSeconds') required(Number.isInteger(value) && value >= 0, '基础设置中的每格电量耗时必须填写大于或等于 0 的整数秒数；0 表示电量保持不变。')
     if (field === 'security.digits') required(value === 4, '密码位数固定为 4，请不要修改。')
     setPath(field.startsWith('story.') ? story : content, field.startsWith('story.') ? field.slice(6) : field, value)
   }
+  if (content.device) delete content.device.powerOffDelaySeconds
   const title = asText(content.site?.title)
   if (basicFields.has('site.title')) required(title, '基础设置中的网页名称不能为空。')
   if (!title) setPath(content, 'site.title', 'PhoneSimulator')
@@ -341,7 +343,7 @@ function convertCallsAndEvents(reader, story, refs) {
     if (row.afterMs !== '') trigger.afterMs = secondsToMs(row.afterMs)
     const triggerAction = mapped(TRIGGER_ACTION, row.triggerAction); if (triggerAction) trigger.action = triggerAction
     if (row.triggerAppId) trigger.appId = asText(row.triggerAppId); if (row.targetId) trigger.targetId = asText(row.targetId)
-    const actionType = mapped(ACTION_TYPE, row.actionType); required(['call', 'sms-script', 'wechat-script', 'moment-publish', 'moment-comment', 'moment-interactions', 'none'].includes(actionType), `剧情事件 ${JSON.stringify(id)}：发生内容无效。`)
+    const actionType = mapped(ACTION_TYPE, row.actionType); required(['call', 'sms-script', 'wechat-script', 'moment-publish', 'moment-comment', 'moment-interactions', 'power-off', 'none'].includes(actionType), `剧情事件 ${JSON.stringify(id)}：发生内容无效。`)
     const action = { type: actionType }
     for (const key of ['smsScriptId', 'wechatScriptId', 'publishScriptId', 'commentScriptId', 'interactionScriptId', 'dialogueId']) if (row[key]) action[key] = asText(row[key])
     if (row.timeoutMs !== '') action.timeoutMs = secondsToMs(row.timeoutMs)

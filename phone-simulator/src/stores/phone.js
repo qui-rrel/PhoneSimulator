@@ -55,8 +55,6 @@ let restoringSuppressedForward = false
 let powerWarningTimer = null
 let powerShutdownTimer = null
 let batteryDrainTimer = null
-let storyPowerOffTimer = null
-let storyTimelineStarted = false
 
 export const usePhoneStore = defineStore('phone', () => {
   const locked = ref(true)
@@ -611,28 +609,10 @@ export const usePhoneStore = defineStore('phone', () => {
   function removeActiveStoryEvent(eventId) {
     activeStoryEvents.value = activeStoryEvents.value.filter((id) => id !== eventId)
   }
-  function clearStoryPowerOffTimer() {
-    window.clearTimeout(storyPowerOffTimer)
-    storyPowerOffTimer = null
-  }
-  function hasPendingStoryEvents() {
-    return activeStoryEvents.value.length > 0 || triggeredEvents.value.some((eventId) => !completedEvents.value.includes(eventId))
-  }
-  function maybeScheduleStoryPowerOff() {
-    if (!storyTimelineStarted || powerState.value !== 'on' || hasPendingStoryEvents()) return
-    if (storyPowerOffTimer) return
-    const seconds = Number(contentConfig.device?.powerOffDelaySeconds)
-    const delay = (Number.isFinite(seconds) && seconds >= 0 ? seconds : 30) * 1000
-    storyPowerOffTimer = window.setTimeout(() => {
-      storyPowerOffTimer = null
-      beginPowerOff()
-    }, delay)
-  }
   function activateStoryEvent(eventId, delayOverride = null) {
     if (powerState.value !== 'on') return
     const event = findStoryEvent(eventId)
     if (!event || completedEvents.value.includes(eventId) || activeStoryEvents.value.includes(eventId)) return
-    clearStoryPowerOffTimer()
     activeStoryEvents.value.push(eventId)
     if (event.trigger?.type !== 'timer') {
       const action = event.trigger?.action
@@ -673,6 +653,12 @@ export const usePhoneStore = defineStore('phone', () => {
       if (!useWechatStore().activateInteractionScript(action.interactionScriptId, event.id)) resolveStoryOutcome(event.id, 'completed')
       return
     }
+    if (action.type === 'power-off') {
+      if (!completedEvents.value.includes(event.id)) completedEvents.value.push(event.id)
+      eventOutcomes.value[event.id] = 'completed'
+      beginPowerOff()
+      return
+    }
     resolveStoryOutcome(event.id, 'completed')
   }
   function resolveStoryOutcome(eventId, outcome) {
@@ -688,7 +674,6 @@ export const usePhoneStore = defineStore('phone', () => {
     eventOutcomes.value[eventId] = outcome
     const nextId = event.nextByOutcome?.[outcome] || event.nextByOutcome?.completed
     if (nextId) activateStoryEvent(nextId)
-    maybeScheduleStoryPowerOff()
   }
   function triggerOperation(action, payload = {}) {
     if (powerState.value !== 'on') return
@@ -702,8 +687,6 @@ export const usePhoneStore = defineStore('phone', () => {
   function startTimeline() {
     timelineTimers.forEach((timer) => window.clearTimeout(timer))
     timelineTimers = []
-    clearStoryPowerOffTimer()
-    storyTimelineStarted = false
     activeStoryEvents.value = []
     const events = storyConfig.events || []
     let initialEvents = events.filter((event) => event.initialActive)
@@ -712,8 +695,6 @@ export const usePhoneStore = defineStore('phone', () => {
       initialEvents = events.filter((event) => !referenced.has(event.id))
     }
     initialEvents.forEach((event) => activateStoryEvent(event.id))
-    storyTimelineStarted = initialEvents.length > 0
-    maybeScheduleStoryPowerOff()
   }
 
   function clearBatteryDrainTimer() {
@@ -723,8 +704,12 @@ export const usePhoneStore = defineStore('phone', () => {
   function updateTimedBatteryLevel() {
     if (powerState.value !== 'on') return
     const seconds = Number(contentConfig.device?.batteryDrainIntervalSeconds)
-    const intervalMs = (Number.isFinite(seconds) && seconds > 0 ? seconds : 30) * 1000
     const initialLevel = Math.max(1, normalizeBatteryLevel(contentConfig.device?.initialBatteryLevel))
+    if (seconds === 0) {
+      batteryLevel.value = initialLevel
+      return
+    }
+    const intervalMs = (Number.isFinite(seconds) && seconds > 0 ? seconds : 30) * 1000
     const drainedLevel = initialLevel - Math.floor((Date.now() - startedAt.value) / intervalMs)
     batteryLevel.value = Math.max(1, drainedLevel)
   }
@@ -732,6 +717,7 @@ export const usePhoneStore = defineStore('phone', () => {
     clearBatteryDrainTimer()
     startedAt.value = Date.now()
     updateTimedBatteryLevel()
+    if (Number(contentConfig.device?.batteryDrainIntervalSeconds) === 0) return
     batteryDrainTimer = window.setInterval(updateTimedBatteryLevel, 1000)
   }
 
@@ -744,8 +730,6 @@ export const usePhoneStore = defineStore('phone', () => {
   function beginPowerOff() {
     if (powerState.value !== 'on') return
     stopIncomingCallRingtone()
-    storyTimelineStarted = false
-    clearStoryPowerOffTimer()
     clearBatteryDrainTimer()
     batteryLevel.value = 0
     powerState.value = 'warning'
@@ -832,9 +816,7 @@ export const usePhoneStore = defineStore('phone', () => {
   function resetStory() {
     stopIncomingCallRingtone()
     clearPowerTimers()
-    clearStoryPowerOffTimer()
     clearBatteryDrainTimer()
-    storyTimelineStarted = false
     batteryLevel.value = Math.max(1, normalizeBatteryLevel(contentConfig.device?.initialBatteryLevel))
     powerState.value = 'on'
     contacts.value = hydrateContacts(contentConfig.contacts)

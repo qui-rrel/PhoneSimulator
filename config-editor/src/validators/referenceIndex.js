@@ -42,7 +42,7 @@ export function collectReferenceTargets({ sections, nodes }) {
     }
   }
   for (const node of nodes) {
-    if (node.kind === 'event' || ['timer', 'operation', 'call', 'terminal'].includes(node.type)) {
+    if (node.kind === 'event' || ['timer', 'operation', 'call', 'terminal', 'power-off'].includes(node.type)) {
       addTarget(targets, 'event', node.id, { sectionId: 'story', nodeId: node.id, title: node.name })
     }
   }

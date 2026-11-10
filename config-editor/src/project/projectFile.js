@@ -3,6 +3,7 @@ import { getOrdinaryResourceSchema, getResourceSchema, ordinaryResourceSchemas, 
 import { layoutStoryEvents } from '../graph/layout.js'
 import { sequenceSchemas } from '../schema/sequences.js'
 import { createSequenceEditorResource, sequenceResourceToRuntime } from './sequenceResources.js'
+import { defaultRuntimeContent, defaultRuntimeStory } from './defaultTemplate.js'
 
 export const PROJECT_FORMAT = 'phonesimulator.visual-project'
 export const PROJECT_SCHEMA_VERSION = 2
@@ -34,81 +35,16 @@ function emptyRuntimeStory() {
   }
 }
 
-export function createDefaultProjectDocument(name = '示例项目', { empty = false } = {}) {
+export function createDefaultProjectDocument(name = 'phone-config-template') {
   const timestamp = nowIso()
-  const content = {
-    site: { title: 'PhoneSimulator' },
-    device: { initialBatteryLevel: 86 },
-    weather: { seed: 20261108 },
-    owner: { name: empty ? '' : '林然' },
-    theme: { accent: '#6f8fe8' },
-    contacts: empty ? [] : [
-      { id: 'contact-chen', name: '陈默', avatar: '/media/avatar-chen.jpg', initials: '', color: '', time: '', unread: 0, messages: [] },
-      { id: 'contact-lin', name: '林然', avatar: '/media/avatar-lin.jpg', initials: '', color: '', time: '', unread: 0, messages: [] },
-    ],
-  }
-  const story = emptyRuntimeStory()
-  const graphNodes = {}
-  const editorResources = {}
-
-  if (!empty) {
-    story.wechatScripts.push({ id: 'wx-airport', conversationId: '', messages: [] })
-    story.phoneDialogues.push({
-      id: 'call-chen-2', contactId: 'contact-chen', direction: 'incoming',
-      hangupAfterMs: 3000, conversation: [],
-    })
-    story.events = [
-      {
-        id: 'event-start', initialActive: true,
-        trigger: { type: 'timer', afterMs: 3000 }, action: { type: 'none' },
-        nextByOutcome: { completed: 'event-message', accepted: '', rejected: '', missed: '' },
-        retry: { enabled: false, afterMs: 30000, outcomes: [] },
-      },
-      {
-        id: 'event-message', initialActive: false,
-        trigger: { type: 'operation', action: 'content-open', appId: 'wechat', targetId: 'contact-lin' },
-        action: { type: 'wechat-script', wechatScriptId: 'wx-airport' },
-        nextByOutcome: { completed: 'event-call-chen', accepted: '', rejected: '', missed: '' },
-        retry: { enabled: false, afterMs: 30000, outcomes: [] },
-      },
-      {
-        id: 'event-call-chen', initialActive: false,
-        trigger: { type: 'timer', afterMs: 5000 },
-        action: { type: 'call', dialogueId: 'call-chen-2', timeoutMs: 15000 },
-        nextByOutcome: { completed: '', accepted: 'event-ending-a', rejected: 'event-ending-b', missed: 'event-ending-b' },
-        retry: { enabled: false, afterMs: 30000, outcomes: [] },
-      },
-      {
-        id: 'event-ending-a', initialActive: false,
-        trigger: { type: 'timer' }, action: { type: 'none' },
-        nextByOutcome: { completed: '', accepted: '', rejected: '', missed: '' },
-        retry: { enabled: false, afterMs: 30000, outcomes: [] },
-      },
-      {
-        id: 'event-ending-b', initialActive: false,
-        trigger: { type: 'timer' }, action: { type: 'none' },
-        nextByOutcome: { completed: '', accepted: '', rejected: '', missed: '' },
-        retry: { enabled: false, afterMs: 30000, outcomes: [] },
-      },
-    ]
-    Object.assign(graphNodes, {
-      'event-start': { x: 100, y: 210, expanded: false, name: '开场等待', type: 'timer' },
-      'event-message': { x: 500, y: 160, expanded: true, name: '等待打开微信', type: 'operation' },
-      'event-call-chen': { x: 950, y: 145, expanded: true, name: '陈默的来电', type: 'call' },
-      'event-ending-a': { x: 1420, y: 90, expanded: false, name: '继续主线', type: 'terminal' },
-      'event-ending-b': { x: 1420, y: 430, expanded: false, name: '等待后续操作', type: 'terminal' },
-    })
-    editorResources['wx-airport'] = { name: '机场重逢', messageCount: 12 }
-    editorResources['call-chen-2'] = { name: '陈默 / 第二次来电', messageCount: 8 }
-  }
 
   return {
     format: PROJECT_FORMAT,
     schemaVersion: PROJECT_SCHEMA_VERSION,
     meta: { name, createdAt: timestamp, updatedAt: timestamp },
-    content,
-    story,
-    editor: { graph: { nodes: graphNodes, auxNodes: [], dataEdges: [], groups: [] }, resources: editorResources },
+    content: clone(defaultRuntimeContent),
+    story: clone(defaultRuntimeStory),
+    editor: { graph: { nodes: {}, auxNodes: [], dataEdges: [], groups: [] }, resources: {} },
   }
 }
 
@@ -255,6 +191,7 @@ function inferNodeType(event) {
   const hasNext = Object.values(event.nextByOutcome || {}).some(Boolean)
   if (!hasNext && event.action?.type === 'none') return 'terminal'
   if (event.action?.type === 'call') return 'call'
+  if (event.action?.type === 'power-off') return 'power-off'
   if (event.trigger?.type === 'operation') return 'operation'
   return 'timer'
 }
@@ -395,7 +332,6 @@ function createSections(document) {
           'device.fixedDate': content.device?.fixedDate ?? '',
           'device.initialBatteryLevel': content.device?.initialBatteryLevel ?? 86,
           'device.batteryDrainIntervalSeconds': content.device?.batteryDrainIntervalSeconds ?? 45,
-          'device.powerOffDelaySeconds': content.device?.powerOffDelaySeconds ?? 30,
         }),
         createResource('basic-owner', '手机主人', 'basic-owner', '手机主人姓名与系统页面资料', {
           'owner.name': content.owner?.name ?? '',
@@ -523,6 +459,7 @@ export function editorStateToProject({ meta, baseContent, baseStory, sections, n
   for (const resource of basicResources) {
     for (const [path, value] of Object.entries(resource.data)) setValueAtPath(content, path, clone(value))
   }
+  if (content.device) delete content.device.powerOffDelaySeconds
   applyOrdinaryContent(content, sections)
 
   for (const [type, schema] of Object.entries(sequenceSchemas)) {

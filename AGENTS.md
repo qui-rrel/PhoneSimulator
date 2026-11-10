@@ -155,7 +155,7 @@ Excel 工作簿 -> excel-json-tool/convert.py
 `content.json` 当前主要分区：
 
 - `site`：浏览器标签页名称等网页设置，不显示在手机界面中。
-- `device`：手机壳画布参数、`initialBatteryLevel` 初始电量、`batteryDrainIntervalSeconds` 每格电量耗时、`powerOffDelaySeconds` 剧情完成后关机等待，以及可空的 `fixedDate` 固定显示日期。
+- `device`：手机壳画布参数、`initialBatteryLevel` 初始电量、`batteryDrainIntervalSeconds` 每格电量耗时，以及可空的 `fixedDate` 固定显示日期。电量间隔为 `0` 时电量保持不变；关机不再属于基础设置。
 - `owner`：用户名、签名、Wi-Fi。
 - `security`：四位数字密码；始终按字符串理解以保留前导零。
 - `theme`：强调色、锁屏和桌面壁纸。
@@ -204,9 +204,10 @@ Excel 工作簿 -> excel-json-tool/convert.py
    - `moment-publish`：激活一段玩家发布朋友圈剧情。
    - `moment-comment`：激活一段玩家评论或回复朋友圈剧情。
    - `moment-interactions`：执行一段联系人朋友圈互动剧情。
+   - `power-off`：关闭手机并停止音乐、闹钟、通话和后续剧情计时。
    - `none`：不展示新内容，直接完成并衔接。
 5. `resolveStoryOutcome()` 根据 `nextByOutcome` 激活下一个节点；若 `retry.enabled` 且当前结果在 `retry.outcomes` 中，则等待后重试本节点。
-6. 电量按 `device.batteryDrainIntervalSeconds` 定时降低；只要仍有激活事件或已触发但未完成的事件，最低保持 1%。所有初始主线、支线及其实际进入的后继分支完成后，等待 `device.powerOffDelaySeconds` 再统一关机。互斥但未进入的结果分支不参与完成判定。
+6. 电量按 `device.batteryDrainIntervalSeconds` 定时降低，数值为 `0` 时保持初始电量；运行期间最低保持 1%。剧情完成本身不会自动关机，只有实际进入 `power-off` 事件才会关机；关机等待时间使用该事件的计时触发延迟配置。
 
 不要增加全局“线性/分支模式”。线性与分支都由事件连接表达，以便未来 App 操作继续复用。
 
@@ -296,6 +297,7 @@ Excel 工作簿 -> excel-json-tool/convert.py
 - 支持把旧 Excel 一次性导入可视化编辑器。导入后保存为可视化项目文件，后续应继续使用该项目文件编辑。
 - 再次导入 Excel 时必须明确提示会替换当前项目内容。
 - 可视化编辑器已经通过旧转换器结果对照和分阶段用户检查；根 README、编辑器 README、Excel README 与前端 README 均以可视化入口为推荐流程。
+- 编辑器首次打开和点击“新建”都使用 `config-editor/src/project/defaultTemplate.js` 中的同一份内置模板快照。该模板保留通用基础设置、桌面应用和微信玩家资料，不含示例文案或剧情，并且不得在运行时从兼容 Excel 或 `phone-simulator/src/data/*.json` 动态读取，以免作品内容修改意外改变以后新建项目的起点。
 
 ### 可视化项目文件
 
@@ -384,6 +386,7 @@ Excel 工作簿 -> excel-json-tool/convert.py
 - 运行时同时保留 `order` 字段的地图地点、微信消息和朋友圈相关内容，编辑器在移动后自动重算该类型的 `order`；`order` 属于编辑器管理字段，不在详细设置中要求作者手填。
 - Excel 一次性导入后，以旧转换器生成数组的顺序作为初始编辑器顺序，同时保留其既有 `order` 值；只有使用者实际移动时才重新编号。
 - 每种确实受顺序影响的普通内容在详细设置底部显示独立“顺序说明”，准确说明它控制的运行时列表或特殊排序规则；基础设置和顺序无意义的资源不显示。
+- 当前对象存在 `media path` 字段或包含 `/media/...` 路径的列表字段时，详细设置底部显示统一“素材路径说明”，明确素材目录为 `phone-simulator/public/media/`、路径必须带真实扩展名且素材需要手动复制。
 
 ### 消息与对白序列规则
 

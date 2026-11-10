@@ -1,0 +1,98 @@
+// This is a deliberate snapshot of the cleaned starter project. Keep it independent
+// from the runtime JSON and the legacy Excel workbook so later content edits do not
+// silently change what authors receive when they create a project.
+export const defaultRuntimeContent = {
+  device: {
+    width: 393,
+    height: 852,
+    radius: 58,
+    fixedDate: '',
+    initialBatteryLevel: 100,
+    batteryDrainIntervalSeconds: 0,
+  },
+  owner: {
+    name: '我',
+    signature: '',
+    wifiName: '',
+  },
+  security: {
+    passcode: '0000',
+    digits: 4,
+  },
+  theme: {
+    accent: '#5b6df8',
+    lockWallpaper: '',
+    homeWallpaper: '',
+    wallpaperOverlay: '',
+  },
+  weather: {
+    location: '上海',
+    seed: 999,
+  },
+  home: {
+    showGreetingWidget: true,
+  },
+  apps: [
+    { id: 'messages', label: '信息', enabled: true, component: 'MessagesApp', iconSrc: '/media/UI/AppIcon/messages-app-icon.png', dock: true },
+    { id: 'phone', label: '电话', enabled: true, component: 'PhoneApp', iconSrc: '/media/UI/AppIcon/phone-app-icon.png', dock: true },
+    { id: 'music', label: '音乐', enabled: true, component: 'MusicApp', iconSrc: '/media/UI/AppIcon/apple-music-app-icon.png', dock: true },
+    { id: 'browser', label: '浏览器', enabled: true, component: 'BrowserApp', iconSrc: '/media/UI/AppIcon/browser-app-icon.png', dock: true },
+    { id: 'photos', label: '照片', enabled: true, component: 'GalleryApp', iconSrc: '/media/UI/AppIcon/photos-app-icon.png' },
+    { id: 'notes', label: '备忘录', enabled: true, component: 'NotesApp', iconSrc: '/media/UI/AppIcon/notes-app-icon.png' },
+    { id: 'mail', label: '邮件', enabled: true, component: 'MailApp', iconSrc: '/media/UI/AppIcon/email-app-icon.png' },
+    { id: 'calendar', label: '日历', enabled: true, component: 'CalendarApp', iconSrc: '' },
+    { id: 'weather', label: '天气', enabled: true, component: 'WeatherApp', iconSrc: '/media/UI/AppIcon/weather-app-icon.png' },
+    { id: 'clock', label: '时钟', enabled: true, component: 'ClockApp', iconSrc: '' },
+    { id: 'settings', label: '设置', enabled: true, component: 'SettingsApp', iconSrc: '/media/UI/AppIcon/settings-app-icon.png' },
+    { id: 'calculator', label: '计算器', enabled: true, component: 'CalculatorApp', iconSrc: '/media/UI/AppIcon/calculator-app-icon.png' },
+    { id: 'wechat', label: '微信', enabled: true, component: 'WeChatApp', iconSrc: '/media/UI/AppIcon/wechat-app-icon.png' },
+    { id: 'maps', label: '地图', enabled: true, component: 'MapsApp', iconSrc: '/media/UI/AppIcon/gps-app-icon.png' },
+    { id: 'xiaohongshu', label: '小红书', enabled: true, component: 'XiaohongshuApp', iconSrc: '/media/UI/AppIcon/redbook-app-icon.png' },
+  ],
+  lockNotifications: [],
+  notes: [],
+  gallery: [],
+  alarms: [],
+  contacts: [],
+  callHistory: [],
+  playlist: [],
+  browserHistory: [],
+  mail: [],
+  calendarEvents: [],
+  site: {
+    title: 'PhoneSimulator',
+  },
+  wechat: {
+    profile: {
+      nickname: '我',
+      wechatId: 'user',
+      avatar: '',
+      initials: '',
+      color: '',
+      momentsCover: '',
+    },
+    contacts: [],
+    groups: [],
+    conversations: [],
+    messages: [],
+    moments: [],
+    momentLikes: [],
+    momentComments: [],
+  },
+  mapLocations: [],
+  xiaohongshu: {
+    homeImageSrc: '',
+    searchHistory: [],
+  },
+}
+
+export const defaultRuntimeStory = {
+  events: [],
+  smsScripts: [],
+  phoneDialogues: [],
+  outgoingCallRules: [],
+  wechatScripts: [],
+  momentPublishScripts: [],
+  momentCommentScripts: [],
+  momentInteractionScripts: [],
+}

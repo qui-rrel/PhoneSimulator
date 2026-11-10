@@ -74,6 +74,7 @@ export const fieldDefinitions = {
       { value: 'moment-comment', labelZh: '执行朋友圈玩家评论', labelEn: 'Run moment comment' },
       { value: 'moment-interactions', labelZh: '执行朋友圈互动', labelEn: 'Run moment interactions' },
       { value: 'call', labelZh: '收到电话', labelEn: 'Incoming call' },
+      { value: 'power-off', labelZh: '手机关机', labelEn: 'Power off phone' },
     ],
   },
   'action.smsScriptId': {
@@ -168,11 +169,7 @@ export const fieldDefinitions = {
   },
   'device.batteryDrainIntervalSeconds': {
     key: 'device.batteryDrainIntervalSeconds', labelZh: '每格电量耗时', labelEn: 'Battery drain interval', type: 'seconds',
-    default: 45, min: 1, step: 1, required: true, description: '剧情运行时每降低一格电量需要等待的秒数。',
-  },
-  'device.powerOffDelaySeconds': {
-    key: 'device.powerOffDelaySeconds', labelZh: '剧情完成后关机等待', labelEn: 'Power-off delay', type: 'seconds',
-    default: 30, min: 0, step: 1, required: true, description: '全部剧情完成后等待多少秒再关机。',
+    default: 45, min: 0, step: 1, required: true, description: '每降低一格电量需要等待的秒数；填写 0 时电量保持初始值，不随时间变化。',
   },
   'weather.seed': {
     key: 'weather.seed', labelZh: '天气随机种子', labelEn: 'Weather seed', type: 'int',
@@ -190,8 +187,8 @@ export const fieldDefinitions = {
     key: 'theme.accent', labelZh: '强调色', labelEn: 'Accent color', type: 'color', default: '#6f8fe8',
     required: true, description: '手机界面中按钮和选中状态使用的主题颜色。',
   },
-  'theme.lockWallpaper': { key: 'theme.lockWallpaper', labelZh: '锁屏壁纸', labelEn: 'Lock wallpaper', type: 'media path', default: '', placeholder: '/media/文件名.后缀', description: '锁屏页面使用的壁纸路径。' },
-  'theme.homeWallpaper': { key: 'theme.homeWallpaper', labelZh: '桌面壁纸', labelEn: 'Home wallpaper', type: 'media path', default: '', placeholder: '/media/文件名.后缀', description: '手机桌面使用的壁纸路径。' },
+  'theme.lockWallpaper': { key: 'theme.lockWallpaper', labelZh: '锁屏壁纸', labelEn: 'Lock wallpaper', type: 'media path', default: '', placeholder: '/media/文件名.后缀', description: '锁屏页面使用的壁纸路径；留空时使用代码内置的默认渐变背景。' },
+  'theme.homeWallpaper': { key: 'theme.homeWallpaper', labelZh: '桌面壁纸', labelEn: 'Home wallpaper', type: 'media path', default: '', placeholder: '/media/文件名.后缀', description: '手机桌面使用的壁纸路径；留空时使用代码内置的默认渐变背景。' },
   'theme.wallpaperOverlay': { key: 'theme.wallpaperOverlay', labelZh: '壁纸遮罩', labelEn: 'Wallpaper overlay', type: 'string', default: '', description: '可选的 CSS 颜色或渐变遮罩。' },
   'weather.location': { key: 'weather.location', labelZh: '天气地点', labelEn: 'Weather location', type: 'string', default: '', required: true, description: '天气组件显示的地点名称。' },
   'home.showGreetingWidget': { key: 'home.showGreetingWidget', labelZh: '显示问候组件', labelEn: 'Show greeting widget', type: 'boolean', default: true, description: '控制桌面问候组件是否显示。' },

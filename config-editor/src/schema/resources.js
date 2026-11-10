@@ -203,7 +203,7 @@ export const ordinaryFieldDefinitions = Object.fromEntries(
 )
 
 export const resourceSchemas = {
-  'basic-device': { label: '页面与设备', fieldKeys: ['site.title', 'device.width', 'device.height', 'device.radius', 'device.fixedDate', 'device.initialBatteryLevel', 'device.batteryDrainIntervalSeconds', 'device.powerOffDelaySeconds'] },
+  'basic-device': { label: '页面与设备', fieldKeys: ['site.title', 'device.width', 'device.height', 'device.radius', 'device.fixedDate', 'device.initialBatteryLevel', 'device.batteryDrainIntervalSeconds'] },
   'basic-owner': { label: '手机主人', fieldKeys: ['owner.name', 'owner.signature', 'owner.wifiName', 'security.passcode'] },
   'basic-theme': { label: '主题与壁纸', fieldKeys: ['theme.accent', 'theme.lockWallpaper', 'theme.homeWallpaper', 'theme.wallpaperOverlay'] },
   'basic-weather': { label: '天气', fieldKeys: ['weather.location', 'weather.seed'] },

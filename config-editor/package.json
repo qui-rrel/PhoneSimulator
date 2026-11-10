@@ -12,6 +12,7 @@
     "test:validation": "node scripts/test-stage7-validation.mjs",
     "test:content-navigation": "node scripts/test-content-navigation.mjs",
     "test:runtime-export": "node scripts/test-runtime-export.mjs",
+    "test:default-template": "node scripts/test-default-template.mjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

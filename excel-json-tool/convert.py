@@ -248,7 +248,6 @@ NUMBER_FIELDS = {
     "weather.seed",
     "device.initialBatteryLevel",
     "device.batteryDrainIntervalSeconds",
-    "device.powerOffDelaySeconds",
 }
 BOOLEAN_FIELDS = {"home.showGreetingWidget"}
 
@@ -324,6 +323,9 @@ ACTION_ALIASES = {
     "执行朋友圈发布剧情": "moment-publish",
     "执行朋友圈玩家评论剧情": "moment-comment",
     "执行朋友圈互动剧情": "moment-interactions",
+    "手机关机": "power-off",
+    "关机": "power-off",
+    "手机没电关机": "power-off",
     "仅衔接下一节点": "none",
     "call": "call",
     "sms-script": "sms-script",
@@ -331,6 +333,7 @@ ACTION_ALIASES = {
     "moment-publish": "moment-publish",
     "moment-comment": "moment-comment",
     "moment-interactions": "moment-interactions",
+    "power-off": "power-off",
     "none": "none",
 }
 WECHAT_CONVERSATION_TYPE_ALIASES = {"单聊": "direct", "群聊": "group", "direct": "direct", "group": "group"}
@@ -580,6 +583,8 @@ for row in rows("基础设置"):
     value = row["value"]
     field = as_text(row["field"])
     basic_fields.add(field)
+    if field == "device.powerOffDelaySeconds":
+        continue
     if field == "security.passcode":
         value = as_passcode(value)
     elif field == "device.fixedDate":
@@ -590,12 +595,8 @@ for row in rows("基础设置"):
             raise ValueError("基础设置中的初始手机电量必须填写 1 到 100 的整数。")
     elif field == "device.batteryDrainIntervalSeconds":
         value = as_number(value)
-        if not isinstance(value, int) or value <= 0:
-            raise ValueError("基础设置中的每格电量耗时必须填写大于 0 的整数秒数。")
-    elif field == "device.powerOffDelaySeconds":
-        value = as_number(value)
         if not isinstance(value, int) or value < 0:
-            raise ValueError("基础设置中的剧情完成后关机等待必须填写大于或等于 0 的整数秒数。")
+            raise ValueError("基础设置中的每格电量耗时必须填写大于或等于 0 的整数秒数；0 表示电量保持不变。")
     elif field == "security.digits":
         value = as_number(value)
         if value != 4:
@@ -610,6 +611,8 @@ for row in rows("基础设置"):
         set_path(story, field[6:], value)
     else:
         set_path(content, field, value)
+
+content.setdefault("device", {}).pop("powerOffDelaySeconds", None)
 
 site_title = as_text(content.get("site", {}).get("title", ""))
 if "site.title" in basic_fields and not site_title:
@@ -1326,10 +1329,8 @@ for row in rows("剧情事件"):
 
     action_type = ACTION_ALIASES.get(str(row["actionType"]).strip(), str(row["actionType"]).strip())
     action = {"type": action_type}
-    if action_type == "power-off" or str(row["actionType"]).strip() == "手机没电关机":
-        raise ValueError(f"剧情事件 {event_id!r}：关机已改为所有主线和支线完成后自动触发，请删除关机事件。")
-    if action_type not in {"call", "sms-script", "wechat-script", "moment-publish", "moment-comment", "moment-interactions", "none"}:
-        raise ValueError(f"剧情事件 {event_id!r}：发生内容必须选择有效的短信、微信、朋友圈、电话或衔接动作。")
+    if action_type not in {"call", "sms-script", "wechat-script", "moment-publish", "moment-comment", "moment-interactions", "power-off", "none"}:
+        raise ValueError(f"剧情事件 {event_id!r}：发生内容必须选择有效的短信、微信、朋友圈、电话、关机或衔接动作。")
     for key in ["smsScriptId", "wechatScriptId", "publishScriptId", "commentScriptId", "interactionScriptId", "dialogueId"]:
         if row.get(key):
             action[key] = as_text(row[key])
